@@ -1,5 +1,5 @@
 <!--
-Copyright (C) 2025 HMTC 2025
+Copyright (C) 2026 HMTC 2026
 
 This project is licensed under the GNU General Public License v3.
 For more details, see https://www.gnu.org/licenses/gpl-3.0.en.html.
@@ -14,7 +14,7 @@ You can clone this repository using one of the following methods:
 #### a. Using Terminal (Bash, etc.)
 
 ```bash
-git clone https://github.com/HMTCITS/hmtc-frontend-2024.git
+git clone https://github.com/HMTCITS/hmtc-frontend-2025.git
 ```
 
 #### b. Using [GitHub Desktop](https://desktop.github.com/)

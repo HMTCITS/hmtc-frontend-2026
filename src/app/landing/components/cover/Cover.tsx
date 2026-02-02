@@ -6,7 +6,7 @@ export default function Cover() {
     <div id='home' className='relative overflow-hidden bg-black text-white'>
       <div className='h-full overflow-hidden'>
         <NextImage
-          src='halamandepan.png'
+          src='halamandepan.webp'
           alt='Background Beranda HMTC 2025'
           className='z-0 h-[calc(100vh-52px)] min-h-[415px] w-full sm:min-h-[470px] lg:min-h-[768px] xl:min-h-[890px] 2xl:min-h-[768px]'
           imgClassName='h-full w-full object-cover object-center'
