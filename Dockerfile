@@ -1,5 +1,5 @@
 # Cloned from https://github.com/vercel/next.js/blob/canary/examples/with-docker/Dockerfile
-# On 2 February 2025
+# On 2 February 2026
 
 # syntax=docker.io/docker/dockerfile:1
 
