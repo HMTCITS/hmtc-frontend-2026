@@ -6,7 +6,7 @@ export default function About() {
     <div className='flex flex-col items-center justify-center bg-white px-12 pt-16 pb-8 sm:px-18 md:px-24 lg:px-20 lg:pt-24'>
       <div className='flex w-full flex-col items-center justify-center md:gap-8 lg:gap-14 xl:flex-row xl:gap-21'>
         <NextImage
-          src='/fotbarhmtc2024.png'
+          src='/fotbarhmtc2024.webp'
           alt='Foto bersama dengan HMTC 2024'
           width={550}
           height={400}
