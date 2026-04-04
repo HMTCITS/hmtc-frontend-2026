@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 const links = [
-  { label: 'Request Media Partner', url: 'http://intip.in/FormMedparHMTC2025' },
+  { label: 'Request Media Partner', url: 'https://intip.in/RequestMedparHMTC2026' },
   { label: 'Instagram', url: 'https://www.instagram.com/hmtc_its' },
   { label: 'WhatsApp OA', url: 'http://wa.me/6285124014965' },
   { label: 'Twitter', url: 'https://twitter.com/hmtc_its' },
