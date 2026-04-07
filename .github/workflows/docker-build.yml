@@ -36,12 +36,13 @@ jobs:
       - name: Set Docker tags
         id: tags
         run: |
+          image_name="ghcr.io/$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')"
           echo "tags<<EOF" >> "$GITHUB_OUTPUT"
-          echo "ghcr.io/${{ github.repository }}:${{ github.sha }}" >> "$GITHUB_OUTPUT"
+          echo "${image_name}:${{ github.sha }}" >> "$GITHUB_OUTPUT"
           if [ "${{ github.ref_name }}" = "main" ]; then
-            echo "ghcr.io/${{ github.repository }}:latest" >> "$GITHUB_OUTPUT"
+            echo "${image_name}:latest" >> "$GITHUB_OUTPUT"
           elif [ "${{ github.ref_name }}" = "staging" ]; then
-            echo "ghcr.io/${{ github.repository }}:staging" >> "$GITHUB_OUTPUT"
+            echo "${image_name}:staging" >> "$GITHUB_OUTPUT"
           fi
           echo "EOF" >> "$GITHUB_OUTPUT"
 
