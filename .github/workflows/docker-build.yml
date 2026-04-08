@@ -76,6 +76,7 @@ jobs:
         if: github.ref_name == 'main'
         env:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
         run: |
           echo "=== DEPLOY MAIN (PRODUCTION) ==="
           echo "Target host: $DEPLOY_HOST"
@@ -84,7 +85,7 @@ jobs:
             -o StrictHostKeyChecking=no \
             -o ServerAliveInterval=30 \
             -o ServerAliveCountMax=10 \
-            deploy@"$DEPLOY_HOST" '
+            "$DEPLOY_USER"@"$DEPLOY_HOST" '
               set -e
               cd ../../data/hmtc-deployment
               docker compose -p hmtc-prod --env-file .env.prod -f docker-compose.prod.yml pull
@@ -97,6 +98,7 @@ jobs:
         if: github.ref_name == 'staging'
         env:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
         run: |
           echo "=== DEPLOY STAGING ==="
           echo "Target host: $DEPLOY_HOST"
@@ -105,7 +107,7 @@ jobs:
             -o StrictHostKeyChecking=no \
             -o ServerAliveInterval=30 \
             -o ServerAliveCountMax=10 \
-            deploy@"$DEPLOY_HOST" '
+            "$DEPLOY_USER"@"$DEPLOY_HOST" '
               set -e
               cd ../../data/hmtc-deployment
               docker compose -p hmtc-staging --env-file .env.staging -f docker-compose.staging.yml pull
