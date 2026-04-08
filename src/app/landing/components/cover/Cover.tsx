@@ -12,7 +12,7 @@ export default function Cover() {
           imgClassName='h-full w-full object-cover object-center'
           width={1512}
           height={982}
-          priority
+          priority={true}
         />
         <div className='absolute inset-0 z-10 h-full w-full bg-black opacity-75'></div>
       </div>
