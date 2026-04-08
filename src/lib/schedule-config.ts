@@ -29,15 +29,15 @@ export const PAGE_SCHEDULES: Array<{
   prefix: string;
   schedule: PageScheduleConfig;
 }> = [
-  {
-    prefix: '/ayomeludaftarmagang',
-    schedule: {
-      mode: 'range',
-      start: '2025-10-30T15:00:00+07:00',
-      end: '2025-10-30T21:00:00+07:00',
-      timezone: 'Asia/Jakarta',
-    },
-  },
+  // {
+  //   prefix: '/ayomeludaftarmagang',
+  //   schedule: {
+  //     mode: 'range',
+  //     start: '2025-10-30T15:00:00+07:00',
+  //     end: '2025-10-30T21:00:00+07:00',
+  //     timezone: 'Asia/Jakarta',
+  //   },
+  // },
   // Test schedule for hidden page used for Cloudflare/asset testing. Adjust
   // the window as needed for your testing. This is intentionally a short
   // window so it can be toggled easily in staging environments.
