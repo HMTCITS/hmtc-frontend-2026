@@ -1,3 +1,4 @@
+import { Libre_Baskerville, Plus_Jakarta_Sans } from 'next/font/google';
 import localFont from 'next/font/local';
 
 /**
@@ -687,4 +688,28 @@ export const poppins = localFont({
     },
   ],
   variable: '--font-poppins',
+});
+
+/**
+ * Google font configuration for Libre Baskerville.
+ * Loaded using next/font/google (recommended by Next.js).
+ */
+export const libreBaskerville = Libre_Baskerville({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  style: ['normal', 'italic'],
+  display: 'swap',
+  variable: '--font-libre-baskerville',
+});
+
+/**
+ * Google font configuration for Plus Jakarta Sans.
+ * Loaded using next/font/google (recommended by Next.js).
+ */
+export const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  weight: ['200', '300', '400', '500', '600', '700', '800'],
+  style: ['normal', 'italic'],
+  display: 'swap',
+  variable: '--font-plus-jakarta-sans',
 });

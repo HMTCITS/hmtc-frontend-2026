@@ -145,7 +145,7 @@ export default function Input({
       {!hideError && error && (
         <div className='mt-[12px] flex h-[26px] items-center gap-[12px] self-stretch rounded-[12px] bg-red-500/[0.07] px-[8px] py-[2px]'>
           <Info className='h-[18px] w-[18px] text-text-error' />
-          <p className='text-[14px] text-text-error'>
+          <p className='font-satoshi text-[14px] text-text-error'>
             {error.message?.toString()}
           </p>
         </div>
