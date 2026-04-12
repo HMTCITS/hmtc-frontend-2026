@@ -49,7 +49,7 @@ const SectionsWrapper = ({ Component }: SectionData) => {
 export default function LandingPage() {
   return (
     <main className='relative scroll-smooth'>
-      <HeaderAnnouncement />
+      <HeaderAnnouncement active={true}/>
       <div className=''>
         <Cover />
         <NavbarDefault />
