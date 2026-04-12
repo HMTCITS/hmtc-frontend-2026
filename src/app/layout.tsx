@@ -8,8 +8,10 @@ import JsonLd from '@/components/JsonLd';
 import {
   adelphe,
   inter,
+  libreBaskerville,
   libreCaslon,
   playfairDisplay,
+  plusJakartaSans,
   poppins,
   satoshi,
 } from '@/lib/font';
@@ -164,6 +166,8 @@ export default function RootLayout({
           inter.variable,
           satoshi.variable,
           libreCaslon.variable,
+          libreBaskerville.variable,
+          plusJakartaSans.variable,
           'scroll-smooth',
         )}
       >

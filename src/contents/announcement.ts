@@ -1,14 +1,14 @@
 /* --------------------------- Announcement Configuration --------------------------- */
 export const ANNOUNCEMENT_CONFIG = {
   isActive: true, // Set to false to hide announcement
-  message: 'Pendaftaran Magang HMTC ITS 2025',
-  actionText: 'Daftar Sekarang',
-  actionUrl: '/ayomeludaftarmagang',
+  message: 'SW ke-133',
+  actionText: 'Berikan Doa dan Harapanmu!',
+  actionUrl: '/magical-message',
   backgroundColor: 'bg-[#2F6FED]',
   textColor: 'text-white',
-  dismissible: false, // Allow users to dismiss the announcement
-  start: '2025-10-30T15:00:00+07:00',
-  end: '2025-10-30T21:00:00+07:00',
+  dismissible: true, // Allow users to dismiss the announcement
+  start: '2026-04-12T13:36:08+0000',
+  end: '2026-05-12T13:36:08+0000',
   timezone: 'Asia/Jakarta',
 } as const;
 

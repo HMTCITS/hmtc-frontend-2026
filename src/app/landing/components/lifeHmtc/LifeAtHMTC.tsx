@@ -74,7 +74,7 @@ const LifeAtHMTC: React.FC = () => {
           Setiap kegiatan yang kami lakukan merupakan wujud nyata dari semangat
           kebersamaan dan dedikasi kami untuk menuju perubahan, mulai dari
           Banabung (Bagi Nasi Bungkus) yang membawa kepedulian sosial, Welcome
-          Party HMTC 2025 yang mempererat solidaritas, hingga HMTC Incremental
+          Party HMTC 2026 yang mempererat solidaritas, hingga HMTC Incremental
           yang menjadi langkah strategis dalam membangun organisasi yang lebih
           progresif.
         </Typography>

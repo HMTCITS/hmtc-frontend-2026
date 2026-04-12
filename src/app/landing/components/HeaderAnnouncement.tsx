@@ -1,6 +1,6 @@
 'use client';
 
-import { X } from 'lucide-react';
+import { ArrowUpRight, X } from 'lucide-react';
 import Link from 'next/link';
 import * as React from 'react';
 
@@ -196,15 +196,15 @@ export default function HeaderAnnouncement({
             {isLoading
               ? `${ANNOUNCEMENT_CONFIG.message} — Memuat...`
               : effectiveActive
-                ? `${ANNOUNCEMENT_CONFIG.message} — Sudah dibuka`
-                : `${ANNOUNCEMENT_CONFIG.message} — Masih ditutup`}
+                ? `${ANNOUNCEMENT_CONFIG.message} — Akan Dimulai!`
+                : `${ANNOUNCEMENT_CONFIG.message} — Sudah Selesai`}
           </Typography>
         </div>
 
         <div className='flex items-center gap-3'>
           {!effectiveActive ? (
             <div
-              className='flex items-center rounded-md bg-white/8 px-3 py-1 font-mono text-xs sm:text-sm'
+              className='flex items-center rounded-md bg-white/8 px-3 py-1 font-plus-jakarta-sans text-xs sm:text-sm'
               role='status'
               aria-live='polite'
             >
@@ -222,7 +222,7 @@ export default function HeaderAnnouncement({
                 href={ANNOUNCEMENT_CONFIG.actionUrl}
                 aria-label={ANNOUNCEMENT_CONFIG.actionText}
               >
-                <Button className='rounded-md bg-white/10 px-3 py-1 text-sm font-semibold transition-colors hover:bg-white/20'>
+                <Button className='rounded-md bg-white/90 text-primary px-3 py-1 text-sm font-plus-jakarta-sans font-semibold transition-colors hover:bg-white/60' leftIcon={ArrowUpRight} >
                   {ANNOUNCEMENT_CONFIG.actionText}
                 </Button>
               </Link>

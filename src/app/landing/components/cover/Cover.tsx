@@ -7,7 +7,7 @@ export default function Cover() {
       <div className='h-full overflow-hidden'>
         <NextImage
           src='halamandepan.webp'
-          alt='Background Beranda HMTC 2025'
+          alt='Background Beranda HMTC 2026'
           className='z-0 h-[calc(100vh-52px)] min-h-[415px] w-full sm:min-h-[470px] lg:min-h-[768px] xl:min-h-[890px] 2xl:min-h-[768px]'
           imgClassName='h-full w-full object-cover object-center'
           width={1512}
@@ -27,7 +27,7 @@ export default function Cover() {
               weight='regular'
               className='opacity-60 sm:text-4xl md:mr-auto md:text-5xl lg:text-7xl'
             >
-              Terangi Haluan <br />
+              Membawa Perubahan <br />
             </Typography>
           </div>
           <div className='flex flex-row justify-end py-12 md:py-16 lg:justify-end'>
@@ -49,7 +49,7 @@ export default function Cover() {
               weight='bold'
               className='text-5xl leading-tight italic sm:text-6xl md:text-7xl lg:text-8xl xl:text-8xl'
             >
-              Suar Peradaban
+              Niat Baik
             </Typography>
           </div>
         </div>
