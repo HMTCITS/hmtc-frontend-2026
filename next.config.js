@@ -61,43 +61,26 @@ const nextConfig = {
     return [];
   },
 
-  webpack(config, { isServer }) {
-    // Exclude .svg dari rule bawaan
-    const assetRule = config.module.rules.find(
-      (rule) => rule.test instanceof RegExp && rule.test.test('.svg'),
-    );
-    if (assetRule) {
-      assetRule.exclude = /\.svg$/i;
-    }
-    // SVGR loader
-    config.module.rules.push({
-      test: /\.svg$/i,
-      issuer: { and: [/\.[jt]sx?$/] },
-      use: [
-        {
-          loader: '@svgr/webpack',
-          options: {
-            prettier: false,
-            svgo: true,
-            svgoConfig: { plugins: [{ removeViewBox: false }] },
-            titleProp: true,
-            ref: true,
+  turbopack: {
+    rules: {
+      '*.svg': {
+        loaders: [
+          {
+            loader: '@svgr/webpack',
+            options: {
+              prettier: false,
+              svgo: true,
+              svgoConfig: {
+                plugins: [{ removeViewBox: false }],
+              },
+              titleProp: true,
+              ref: true,
+            },
           },
-        },
-      ],
-    });
-    // Suppress dynamic require warnings from Sentry / otel libs in client bundle by aliasing to empty module
-    if (!config.resolve) config.resolve = {};
-    config.resolve.alias = {
-      ...(config.resolve.alias || {}),
-      ...(!isServer && {
-        '@sentry/node': false,
-        '@sentry/nextjs': false,
-        'require-in-the-middle': false,
-        '@opentelemetry/instrumentation': false,
-      }),
-    };
-    return config;
+        ],
+        as: '*.js',
+      },
+    },
   },
 
   images: {
