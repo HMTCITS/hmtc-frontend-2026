@@ -6,7 +6,7 @@ export const ANNOUNCEMENT_CONFIG = {
   actionUrl: '/magical-message',
   backgroundColor: 'bg-[#2F6FED]',
   textColor: 'text-white',
-  dismissible: true, // Allow users to dismiss the announcement
+  dismissible: false, // Allow users to dismiss the announcement
   start: '2026-04-12T13:36:08+0000',
   end: '2026-05-12T13:36:08+0000',
   timezone: 'Asia/Jakarta',

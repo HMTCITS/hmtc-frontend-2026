@@ -7,8 +7,6 @@ import AboutSkeleton from '@/app/landing/components/about/AboutSkeleton';
 import Cover from '@/app/landing/components/cover/Cover';
 import GallerySkeleton from '@/app/landing/components/gallery/GallerySkeleton';
 import HeaderAnnouncement from '@/app/landing/components/HeaderAnnouncement';
-import HMTCBlogSkeleton from '@/app/landing/components/hmtcblog/HMTCBlogSkeleton';
-import LifeAtHMTCSkeleton from '@/app/landing/components/lifeHmtc/LifeAtHMTCSkeleton';
 import PeopleSkeleton from '@/app/landing/components/people/PeopleHMTCSkeleton';
 import ShowCase from '@/app/landing/components/showcase/ShowCase';
 import ShowCaseSkeleton from '@/app/landing/components/showcase/ShowCaseSkeleton';
@@ -21,9 +19,7 @@ const createDynamicImport = (importer: () => Promise<any>) => {
 
 const About = createDynamicImport(() => import('./components/about/About'));
 const PeopleHMTC = createDynamicImport(() => import('./components/people/PeopleHMTC'));
-const LifeAtHMTC = createDynamicImport(() => import('./components/lifeHmtc/LifeAtHMTC'));
 const GalleryHMTC = createDynamicImport(() => import('./components/gallery/GalleryHMTC'));
-const HMTCBlog = createDynamicImport(() => import('./components/hmtcblog/HMTCBlog'));
 
 
 // Sections
@@ -37,9 +33,7 @@ const HOME_SECTIONS: SectionData[] = [
   { id: 'about', Component: About, Fallback: AboutSkeleton },
   { id: 'showcase', Component: ShowCase, Fallback: ShowCaseSkeleton },
   { id: 'people', Component: PeopleHMTC, Fallback: PeopleSkeleton },
-  { id: 'life', Component: LifeAtHMTC, Fallback: LifeAtHMTCSkeleton },
   { id: 'gallery', Component: GalleryHMTC, Fallback: GallerySkeleton },
-  { id: 'blog', Component: HMTCBlog, Fallback: HMTCBlogSkeleton },
 ]
 
 const SectionsWrapper = ({ Component }: SectionData) => {
