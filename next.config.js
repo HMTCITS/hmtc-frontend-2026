@@ -53,8 +53,6 @@ const nextConfig = {
     removeConsole: process.env.NODE_ENV === 'production',
   },
 
-  eslint: { dirs: ['src'] },
-
   /** Hanya pasang security headers di production, skip di dev */
   async headers() {
     if (process.env.NODE_ENV === 'production') {

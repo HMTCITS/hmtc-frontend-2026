@@ -39,6 +39,7 @@ export default [
         version: 'detect',
       },
     },
+    files: ['src/**/*.{js,jsx,ts,tsx}'],
     rules: {
       'react/prop-types': 'off',
       'no-console': 'warn',
