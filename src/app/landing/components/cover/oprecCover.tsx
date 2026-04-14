@@ -54,7 +54,7 @@ export default function Cover() {
             weight='bold'
             className='mt-3 text-white'
           >
-            HMTC 2025
+            HMTC 2026
           </Typography>
 
           <div className='mt-8 flex items-center justify-center'>

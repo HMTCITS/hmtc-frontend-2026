@@ -73,7 +73,7 @@ const EmblaCarousel: React.FC<PropType> = ({ options }) => {
             berkembang menjadi organisasi yang solid dan inovatif. Tiap periode
             kepemimpinan terus membawa perubahan, tantangan, serta pencapaian
             yang menjadi fondasi bagi generasi HMTC berikutnya, hingga kini,
-            Wildan Fauzy Maulana Hasyim, Ketua HMTC 2025 Kabinet Suar Peradaban
+            Agym Kamil Ramadhan, Ketua HMTC 2026 Niat Baik
             hadir untuk membawa transformasi HMTC kearah yang lebih baik.
           </p>
         </div>

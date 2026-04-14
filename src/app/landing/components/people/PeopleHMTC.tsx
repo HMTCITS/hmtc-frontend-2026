@@ -44,7 +44,7 @@ export default function PeopleHMTC() {
             weight='medium'
             className='text-gradient text-lg'
           >
-            HMTC 2025 SUAR PERADABAN
+            HMTC 2026 NIAT BAIK
           </Typography>
           <Typography
             as='h2'
@@ -97,7 +97,7 @@ export default function PeopleHMTC() {
                   className='text-base text-gray-600'
                 >
                   9 departemen HMTC yang saling berkolaborasi dalam menjalankan
-                  berbagai terobosan program HMTC Suar Peradaban.
+                  berbagai terobosan program HMTC Niat Baik.
                 </Typography>
               </div>
             </div>
@@ -160,7 +160,7 @@ export default function PeopleHMTC() {
                   weight='regular'
                   className='text-base text-gray-600'
                 >
-                  Dengan lebih dari 20 program kerja unggulan, HMTC 2025
+                  Dengan lebih dari 20 program kerja unggulan, HMTC 2026
                   berfokus untuk memberikan kontribusi nyata bagi mahasiswa dan
                   KM ITS.
                 </Typography>

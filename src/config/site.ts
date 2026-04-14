@@ -6,7 +6,7 @@ export const siteConfig = {
   url: 'https://hmtc-its.com',
 
   // Kabinet Information
-  kabinet: 'Suar Peradaban',
+  kabinet: 'Niat Baik',
   logo: '/logo/hmtc-logo-2025.png',
   tahun: 2025,
   visi: 'Terwujudnya relevansi HMTC yang berdasar berdampak bagi mahasiswa Teknik Informatika ITS melalui pergerakan yang holistik dan esensial',

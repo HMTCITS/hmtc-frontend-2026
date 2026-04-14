@@ -12,7 +12,6 @@ import Link from 'next/link';
 import React from 'react';
 
 import BaseLink from '@/components/links/BaseLink';
-import NextImage from '@/components/NextImage';
 import Typography from '@/components/Typography';
 import { NAVBAR_LINKS as ApaIni } from '@/contents/layout';
 import SocialCard from '@/layouts/components/Social';
@@ -80,7 +79,7 @@ export default function Footer() {
         )}
       >
         <BaseLink href='/' className='flex items-center gap-x-1'>
-          <div className='w-12'>
+          {/* <div className='w-12'>
             <NextImage
               src='/logo-hmtc2025-footer.png'
               alt='Logo HMTC ITS 2025'
@@ -90,14 +89,14 @@ export default function Footer() {
               quality={80}
               priority={false}
             />
-          </div>
+          </div> */}
           <div>
             <Typography
               variant='h2'
               className='flex flex-col font-satoshi text-base font-bold'
             >
-              <span>Suar</span>
-              <span>Peradaban</span>
+              <span>Kabinet</span>
+              <span>Niat Baik</span>
             </Typography>
           </div>
         </BaseLink>
@@ -210,7 +209,7 @@ export default function Footer() {
           variant='s2'
           className='font-secondary text-base-icon order-2 font-satoshi text-sm uppercase md:order-1 md:text-center'
         >
-          &copy; HMTC ITS 2025 | SUAR PERADABAN
+          &copy; HMTC ITS 2026 | NIAT BAIK
         </Typography>
         <div className='order-1 flex items-center gap-x-4 md:order-2'>
           {SocialMedia.map(({ icon: Icon, href }, index) => (
