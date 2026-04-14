@@ -1,5 +1,5 @@
 /**
- * Global Middleware
+ * Global Middleware (Proxy in next.js 16+)
  *
  * Responsibilities:
  * 1) Period-based gating (public pages):
@@ -237,7 +237,7 @@ function handleAdminBlocking(
    Middleware Entry Point
    --------------------------- */
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   // Only apply gating to safe idempotent fetches to avoid interfering with non-GET requests
   if (!isSafeMethod(req.method)) {
     return NextResponse.next();
