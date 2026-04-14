@@ -85,6 +85,7 @@ jobs:
             -o StrictHostKeyChecking=no \
             -o ServerAliveInterval=30 \
             -o ServerAliveCountMax=10 \
+            -o ConnectTimeout=60 \
             "$DEPLOY_USER"@"$DEPLOY_HOST" '
               set -e
               cd ../../data/hmtc-deployment
@@ -107,6 +108,7 @@ jobs:
             -o StrictHostKeyChecking=no \
             -o ServerAliveInterval=30 \
             -o ServerAliveCountMax=10 \
+            -o ConnectTimeout=60 \
             "$DEPLOY_USER"@"$DEPLOY_HOST" '
               set -e
               cd ../../data/hmtc-deployment
