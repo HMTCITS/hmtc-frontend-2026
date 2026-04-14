@@ -97,7 +97,7 @@ export default function PeopleHMTC() {
                   className='text-base text-gray-600'
                 >
                   9 departemen HMTC yang saling berkolaborasi dalam menjalankan
-                  berbagai terobosan program HMTC Suar Peradaban.
+                  berbagai terobosan program HMTC Niat Baik.
                 </Typography>
               </div>
             </div>

@@ -218,7 +218,7 @@ export default function Navbar() {
           tabIndex={0}
           onClick={(e) => handleAnchorClick(e, 'home', 0)}
         >
-          <NextImage
+          {/* <NextImage
             src='logo-hmtc2025-navbar.png'
             alt='Logo HMTC ITS 2025'
             width={100}
@@ -226,7 +226,13 @@ export default function Navbar() {
             priority
             quality={80}
             className='w-full'
-          />
+          /> */}
+          <span className='flex h-full items-center align-middle font-libre-baskerville text-white-main'>
+            NIAT
+            <span className='italic'>
+              BA<span className='text-blue-500'>I</span>K
+            </span>
+          </span>
         </a>
 
         <Button
