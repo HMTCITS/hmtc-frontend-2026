@@ -21,7 +21,7 @@ jobs:
       - name: ⎔ Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 24
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
@@ -44,7 +44,7 @@ jobs:
       - name: ⎔ Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 24
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
@@ -53,6 +53,9 @@ jobs:
 
       - name: ⚡ Install Dependencies (pnpm)
         run: pnpm install
+
+      - name: ⚙️ Build content-collections
+        run: npx content-collections build
 
       - name: 🔎 Run Type Check
         run: pnpm typecheck
@@ -67,7 +70,7 @@ jobs:
       - name: ⎔ Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 24
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
