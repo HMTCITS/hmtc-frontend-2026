@@ -78,6 +78,7 @@ export default [
       '**/.next/',
       '**/next.config.js',
       '**/next-env.d.ts',
+      '**/.content-collections/',
     ],
   },
 ];
