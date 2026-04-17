@@ -1,21 +1,22 @@
 import { NextResponse } from 'next/server';
 
-type MagicalMessagePayload = {
-  doaHarapan?: string;
-  namaPenulis?: string;
+type SeminarDosenPayload = {
+  fullName?: string;
+  nrp?: string;
+  prodi?: string;
   submittedAt?: string;
 };
 
 function getRequiredEnv() {
   const baseUrl = process.env.NOCODB_BASE_URL;
   const apiToken = process.env.NOCODB_API_TOKEN;
-  const tableId = process.env.NOCODB_MAGICAL_MESSAGE_TABLE_ID;
+  const tableId = process.env.NOCODB_SEMINAR_DOSEN_TABLE_ID;
 
   if (!baseUrl || !apiToken || !tableId) {
     return {
       ok: false as const,
       message:
-        'NocoDB env belum lengkap. Isi NOCODB_BASE_URL, NOCODB_API_TOKEN, dan NOCODB_MAGICAL_MESSAGE_TABLE_ID.',
+        'NocoDB env belum lengkap. Isi NOCODB_BASE_URL, NOCODB_API_TOKEN, dan NOCODB_SEMINAR_DOSEN_TABLE_ID.',
     };
   }
 
@@ -24,10 +25,14 @@ function getRequiredEnv() {
     baseUrl,
     apiToken,
     tableId,
-    viewId: process.env.NOCODB_VIEW_ID,
-    fieldDoaHarapan: process.env.NOCODB_FIELD_DOA_HARAPAN || 'doaHarapan',
-    fieldNamaPenulis: process.env.NOCODB_FIELD_NAMA_PENULIS || 'namaPenulis',
-    fieldSubmittedAt: process.env.NOCODB_FIELD_SUBMITTED_AT || 'submittedAt',
+    viewId:
+      process.env.NOCODB_SEMINAR_DOSEN_VIEW_ID || process.env.NOCODB_VIEW_ID,
+    fieldFullName:
+      process.env.NOCODB_FIELD_SEMINAR_DOSEN_FULL_NAME || 'fullName',
+    fieldNrp: process.env.NOCODB_FIELD_SEMINAR_DOSEN_NRP || 'nrp',
+    fieldProdi: process.env.NOCODB_FIELD_SEMINAR_DOSEN_PRODI || 'prodi',
+    fieldSubmittedAt:
+      process.env.NOCODB_FIELD_SEMINAR_DOSEN_SUBMITTED_AT || 'submittedAt',
   };
 }
 
@@ -37,9 +42,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: env.message }, { status: 500 });
   }
 
-  let body: MagicalMessagePayload;
+  let body: SeminarDosenPayload;
   try {
-    body = (await request.json()) as MagicalMessagePayload;
+    body = (await request.json()) as SeminarDosenPayload;
   } catch {
     return NextResponse.json(
       { message: 'Payload JSON tidak valid.' },
@@ -47,13 +52,14 @@ export async function POST(request: Request) {
     );
   }
 
-  const doaHarapan = body.doaHarapan?.trim();
-  const namaPenulis = body.namaPenulis?.trim();
+  const fullName = body.fullName?.trim();
+  const nrp = body.nrp?.trim();
+  const prodi = body.prodi?.trim();
   const submittedAt = body.submittedAt?.trim() || new Date().toISOString();
 
-  if (!doaHarapan || !namaPenulis) {
+  if (!fullName || !nrp || !prodi) {
     return NextResponse.json(
-      { message: 'Doa dan Harapan serta Nama Pengirim wajib diisi.' },
+      { message: 'Full Name, NRP, dan Prodi wajib diisi.' },
       { status: 400 },
     );
   }
@@ -67,8 +73,9 @@ export async function POST(request: Request) {
   }
 
   const rowData: Record<string, string> = {
-    [env.fieldDoaHarapan]: doaHarapan,
-    [env.fieldNamaPenulis]: namaPenulis,
+    [env.fieldFullName]: fullName,
+    [env.fieldNrp]: nrp,
+    [env.fieldProdi]: prodi,
     [env.fieldSubmittedAt]: submittedAt,
   };
 
@@ -91,13 +98,13 @@ export async function POST(request: Request) {
       const message =
         nocodbError?.message ||
         nocodbError?.msg ||
-        'Gagal menyimpan data ke NocoDB.';
+        'Gagal menyimpan data seminar ke NocoDB.';
 
       return NextResponse.json({ message }, { status: nocodbResponse.status });
     }
 
     return NextResponse.json(
-      { message: 'Pesan berhasil dikirim.' },
+      { message: 'Pendaftaran seminar berhasil dikirim.' },
       { status: 201 },
     );
   } catch {

@@ -1,4 +1,8 @@
-import { Libre_Baskerville, Plus_Jakarta_Sans } from 'next/font/google';
+import {
+  JetBrains_Mono,
+  Libre_Baskerville,
+  Plus_Jakarta_Sans,
+} from 'next/font/google';
 import localFont from 'next/font/local';
 
 /**
@@ -712,4 +716,16 @@ export const plusJakartaSans = Plus_Jakarta_Sans({
   style: ['normal', 'italic'],
   display: 'swap',
   variable: '--font-plus-jakarta-sans',
+});
+
+/**
+ * Google font configuration for JetBrains Mono.
+ * Loaded using next/font/google (recommended by Next.js).
+ */
+export const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
+  style: ['normal', 'italic'],
+  display: 'swap',
+  variable: '--font-jetbrains-mono',
 });

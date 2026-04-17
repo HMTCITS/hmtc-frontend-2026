@@ -41,6 +41,7 @@ const FONT_FAMILY_CLASSES = {
   satoshi: 'font-satoshi',
   adelphe: 'font-adelphe',
   libre: 'font-libre',
+  jetbrainsMono: 'font-jetbrains-mono',
   inter: 'font-inter',
   helveticaNeue: 'font-helveticaNeue',
   playfair: 'font-playfairDisplay',
@@ -88,7 +89,7 @@ export type TypographyProps<T extends React.ElementType> = {
   weight?: FontWeight;
   /**
    * Font family. Acceptable values: 'poppins', 'satoshi', 'adelphe', 'libre',
-   * 'inter', 'playfair'.
+   * 'jetbrainsMono', 'inter', 'playfair'.
    * @default 'poppins'
    */
   font?: FontFamily;
