@@ -189,7 +189,7 @@ export default function SeminarRegistrationForm({
       id={registration.id}
       className='relative overflow-hidden bg-white px-4 pt-16 pb-20 sm:px-8 lg:px-20'
     >
-      <div className='absolute inset-0'>
+      <div className='absolute inset-0 hidden md:block'>
         <Threads
           className='h-full w-full opacity-70'
           color={[0, 0.47058823529411764, 0.7058823529411765]}
@@ -198,8 +198,8 @@ export default function SeminarRegistrationForm({
           enableMouseInteraction
         />
       </div>
-      <div className='pointer-events-none absolute inset-x-0 bottom-8 h-20 bg-[radial-gradient(ellipse_at_center,rgba(31,111,237,0.16),transparent_70%)]' />
-      <div className='pointer-events-none absolute inset-x-0 bottom-10 h-px bg-[repeating-linear-gradient(90deg,rgba(0,120,180,0.2),rgba(0,120,180,0.2)_24px,transparent_24px,transparent_56px)]' />
+      <div className='pointer-events-none absolute inset-x-0 bottom-8 hidden h-20 bg-[radial-gradient(ellipse_at_center,rgba(31,111,237,0.16),transparent_70%)] md:block' />
+      <div className='pointer-events-none absolute inset-x-0 bottom-10 hidden h-px bg-[repeating-linear-gradient(90deg,rgba(0,120,180,0.2),rgba(0,120,180,0.2)_24px,transparent_24px,transparent_56px)] md:block' />
 
       <div className='relative z-10 mx-auto max-w-2xl rounded-[10px] border border-[#D3D3D3] bg-[rgba(248,249,250,0.2)] p-7 shadow-[4px_4px_32px_0_#CED4DA] backdrop-blur-[10px] md:p-10'>
         <p className='font-plus-jakarta-sans text-base font-extrabold text-[#0078B4] sm:text-lg'>

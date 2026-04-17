@@ -73,6 +73,11 @@ const seminarDosenContent: SeminarEventContent = {
         label: 'Prodi',
         placeholder: 'Teknik Informatika',
       },
+      {
+        id: 'email',
+        label: 'Email',
+        placeholder: 'emailkamu@email.com',
+      },
     ],
     submitLabel: 'Daftar',
     apiEndpoint: '/api/seminar-dosen',

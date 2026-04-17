@@ -4,6 +4,7 @@ type SeminarDosenPayload = {
   fullName?: string;
   nrp?: string;
   prodi?: string;
+  email?: string;
   submittedAt?: string;
 };
 
@@ -31,6 +32,7 @@ function getRequiredEnv() {
       process.env.NOCODB_FIELD_SEMINAR_DOSEN_FULL_NAME || 'fullName',
     fieldNrp: process.env.NOCODB_FIELD_SEMINAR_DOSEN_NRP || 'nrp',
     fieldProdi: process.env.NOCODB_FIELD_SEMINAR_DOSEN_PRODI || 'prodi',
+    fieldEmail: process.env.NOCODB_FIELD_SEMINAR_DOSEN_EMAIL || 'email',
     fieldSubmittedAt:
       process.env.NOCODB_FIELD_SEMINAR_DOSEN_SUBMITTED_AT || 'submittedAt',
   };
@@ -56,10 +58,11 @@ export async function POST(request: Request) {
   const nrp = body.nrp?.trim();
   const prodi = body.prodi?.trim();
   const submittedAt = body.submittedAt?.trim() || new Date().toISOString();
+  const email = body.email?.trim();
 
-  if (!fullName || !nrp || !prodi) {
+  if (!fullName || !nrp || !prodi || !email) {
     return NextResponse.json(
-      { message: 'Full Name, NRP, dan Prodi wajib diisi.' },
+      { message: 'Full Name, NRP, Prodi, dan Email wajib diisi.' },
       { status: 400 },
     );
   }
@@ -77,6 +80,7 @@ export async function POST(request: Request) {
     [env.fieldNrp]: nrp,
     [env.fieldProdi]: prodi,
     [env.fieldSubmittedAt]: submittedAt,
+    [env.fieldEmail]: email,
   };
 
   try {
