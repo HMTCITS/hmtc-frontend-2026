@@ -1,10 +1,12 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import Threads from '@/components/Threads';
 import { Button } from '@/components/ui/button';
+import { ConfirmModal } from '@/components/ui/confirm-modal';
 import { Input } from '@/components/ui/input';
+import { getCookie, setCookie } from '@/lib/cookies';
 
 type SeminarFormField = {
   id: string;
@@ -29,6 +31,10 @@ type SeminarRegistrationFormProps = {
   registration: SeminarRegistrationConfig;
 };
 
+const SEMINAR_ATTENDANCE_LINK = 'its.id/m/SeminarDosen1ETC2026';
+const REGISTRATION_STORAGE_KEY_PREFIX = 'seminar.registration.submitted';
+const REGISTRATION_COOKIE_KEY_PREFIX = 'seminar_registration_submitted';
+
 function buildInitialValues(fields: SeminarFormField[]) {
   return fields.reduce<Record<string, string>>((acc, field) => {
     acc[field.id] = '';
@@ -39,6 +45,15 @@ function buildInitialValues(fields: SeminarFormField[]) {
 export default function SeminarRegistrationForm({
   registration,
 }: SeminarRegistrationFormProps) {
+  const registrationStorageKey = useMemo(
+    () => `${REGISTRATION_STORAGE_KEY_PREFIX}.${registration.id}`,
+    [registration.id],
+  );
+  const registrationCookieKey = useMemo(
+    () => `${REGISTRATION_COOKIE_KEY_PREFIX}_${registration.id}`,
+    [registration.id],
+  );
+
   const initialValues = useMemo(
     () => buildInitialValues(registration.fields),
     [registration.fields],
@@ -49,6 +64,37 @@ export default function SeminarRegistrationForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const savedLocalStatus = localStorage.getItem(registrationStorageKey);
+    const savedCookieStatus = getCookie(registrationCookieKey);
+    const hasRegistered =
+      savedLocalStatus === 'true' || savedCookieStatus === 'true';
+
+    if (!hasRegistered) {
+      return;
+    }
+
+    setIsSubmitted(true);
+    setIsSuccessModalOpen(true);
+
+    try {
+      localStorage.setItem(registrationStorageKey, 'true');
+    } catch (error) {
+      void error;
+    }
+
+    setCookie(registrationCookieKey, 'true', {
+      maxAge: 60 * 60 * 24 * 30,
+      path: '/',
+      sameSite: 'Lax',
+    });
+  }, [registrationCookieKey, registrationStorageKey]);
 
   const isRsvpClosed = useMemo(() => {
     if (!registration.rsvpClosesAt) {
@@ -112,7 +158,20 @@ export default function SeminarRegistrationForm({
         );
       }
 
+      try {
+        localStorage.setItem(registrationStorageKey, 'true');
+      } catch (error) {
+        void error;
+      }
+
+      setCookie(registrationCookieKey, 'true', {
+        maxAge: 60 * 60 * 24 * 30,
+        path: '/',
+        sameSite: 'Lax',
+      });
+
       setIsSubmitted(true);
+      setIsSuccessModalOpen(true);
       setFormValues(initialValues);
     } catch (error) {
       const message =
@@ -155,7 +214,17 @@ export default function SeminarRegistrationForm({
 
         {isSubmitted ? (
           <p className='mt-6 rounded-lg border border-[#C7E2CD] bg-[#E8F6EB] px-4 py-3 font-plus-jakarta-sans text-sm font-semibold text-[#216E39]'>
-            {registration.successMessage || 'Pendaftaran berhasil dikirim.'}
+            {registration.successMessage ||
+              'Pendaftaran diterima. Sampai jumpa di sesi seminar!'}{' '}
+            Save this link to attend seminar:{' '}
+            <a
+              href='https://its.id/m/SeminarDosen1ETC2026'
+              target='_blank'
+              rel='noreferrer'
+              className='underline underline-offset-2'
+            >
+              {SEMINAR_ATTENDANCE_LINK}
+            </a>
           </p>
         ) : null}
 
@@ -189,14 +258,16 @@ export default function SeminarRegistrationForm({
 
           <Button
             type='submit'
-            disabled={isSubmitting || isRsvpClosed}
+            disabled={isSubmitting || isRsvpClosed || isSubmitted}
             className='mt-2 h-[50px] w-full rounded-lg bg-[#0078B4] font-plus-jakarta-sans text-base font-bold text-white hover:bg-[#02699f]'
           >
             {isRsvpClosed
               ? 'RSVP Closed'
-              : isSubmitting
-                ? 'Mengirim...'
-                : registration.submitLabel}
+              : isSubmitted
+                ? 'Sudah Terdaftar'
+                : isSubmitting
+                  ? 'Mengirim...'
+                  : registration.submitLabel}
           </Button>
 
           {submitError ? (
@@ -206,6 +277,38 @@ export default function SeminarRegistrationForm({
           ) : null}
         </form>
       </div>
+
+      <ConfirmModal
+        open={isSuccessModalOpen}
+        onOpenChange={setIsSuccessModalOpen}
+        variant='success'
+        size='md'
+        title='Registration Successful'
+        subtitle='Pendaftaran diterima. Sampai jumpa di sesi seminar!'
+        actions={[
+          {
+            id: 'close',
+            label: 'Tutup',
+            variant: 'default',
+            autoFocus: true,
+          },
+        ]}
+        closeOnOverlayClick
+        closeOnEsc
+        primaryOnEnter
+      >
+        <p className='font-plus-jakarta-sans text-sm text-black'>
+          Save this link to attend seminar:{' '}
+          <a
+            href='https://its.id/m/SeminarDosen1ETC2026'
+            target='_blank'
+            rel='noreferrer'
+            className='font-semibold text-[#0078B4] underline underline-offset-2'
+          >
+            {SEMINAR_ATTENDANCE_LINK}
+          </a>
+        </p>
+      </ConfirmModal>
     </section>
   );
 }

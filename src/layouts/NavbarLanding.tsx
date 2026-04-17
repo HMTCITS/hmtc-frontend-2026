@@ -5,7 +5,6 @@ import Link from 'next/link';
 import * as React from 'react';
 
 import Button from '@/components/buttons/Button';
-import NextImage from '@/components/NextImage';
 import Typography from '@/components/Typography';
 import { NAVBAR_LINKS } from '@/contents/layout';
 import { cn } from '@/lib/utils';
@@ -69,7 +68,7 @@ export default function NavbarLanding({ isActive = false }: Props) {
           tabIndex={0}
           onClick={(e) => handleAnchorClick(e, 'home', 0)}
         >
-          <NextImage
+          {/* <NextImage
             src='logo-hmtc2025-navbar.png'
             alt='Logo HMTC ITS 2025'
             width={100}
@@ -77,7 +76,13 @@ export default function NavbarLanding({ isActive = false }: Props) {
             priority
             quality={80}
             className='w-full'
-          />
+          /> */}
+          <span className='flex h-full items-center align-middle font-libre-baskerville text-white-main'>
+            NIAT
+            <span className='italic'>
+              BA<span className='text-blue-500'>I</span>K
+            </span>
+          </span>
         </a>
 
         <Button
@@ -133,15 +138,21 @@ export default function NavbarLanding({ isActive = false }: Props) {
             onClick={(e) => handleAnchorClick(e, 'home')}
             tabIndex={0}
           >
-            <NextImage
-              src='logo-hmtc2025-navbar.png'
-              alt='Logo HMTC ITS 2025'
-              width={128}
-              height={34}
-              priority
-              quality={80}
-              className='h-full w-full'
-            />
+            {/* <NextImage
+            src='logo-hmtc2025-navbar.png'
+            alt='Logo HMTC ITS 2025'
+            width={100}
+            height={20}
+            priority
+            quality={80}
+            className='w-full'
+          /> */}
+            <span className='flex h-full items-center align-middle font-libre-baskerville text-white-main'>
+              NIAT
+              <span className='italic'>
+                BA<span className='text-blue-500'>I</span>K
+              </span>
+            </span>
           </a>
 
           <div className='flex flex-col items-center gap-8'>
