@@ -274,7 +274,7 @@ export default function NextImage({
           ? { width: `${width}px` }
           : undefined
       }
-      className={cn('relative', className)}
+      className={cn('relative overflow-hidden', className)}
     >
       {/* eslint-disable-next-line jsx-a11y/alt-text */}
       <Image {...imageProps} />

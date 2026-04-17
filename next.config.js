@@ -1,4 +1,4 @@
-const { withContentCollections } = require("@content-collections/next");
+const { withContentCollections } = require('@content-collections/next');
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
   enabled: process.env.ANALYZE === 'true',
 });

@@ -8,6 +8,7 @@ import JsonLd from '@/components/JsonLd';
 import {
   adelphe,
   inter,
+  jetbrainsMono,
   libreBaskerville,
   libreCaslon,
   playfairDisplay,
@@ -164,6 +165,7 @@ export default function RootLayout({
           poppins.variable,
           adelphe.variable,
           inter.variable,
+          jetbrainsMono.variable,
           satoshi.variable,
           libreCaslon.variable,
           libreBaskerville.variable,
