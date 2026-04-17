@@ -149,6 +149,7 @@ export default function SeminarEventTemplate({
               transparent
               edgeFade={0.5}
               className='h-full w-full'
+              style={{}}
             />
           </div>
           <div className='pointer-events-none absolute inset-0' />
