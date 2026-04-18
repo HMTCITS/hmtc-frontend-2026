@@ -729,3 +729,17 @@ export const jetbrainsMono = JetBrains_Mono({
   display: 'swap',
   variable: '--font-jetbrains-mono',
 });
+
+/**
+ * Font configuration for the Harry Potter font.
+ * Files should be located in: src/lib/fonts/harry-potter/
+ */
+export const harryPotter = localFont({
+  src: [
+    {
+      path: './fonts/harry-potter/HARRYP__.ttf',
+    },
+  ],
+  display: 'swap',
+  variable: '--font-harry-potter',
+});

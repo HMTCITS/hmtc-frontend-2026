@@ -7,6 +7,7 @@ import Providers from '@/app/providers';
 import JsonLd from '@/components/JsonLd';
 import {
   adelphe,
+  harryPotter,
   inter,
   jetbrainsMono,
   libreBaskerville,
@@ -14,8 +15,7 @@ import {
   playfairDisplay,
   plusJakartaSans,
   poppins,
-  satoshi,
-} from '@/lib/font';
+  satoshi} from '@/lib/font';
 import { cn } from '@/lib/utils';
 
 export const metadata: Metadata = {
@@ -169,6 +169,7 @@ export default function RootLayout({
           satoshi.variable,
           libreCaslon.variable,
           libreBaskerville.variable,
+          harryPotter.variable,
           plusJakartaSans.variable,
           'scroll-smooth',
         )}
