@@ -17,6 +17,7 @@ const ContentSecurityPolicy = `
   img-src 'self' data: https:;
   object-src 'none';
   base-uri 'self';
+  frame-src https://www.youtube.com https://www.youtube-nocookie.com;
   frame-ancestors 'self';
   manifest-src 'self';
 `

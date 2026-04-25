@@ -40,3 +40,6 @@ next-env.d.ts
 
 # Content Collections
 .content-collections
+
+# Claude
+.claude
