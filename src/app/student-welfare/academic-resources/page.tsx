@@ -13,11 +13,12 @@ const academicResourcesContent: AcademicResourcesContent = {
   },
   lede: 'Kumpulan video tutorial mata kuliah dari kakak tingkat untuk teman-teman Teknik Informatika. Dirancang khusus menjelang ETS dan EAS — ringkas, fokus pada soal yang sering keluar, dan dibawakan dengan bahasa yang mudah diikuti. Dukung sesama, satu langkah lebih dekat ke wisuda.',
   hashtags: [
-    'StudentWelfare',
-    'HMTCNiatBaik',
-    'BelajarBareng',
-    'HMTCITS',
-    'ITDevKeren',
+    'P3K-TutorETS',
+    'SWNiatBaik',
+    'UpdateWebsite',
+    'CMINiatBaik',
+    'HMTCNiatBaik26',
+    'ITSSurabaya'
   ],
   tutorials: [
     {
