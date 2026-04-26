@@ -12,6 +12,7 @@ import Link from 'next/link';
 import React from 'react';
 
 import BaseLink from '@/components/links/BaseLink';
+import NextImage from '@/components/NextImage';
 import Typography from '@/components/Typography';
 import { NAVBAR_LINKS as ApaIni } from '@/contents/layout';
 import SocialCard from '@/layouts/components/Social';
@@ -28,11 +29,22 @@ const SocialMedia = [
   { icon: Link2, href: '/info' },
 ];
 
-const Akademik = [
-  { label: 'Bank Soal', href: '/coming-soon', offset: -80 },
-  { label: 'Silabus', href: '/coming-soon', offset: -80 },
-  { label: 'MBKM', href: '/coming-soon', offset: -80 },
-  { label: 'Kalender Akademik', href: '/coming-soon', offset: -80 },
+const ProgramKerja = [
+  {
+    label: 'Syukuran Wisuda',
+    href: '/coming-soon',
+    offset: -80,
+  },
+  {
+    label: 'Video Tutorial',
+    href: '/student-welfare/academic-resources',
+    offset: -80,
+  },
+  {
+    label: 'Seminar Dosen',
+    href: '/research-and-technology/seminar-dosen',
+    offset: -80,
+  }
 ];
 
 function handleSmoothAnchorClick(
@@ -61,9 +73,9 @@ function handleSmoothAnchorClick(
 
 export default function Footer() {
   const [isApaIniOpen, setIsApaIniOpen] = React.useState(false);
-  const [isAkademikOpen, setIsAkademikOpen] = React.useState(false);
+  const [isProgramKerjaOpen, setIsProgramKerjaOpen] = React.useState(false);
   const toggleApaIni = () => setIsApaIniOpen((prev) => !prev);
-  const toggleAkademik = () => setIsAkademikOpen((prev) => !prev);
+  const toggleProgramKerja = () => setIsProgramKerjaOpen((prev) => !prev);
 
   return (
     <footer
@@ -79,26 +91,21 @@ export default function Footer() {
         )}
       >
         <BaseLink href='/' className='flex items-center gap-x-1'>
-          {/* <div className='w-12'>
-            <NextImage
-              src='/logo-hmtc2025-footer.png'
-              alt='Logo HMTC ITS 2025'
-              width={1440}
-              height={1440}
-              className='h-[100px] w-[35px]'
-              quality={80}
-              priority={false}
-            />
-          </div> */}
-          <div>
-            <Typography
-              variant='h2'
-              className='flex flex-col font-satoshi text-base font-bold'
-            >
-              <span>Kabinet</span>
-              <span>Niat Baik</span>
-            </Typography>
-          </div>
+          <NextImage
+            src='logo-hmtc-2026.svg'
+            alt='Logo HMTC ITS 2026'
+            width={32}
+            height={32}
+            priority
+            quality={80}
+            className=''
+          />
+          <span className='flex h-full items-center align-middle font-libre-baskerville text-white-main'>
+            NIAT
+            <span className='italic'>
+              BA<span className='text-blue-500'>I</span>K
+            </span>
+          </span>
         </BaseLink>
 
         <div className='font-secondary grid grid-cols-2 gap-x-6'>
@@ -106,7 +113,7 @@ export default function Footer() {
             <div onClick={toggleApaIni} className='flex items-center gap-2'>
               <Typography
                 variant='s2'
-                className='font-secondary cursor-pointer uppercase md:pb-5'
+                className='cursor-pointer font-plus-jakarta-sans font-bold uppercase md:pb-5'
               >
                 hmtc
               </Typography>
@@ -157,18 +164,21 @@ export default function Footer() {
             </div>
           </div>
           <div className='flex w-full flex-col items-start gap-y-2.5 md:w-[187px]'>
-            <div onClick={toggleAkademik} className='flex items-center gap-2'>
+            <div
+              onClick={toggleProgramKerja}
+              className='flex items-center gap-2'
+            >
               <Typography
                 variant='s2'
-                className='font-secondary cursor-pointer uppercase md:pb-5'
+                className='cursor-pointer font-plus-jakarta-sans font-bold uppercase md:pb-5'
               >
-                akademik
+                program kerja
               </Typography>
               <ChevronDown
                 className={cn(
                   'text-white md:hidden',
                   'transition-transform duration-200 ease-in-out',
-                  isAkademikOpen && 'rotate-180',
+                  isProgramKerjaOpen && 'rotate-180',
                 )}
               />
             </div>
@@ -176,12 +186,12 @@ export default function Footer() {
               className={cn(
                 'flex flex-col items-start gap-3',
                 'overflow-y-hidden transition-all duration-300 ease-in-out',
-                isAkademikOpen
+                isProgramKerjaOpen
                   ? 'max-h-96 opacity-100'
                   : 'max-h-0 opacity-0 md:max-h-96 md:opacity-100',
               )}
             >
-              {Akademik.map(({ label, href, offset }, index) => (
+              {ProgramKerja.map(({ label, href, offset }, index) => (
                 <a
                   key={index}
                   href={href}

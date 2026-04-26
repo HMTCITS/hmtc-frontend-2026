@@ -8,7 +8,7 @@ const HEADLINE_LINES = ['MEMBAWA', 'PERUBAHAN', 'POSITIF &', 'PROGRESIF.'];
 
 const STATS = [
   { value: '9', label: 'DEPARTEMEN' },
-  { value: '180+', label: 'PENGURUS AKTIF' },
+  { value: '100+', label: 'PENGURUS AKTIF' },
   { value: '2026', label: 'PERIODE' },
 ];
 
@@ -60,7 +60,7 @@ function DoveIcon({ className }: { className?: string }) {
   );
 }
 
-export default function Cover() {
+export default function Cover({ heroReady }: { heroReady?: boolean }) {
   return (
     <div id='home' className='relative overflow-hidden bg-black text-white'>
       {/* Background */}
@@ -77,11 +77,11 @@ export default function Cover() {
         <div className='absolute inset-0 bg-black/72' />
       </div>
 
-      {/* Root animation container — key forces remount on replay */}
+      {/* Root animation container — starts only after loading screen exits */}
       <motion.div
         className='relative z-10 flex min-h-svh flex-col'
         initial='hidden'
-        animate='visible'
+        animate={heroReady ? 'visible' : 'hidden'}
       >
         {/* ── Hero body ─────────────────────────────────────────────── */}
         <div className='relative flex flex-1 flex-col px-8 pt-10 pb-8 lg:px-14 lg:pt-14 xl:px-20'>
@@ -95,7 +95,7 @@ export default function Cover() {
           </motion.div>
 
           {/* ── Giant headline ──────────────────────────────────────── */}
-          <div className='mt-6 flex flex-1 flex-col justify-center lg:mt-4'>
+          <div className='mt-8 flex flex-1 flex-col justify-center lg:mt-6'>
             {HEADLINE_LINES.map((line, i) => (
               <div key={line} className='overflow-hidden'>
                 <motion.h1

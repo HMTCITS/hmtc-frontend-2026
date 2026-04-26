@@ -211,29 +211,29 @@ export default function Navbar() {
           isShift && 'bg-black shadow-sm backdrop-blur',
         )}
       >
-        <a
-          href='#home'
+        <Link
+          href='/'
           aria-label='Kembali ke beranda HMTC ITS'
-          className='relative h-13 w-28 cursor-pointer'
+          className='relative flex flex-row items-center h-13 w-32 cursor-pointer'
           tabIndex={0}
           onClick={(e) => handleAnchorClick(e, 'home', 0)}
         >
-          {/* <NextImage
-            src='logo-hmtc2025-navbar.png'
-            alt='Logo HMTC ITS 2025'
-            width={100}
-            height={20}
+          <NextImage
+            src='logo-hmtc-2026.svg'
+            alt='Logo HMTC ITS 2026'
+            width={32}
+            height={32}
             priority
             quality={80}
-            className='w-full'
-          /> */}
+            className=''
+          />
           <span className='flex h-full items-center align-middle font-libre-baskerville text-white-main'>
             NIAT
             <span className='italic'>
               BA<span className='text-blue-500'>I</span>K
             </span>
           </span>
-        </a>
+        </Link>
 
         <Button
           icon={Menu}
@@ -281,23 +281,23 @@ export default function Navbar() {
         )}
       >
         <div className='z-10 flex flex-col items-center gap-14 px-4 py-24'>
-          <a
-            href='#home'
+          <Link
+            href='/'
             aria-label='Kembali ke beranda HMTC ITS'
             className='w-32'
             onClick={(e) => handleAnchorClick(e, 'home')}
             tabIndex={0}
           >
             <NextImage
-              src='logo-hmtc2025-navbar.png'
-              alt='Logo HMTC ITS 2025'
-              width={128}
-              height={34}
+              src='logo-hmtc-2026.svg'
+              alt='Logo HMTC ITS 2026'
+              width={32}
+              height={32}
               priority
               quality={80}
-              className='h-full w-full'
+              className='h-16 w-auto'
             />
-          </a>
+          </Link>
 
           <div className='flex flex-col items-center gap-8'>
             {NAVBAR_LINKS.map(({ id, name, href, offset }) =>

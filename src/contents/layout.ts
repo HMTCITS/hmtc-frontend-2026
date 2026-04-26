@@ -1,7 +1,7 @@
 export const NAVBAR_LINKS = [
-  { id: 1, name: 'About Us', href: '#aboutus', offset: -50 },
-  { id: 2, name: 'History of HMTC', href: '#historyofhmtc', offset: 1500 },
-  { id: 3, name: 'Gallery', href: '#gallery', offset: -100 },
+  { id: 1, name: 'Beranda', href: '/', offset: -50 },
+  { id: 2, name: 'Academic Resources', href: '/student-welfare/academic-resources', offset: 1500 },
+  // { id: 3, name: 'Gallery', href: '#gallery', offset: -100 },
   { id: 4, name: 'Info', href: '/info' },
 ];
 

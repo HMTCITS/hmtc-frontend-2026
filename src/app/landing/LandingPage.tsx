@@ -5,8 +5,9 @@ import * as React from 'react';
 
 import AboutSkeleton from '@/app/landing/components/about/AboutSkeleton';
 import Cover from '@/app/landing/components/cover/Cover';
-import GallerySkeleton from '@/app/landing/components/gallery/GallerySkeleton';
+// import GallerySkeleton from '@/app/landing/components/gallery/GallerySkeleton';
 import HeaderAnnouncement from '@/app/landing/components/HeaderAnnouncement';
+import LoadingScreen from '@/app/landing/components/LoadingScreen';
 import PeopleSkeleton from '@/app/landing/components/people/PeopleHMTCSkeleton';
 import ShowCase from '@/app/landing/components/showcase/ShowCase';
 import ShowCaseSkeleton from '@/app/landing/components/showcase/ShowCaseSkeleton';
@@ -19,7 +20,7 @@ const createDynamicImport = (importer: () => Promise<any>) => {
 
 const About = createDynamicImport(() => import('./components/about/About'));
 const PeopleHMTC = createDynamicImport(() => import('./components/people/PeopleHMTC'));
-const GalleryHMTC = createDynamicImport(() => import('./components/gallery/GalleryHMTC'));
+// const GalleryHMTC = createDynamicImport(() => import('./components/gallery/GalleryHMTC'));
 
 
 // Sections
@@ -33,7 +34,7 @@ const HOME_SECTIONS: SectionData[] = [
   { id: 'about', Component: About, Fallback: AboutSkeleton },
   { id: 'showcase', Component: ShowCase, Fallback: ShowCaseSkeleton },
   { id: 'people', Component: PeopleHMTC, Fallback: PeopleSkeleton },
-  { id: 'gallery', Component: GalleryHMTC, Fallback: GallerySkeleton },
+  // { id: 'gallery', Component: GalleryHMTC, Fallback: GallerySkeleton },
 ]
 
 const SectionsWrapper = ({ Component }: SectionData) => {
@@ -41,11 +42,14 @@ const SectionsWrapper = ({ Component }: SectionData) => {
 }
 
 export default function LandingPage() {
+  const [heroReady, setHeroReady] = React.useState(false);
+
   return (
     <main className='relative scroll-smooth'>
+      <LoadingScreen onComplete={() => setHeroReady(true)} />
       <HeaderAnnouncement active={true}/>
       <div className=''>
-        <Cover />
+        <Cover heroReady={heroReady} />
         <NavbarDefault />
       </div>
 

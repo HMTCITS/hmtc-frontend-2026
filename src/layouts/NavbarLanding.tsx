@@ -5,6 +5,7 @@ import Link from 'next/link';
 import * as React from 'react';
 
 import Button from '@/components/buttons/Button';
+import NextImage from '@/components/NextImage';
 import Typography from '@/components/Typography';
 import { NAVBAR_LINKS } from '@/contents/layout';
 import { cn } from '@/lib/utils';
@@ -61,29 +62,29 @@ export default function NavbarLanding({ isActive = false }: Props) {
           'transition-colors duration-150',
         )}
       >
-        <a
-          href='#home'
+        <Link
+          href='/'
           aria-label='Kembali ke beranda HMTC ITS'
-          className='relative h-13 w-28 cursor-pointer'
+          className='relative flex flex-row items-center h-13 w-28 cursor-pointer'
           tabIndex={0}
           onClick={(e) => handleAnchorClick(e, 'home', 0)}
         >
-          {/* <NextImage
-            src='logo-hmtc2025-navbar.png'
-            alt='Logo HMTC ITS 2025'
-            width={100}
-            height={20}
+          <NextImage
+            src='logo-hmtc-2026.svg'
+            alt='Logo HMTC ITS 2026'
+            width={32}
+            height={32}
             priority
             quality={80}
-            className='w-full'
-          /> */}
+            className=''
+          />
           <span className='flex h-full items-center align-middle font-libre-baskerville text-white-main'>
             NIAT
             <span className='italic'>
               BA<span className='text-blue-500'>I</span>K
             </span>
           </span>
-        </a>
+        </Link>
 
         <Button
           icon={Menu}
@@ -131,29 +132,29 @@ export default function NavbarLanding({ isActive = false }: Props) {
         )}
       >
         <div className='z-10 flex flex-col items-center gap-14 px-4 py-24'>
-          <a
-            href='#home'
+          <Link
+            href='/'
             aria-label='Kembali ke beranda HMTC ITS'
-            className='w-32'
-            onClick={(e) => handleAnchorClick(e, 'home')}
+            className='relative flex h-13 w-32 cursor-pointer flex-row items-center'
             tabIndex={0}
+            onClick={(e) => handleAnchorClick(e, 'home', 0)}
           >
-            {/* <NextImage
-            src='logo-hmtc2025-navbar.png'
-            alt='Logo HMTC ITS 2025'
-            width={100}
-            height={20}
-            priority
-            quality={80}
-            className='w-full'
-          /> */}
+            <NextImage
+              src='logo-hmtc-2026.svg'
+              alt='Logo HMTC ITS 2026'
+              width={32}
+              height={32}
+              priority
+              quality={80}
+              className=''
+            />
             <span className='flex h-full items-center align-middle font-libre-baskerville text-white-main'>
               NIAT
               <span className='italic'>
                 BA<span className='text-blue-500'>I</span>K
               </span>
             </span>
-          </a>
+          </Link>
 
           <div className='flex flex-col items-center gap-8'>
             {NAVBAR_LINKS.map(({ id, name, href, offset }) =>

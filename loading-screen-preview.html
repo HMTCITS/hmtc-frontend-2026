@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HMTC 2026 — Loading Screen Preview</title>
+    <style>
+      *,
+      *::before,
+      *::after {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #ffffff;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      }
+
+      /* ── Loading Screen ─────────────────────────────────────────── */
+      .loading-screen {
+        position: fixed;
+        inset: 0;
+        background: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        animation: screenFadeOut 0.35s ease-in 2.35s forwards;
+      }
+
+      /* Black wipe — grows from left to right */
+      .loading-screen__wipe {
+        position: absolute;
+        inset: 0;
+        background: #000000;
+        transform: scaleX(0);
+        transform-origin: left center;
+        animation: wipeIn 1.4s cubic-bezier(0.76, 0, 0.24, 1) 0.3s forwards;
+      }
+
+      /* Logo + percent — stacked column, centred above the wipe */
+      .loading-screen__center {
+        position: relative;
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+        opacity: 0;
+        animation: logoReveal 0.55s ease-out 1.05s forwards;
+      }
+
+      .loading-screen__logo {
+        width: 120px;
+        height: 120px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .loading-screen__logo img {
+        width: 120px;
+        height: 120px;
+        object-fit: contain;
+        /* Force the SVG to render as white against the black background */
+        filter: brightness(0) invert(1);
+      }
+
+      /* Fallback text shown if the img tag has no src */
+      .loading-screen__logo-text {
+        color: #ffffff;
+        font-size: 10px;
+        font-weight: 500;
+        letter-spacing: 0.18em;
+        text-align: center;
+        text-transform: uppercase;
+        line-height: 1.5;
+        white-space: nowrap;
+      }
+
+      /* Percent indicator — mix-blend-mode:difference makes it
+         black on white background and white on black background */
+      .loading-screen__percent {
+        color: #0078B4;
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 3rem;
+        font-weight: 100;
+        letter-spacing: 0.15em;
+        font-variant-numeric: tabular-nums;
+      }
+
+      /* ── Keyframes ──────────────────────────────────────────────── */
+      @keyframes wipeIn {
+        from {
+          transform: scaleX(0);
+        }
+        to {
+          transform: scaleX(1);
+        }
+      }
+
+      @keyframes logoReveal {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      @keyframes screenFadeOut {
+        from {
+          opacity: 1;
+          pointer-events: all;
+        }
+        to {
+          opacity: 0;
+          pointer-events: none;
+        }
+      }
+
+      /* ── Page beneath ───────────────────────────────────────────── */
+      .page-hint {
+        position: fixed;
+        inset: 0;
+        background: #000000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: rgba(255, 255, 255, 0.25);
+        font-size: 11px;
+        letter-spacing: 0.25em;
+        text-transform: uppercase;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Simulated page underneath -->
+    <div class="page-hint">Landing Page</div>
+
+    <!-- Loading Screen -->
+    <div class="loading-screen">
+      <div class="loading-screen__wipe"></div>
+
+      <div class="loading-screen__center">
+        <div class="loading-screen__logo">
+          <img
+            src="public/images/logo-hmtc-2026.svg"
+            alt="Logo HMTC 2026"
+            onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
+          />
+          <span class="loading-screen__logo-text" style="display: none">
+            LOGO<br />KABINET
+          </span>
+        </div>
+
+        <span class="loading-screen__percent" id="pct">0%</span>
+      </div>
+    </div>
+
+    <script>
+      // Count 0→100 starting when the logo fades in (1050ms delay, 1200ms duration)
+      (function () {
+        var el = document.getElementById('pct');
+        var start = null;
+        var duration = 1200;
+
+        // Easing: cubic-bezier approximation of [0.22, 1, 0.36, 1]
+        function easeOutQuint(t) {
+          return 1 - Math.pow(1 - t, 5);
+        }
+
+        function tick(ts) {
+          if (!start) start = ts;
+          var elapsed = ts - start;
+          var t = Math.min(elapsed / duration, 1);
+          var value = Math.round(easeOutQuint(t) * 100);
+          el.textContent = value + '%';
+          if (t < 1) requestAnimationFrame(tick);
+        }
+
+        setTimeout(function () {
+          requestAnimationFrame(tick);
+        }, 1050);
+      })();
+    </script>
+  </body>
+</html>
