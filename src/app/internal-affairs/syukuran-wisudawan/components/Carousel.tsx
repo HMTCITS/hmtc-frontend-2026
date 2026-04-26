@@ -1,13 +1,12 @@
 'use client';
 import useEmblaCarousel from 'embla-carousel-react';
+import Image from 'next/image';
 import React, { useCallback, useEffect, useState } from 'react';
-
-import NextImage from '@/components/NextImage';
 
 const Carousel: React.FC = () => {
   const [emblaRef, embla] = useEmblaCarousel({
     loop: false,
-    slidesToScroll: 3, // Default (Desktop)
+    slidesToScroll: 1, // Default (Desktop)
     breakpoints: {
       '(max-width: 767px)': { slidesToScroll: 1 } // Mobile override
     }
@@ -56,79 +55,117 @@ const Carousel: React.FC = () => {
 
   const posts = [
     {
-      image: '/lifeathmtc/life-1.png',
+      image: '/images/internal-affairs/syukuran-wisuda/gallery/1776836660255.JPG',
     },
     {
-      image: '/lifeathmtc/life-2.png',
+      image: '/images/internal-affairs/syukuran-wisuda/gallery/DSC01298.JPG',
     },
     {
-      image: '/lifeathmtc/life-3.png',
+      image: '/images/internal-affairs/syukuran-wisuda/gallery/DSC01299.JPG',
     },
     {
-      image: '/lifeathmtc/life-2.png',
+      image: '/images/internal-affairs/syukuran-wisuda/gallery/IMG_2687.JPG',
     },
     {
-      image: '/lifeathmtc/life-1.png',
+      image: '/images/internal-affairs/syukuran-wisuda/gallery/IMG_2707.JPG',
     },
     {
-      image: '/lifeathmtc/life-2.png',
+      image: '/images/internal-affairs/syukuran-wisuda/gallery/IMG_2758.JPG',
     },
     {
-      image: '/lifeathmtc/life-3.png',
+      image: '/images/internal-affairs/syukuran-wisuda/gallery/IMG_2760.JPG',
     },
     {
-      image: '/lifeathmtc/life-2.png',
+      image: '/images/internal-affairs/syukuran-wisuda/gallery/IMG_2823.JPG',
+    },
+    {
+      image: '/images/internal-affairs/syukuran-wisuda/gallery/IMG_2832.JPG',
+    },
+    {
+      image: '/images/internal-affairs/syukuran-wisuda/gallery/IMG_2858.JPG',
+    },
+    {
+      image: '/images/internal-affairs/syukuran-wisuda/gallery/IMG_2877.JPG',
+    },
+    {
+      image: '/images/internal-affairs/syukuran-wisuda/gallery/IMG_2903.JPG',
+    },
+    {
+      image: '/images/internal-affairs/syukuran-wisuda/gallery/IMG_2913.JPG',
+    },
+    {
+      image: '/images/internal-affairs/syukuran-wisuda/gallery/IMG_2931.JPG',
+    },
+    {
+      image: '/images/internal-affairs/syukuran-wisuda/gallery/IMG_2988.JPG',
+    },
+    {
+      image: '/images/internal-affairs/syukuran-wisuda/gallery/IMG_3000.JPG',
+    },
+    {
+      image: '/images/internal-affairs/syukuran-wisuda/gallery/IMG_3093.JPG',
+    },
+    {
+      image: '/images/internal-affairs/syukuran-wisuda/gallery/1776836660917.JPG',
+    },
+    {
+      image: '/images/internal-affairs/syukuran-wisuda/gallery/DSC09591.JPG',
+    },
+    {
+      image: '/images/internal-affairs/syukuran-wisuda/gallery/DSC09592.JPG',
+    },
+    {
+      image: '/images/internal-affairs/syukuran-wisuda/gallery/DSC09596.JPG',
+    },
+    {
+      image: '/images/internal-affairs/syukuran-wisuda/gallery/DSC09624.JPG',
     },
   ];
 
   return (
-    <div className='embla' ref={emblaRef}>
-      <div className='embla__container flex select-none gap-8 cursor-grab'>
+    <div className='embla select-none' ref={emblaRef}>
+      <div className='flex gap-2 cursor-grab'>
         {posts.map((post, index) => (
-          <div className='embla__slide flex-none min-w-0' key={index}>
-            <div
-              className='flex'
-            >
-              <div className='relative flex'>
-                <NextImage
-                  src={post.image}
-                  alt={`Post ${index + 1} Kehidupan Sehari hari anak TC`}
-                  width={425}
-                  height={530}
-                  className='h-full w-full'
-                  imgClassName='object-cover'
-                />
-              </div>
+          <div className='flex-[0_0_100%] h-[50vh] w-full md:flex-[0_0_90%] lg:flex-[0_0_60%] md:h-[50vh] flex justify-center content-center' key={index}>
+            <div className='relative w-full h-full'>
+              <Image
+                src={post.image}
+                alt={`Post ${index + 1} Foto Gallery Syukuran Wisuda ke-133 TC`}
+                fill
+                className='object-contain'
+              />
             </div>
           </div>
         ))}
       </div>
-      <div className='mt-8 inline-flex flex-wrap justify-center items-center gap-2 bg-gray-950 rounded-full px-4'>
-        <button
-          aria-label='Backward'
-          onClick={scrollPrev}
-          className='px-1 py-2 text-xl text-gray-300 hover:text-yellow-300 cursor-pointer'
-        >
-          ←
-        </button>
-        {scrollSnaps.map((_, index) => (
+      <div className='flex justify-center items-center'>
+        <div className='mt-8 grid grid-cols-[auto_auto_auto] w-fit justify-center items-center gap-2 bg-gray-950 rounded-full px-4'>
           <button
-            aria-label='Scroll to slide'
-            key={index}
-            className={`cursor-pointer mx-1 h-2 w-2 rounded-full ${index === selectedIndex ? 'bg-yellow-300' : 'bg-gray-300'
-              }`}
-            onClick={() => scrollTo(index)}
-          />
-        ))}
-        <button
-          aria-label='Forward'
-          onClick={scrollNext}
-          className='px-1 py-2 text-xl text-gray-300 hover:text-yellow-300 cursor-pointer'
-        >
-          →
-        </button>
-      </div>
-      <div className='mt-2'>
+            aria-label='Backward'
+            onClick={scrollPrev}
+            className='px-1 py-2 text-xl text-gray-300 hover:text-yellow-300 cursor-pointer'
+          >
+            ←
+          </button>
+          <div className='flex flex-wrap justify-center items-center'>
+            {scrollSnaps.map((_, index) => (
+              <button
+                aria-label='Scroll to slide'
+                key={index}
+                className={`cursor-pointer mx-1 h-2 w-2 rounded-full ${index === selectedIndex ? 'bg-yellow-300' : 'bg-gray-300'
+                  }`}
+                onClick={() => scrollTo(index)}
+              />
+            ))}
+          </div>
+          <button
+            aria-label='Forward'
+            onClick={scrollNext}
+            className='px-1 py-2 text-xl text-gray-300 hover:text-yellow-300 cursor-pointer'
+          >
+            →
+          </button>
+        </div>
       </div>
     </div>
   );

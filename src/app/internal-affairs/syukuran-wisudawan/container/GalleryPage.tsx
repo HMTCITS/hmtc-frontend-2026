@@ -69,8 +69,8 @@ export default function GalleryPage() {
           className="select-none"
         />
       </div>
-      <div className="flex flex-col justify-center text-center md:p-32 gap-7 mb-16">
-        <h1 className="text-[#FDC100] text-[clamp(3.5rem,25vw,128px)] font-normal [text-shadow:0_4px_8px_rgba(254,194,0,0.50)] [-webkit-text-stroke:1px_#7B4100] font-harry-potter">Precious Moments</h1>
+      <div className="flex flex-col justify-center text-center md:p-32 gap-7 mb-16 w-full">
+        <h1 className="text-[#FDC100] text-[clamp(1.0rem,25vw,128px)] font-normal [text-shadow:0_4px_8px_rgba(254,194,0,0.50)] [-webkit-text-stroke:1px_#7B4100] font-harry-potter">Precious Moments</h1>
         <Carousel />
       </div>
     </div>
