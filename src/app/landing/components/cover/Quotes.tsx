@@ -66,19 +66,19 @@ const Quotes: React.FC = () => {
 
           <div className='flex flex-row items-center'>
             <div className='h-[1px] w-[80px] border border-white md:w-[120px]'></div>
-            <Typography
+            {/* <Typography
               as='p'
               variant='b2'
               font='satoshi'
               weight='regular'
               className='ml-2 text-sm text-white lg:text-sm'
             >
-              29 06 2024
-            </Typography>
+              29 06 2026
+            </Typography> */}
           </div>
         </div>
         <NextImage
-          src='/Quotes/Quotes.png'
+          src='/Quotes/incremental2026.png'
           alt='Quotes Background'
           className='h-full w-full rounded-none'
           imgClassName='object-cover'

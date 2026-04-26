@@ -7,8 +7,8 @@ export default function ShowCase() {
   return (
     <div className='relative bg-gray-100'>
       <NextImage
-        src='/fotohmtc2024.webp'
-        alt='Foto HMTC 2024'
+        src='/fotohmtc2026.png'
+        alt='Foto HMTC 2026'
         className='relative h-screen w-full object-cover'
         style={{ objectFit: 'cover' }}
         width={1512}

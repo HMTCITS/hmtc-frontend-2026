@@ -1,59 +1,161 @@
+'use client';
+
+import { motion } from 'motion/react';
+
 import NextImage from '@/components/NextImage';
-import Typography from '@/components/Typography';
+
+const HEADLINE_LINES = ['MEMBAWA', 'PERUBAHAN', 'POSITIF &', 'PROGRESIF.'];
+
+const STATS = [
+  { value: '9', label: 'DEPARTEMEN' },
+  { value: '180+', label: 'PENGURUS AKTIF' },
+  { value: '2026', label: 'PERIODE' },
+];
+
+// Shared variant names propagated from root
+const lineReveal = {
+  hidden: { y: '108%' },
+  visible: (i: number) => ({
+    y: '0%',
+    transition: {
+      duration: 0.78,
+      delay: 0.32 + i * 0.11,
+      ease: [0.22, 1, 0.36, 1] as [number, number, number, number],
+    },
+  }),
+};
+
+const fadeSlideUp = (delay: number) => ({
+  hidden: { opacity: 0, y: 18 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.6,
+      delay,
+      ease: [0.22, 1, 0.36, 1] as [number, number, number, number],
+    },
+  },
+});
+
+const fadeOnly = (delay: number) => ({
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { duration: 0.5, delay },
+  },
+});
+
+function DoveIcon({ className }: { className?: string }) {
+  return (
+    <NextImage
+      src='logo-hmtc-2026.svg'
+      alt='Logo HMTC 2026'
+      width={40}
+      height={40}
+      isVector={true}
+      className={className}
+      imgClassName='h-full w-full'
+    />
+  );
+}
 
 export default function Cover() {
   return (
     <div id='home' className='relative overflow-hidden bg-black text-white'>
-      <div className='h-full overflow-hidden'>
+      {/* Background */}
+      <div className='absolute inset-0'>
         <NextImage
-          src='halamandepan.webp'
+          src='bendera.png'
           alt='Background Beranda HMTC 2026'
-          className='z-0 h-[calc(100vh-52px)] min-h-[415px] w-full sm:min-h-[470px] lg:min-h-[768px] xl:min-h-[890px] 2xl:min-h-[768px]'
+          className='h-full w-full'
           imgClassName='h-full w-full object-cover object-center'
           width={1512}
           height={982}
           priority={true}
         />
-        <div className='absolute inset-0 z-10 h-full w-full bg-black opacity-75'></div>
+        <div className='absolute inset-0 bg-black/72' />
       </div>
 
-      <div className='absolute top-0 z-20 flex h-full w-full items-center justify-center'>
-        <div className='m-10 w-full max-lg:flex max-lg:flex-col max-lg:justify-between lg:mx-16 lg:my-20'>
-          <div className='flex flex-col md:flex-row md:items-center md:justify-between'>
-            <Typography
-              as='h1'
-              font='libre'
-              variant='j2'
-              weight='regular'
-              className='opacity-60 sm:text-4xl md:mr-auto md:text-5xl lg:text-7xl'
-            >
-              Membawa Perubahan <br />
-            </Typography>
+      {/* Root animation container — key forces remount on replay */}
+      <motion.div
+        className='relative z-10 flex min-h-svh flex-col'
+        initial='hidden'
+        animate='visible'
+      >
+        {/* ── Hero body ─────────────────────────────────────────────── */}
+        <div className='relative flex flex-1 flex-col px-8 pt-10 pb-8 lg:px-14 lg:pt-14 xl:px-20'>
+          <motion.div
+            variants={fadeOnly(1.05)}
+            className='absolute top-1/2 right-3.5 hidden -translate-y-1/2 rotate-90 lg:block'
+          >
+            <span className='font-plus-jakarta-sans text-[9px] tracking-[0.3em] whitespace-nowrap text-white/28 uppercase'>
+              TEKNIK INFORMATIKA - ITS
+            </span>
+          </motion.div>
+
+          {/* ── Giant headline ──────────────────────────────────────── */}
+          <div className='mt-6 flex flex-1 flex-col justify-center lg:mt-4'>
+            {HEADLINE_LINES.map((line, i) => (
+              <div key={line} className='overflow-hidden'>
+                <motion.h1
+                  custom={i}
+                  variants={lineReveal}
+                  className='font-helveticaNeue text-[clamp(2.6rem,9.5vw,8.5rem)] leading-[0.9] font-thin tracking-[-0.01em] text-white'
+                >
+                  {line}
+                </motion.h1>
+              </div>
+            ))}
           </div>
-          <div className='flex flex-row justify-end py-12 md:py-16 lg:justify-end'>
-            <Typography
-              as='h1'
-              font='libre'
-              variant='j1'
-              weight='bold'
-              className='opacity-86 max-md:pr-6 sm:text-5xl md:text-6xl lg:text-8xl'
+
+          {/* ── Bottom row ─────────────────────────────────────────── */}
+          <div className='mt-10 flex items-end justify-between gap-6'>
+            {/* Subtitle */}
+            <motion.p
+              variants={fadeSlideUp(0.92)}
+              className='max-w-[340px] font-satoshi text-sm leading-relaxed text-white/60'
             >
-              Bersama
-            </Typography>
-          </div>
-          <div className='flex flex-col md:flex-row md:items-center md:justify-between lg:mt-20'>
-            <Typography
-              as='h1'
-              font='libre'
-              variant='j0'
-              weight='bold'
-              className='text-5xl leading-tight italic sm:text-6xl md:text-7xl lg:text-8xl xl:text-8xl'
+              Kabinet mahasiswa yang berdedikasi membangun komunitas akademik
+              yang berdaya, inklusif, dan berorientasi pada masa depan.
+            </motion.p>
+
+            {/* Branding mark */}
+            <motion.div
+              variants={fadeSlideUp(1.02)}
+              className='hidden shrink-0 items-center gap-3 lg:flex'
             >
-              Niat Baik
-            </Typography>
+              <DoveIcon className='h-8 w-8' />
+              <div>
+                <p className='font-libre text-sm leading-tight font-semibold text-white italic'>
+                  Kabinet Niat Baik
+                </p>
+                <p className='mt-0.5 font-satoshi text-[10px] tracking-[0.22em] text-white/40 uppercase'>
+                  Periode 2026 — 27
+                </p>
+              </div>
+            </motion.div>
           </div>
         </div>
-      </div>
+
+        {/* ── Stats bar ──────────────────────────────────────────────── */}
+        <div className='grid grid-cols-2 border-t border-white/10 sm:grid-cols-4'>
+          {STATS.map(({ value, label }, i) => (
+            <motion.div
+              key={label}
+              variants={fadeSlideUp(1.1 + i * 0.07)}
+              className='flex flex-col gap-1.5 border-r border-b border-white/10 px-8 py-6 last:border-r-0 sm:border-b-0'
+            >
+              <span className='font-helveticaNeue text-[2rem] leading-none font-thin text-white lg:text-[2.6rem]'>
+                {value}
+              </span>
+              <span className='font-satoshi text-[10px] tracking-[0.22em] text-white/40 uppercase'>
+                {label}
+              </span>
+            </motion.div>
+          ))}
+        </div>
+      </motion.div>
     </div>
   );
 }
