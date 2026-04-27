@@ -1,10 +1,11 @@
-"use client";
-import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
-import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+'use client';
+import { ChevronLeftIcon, ChevronRightIcon, XIcon } from 'lucide-react';
+import Image from 'next/image';
+import { useEffect, useMemo, useState } from 'react';
 
-import Box from "@/app/internal-affairs/syukuran-wisudawan/components/Box";
-import Typography from "@/components/Typography";
+import Box from '@/app/internal-affairs/syukuran-wisudawan/components/Box';
+import wishesJson from '@/app/internal-affairs/syukuran-wisudawan/components/wishes.json';
+import Typography from '@/components/Typography';
 import {
   Pagination,
   PaginationContent,
@@ -14,26 +15,41 @@ import {
 } from '@/components/ui/pagination';
 import { cn } from '@/lib/utils';
 
-const wishes = [
-  { author: "Dave", wishes: "Buat para wisudawan semoga sukses, mendapatkan jodoh dan pekerjaan yang layak" },
-  { author: "Sarah", wishes: "Selamat menempuh hidup baru di dunia kerja, tetap semangat!" },
-  { author: "Budi", wishes: "Semoga ilmu yang didapat bermanfaat bagi nusa dan bangsa." },
-  { author: "Lestari", wishes: "Sukses selalu untuk langkah selanjutnya!" },
-  { author: "Dave", wishes: "Buat para wisudawan semoga sukses, mendapatkan jodoh dan pekerjaan yang layak" },
-  { author: "Sarah", wishes: "Selamat menempuh hidup baru di dunia kerja, tetap semangat!" },
-  { author: "Budi", wishes: "Semoga ilmu yang didapat bermanfaat bagi nusa dan bangsa." },
-  { author: "Lestari", wishes: "Sukses selalu untuk langkah selanjutnya!" },
-  { author: "Dave", wishes: "Buat para wisudawan semoga sukses, mendapatkan jodoh dan pekerjaan yang layak" },
-  { author: "Sarah", wishes: "Selamat menempuh hidup baru di dunia kerja, tetap semangat!" },
-  { author: "Budi", wishes: "Semoga ilmu yang didapat bermanfaat bagi nusa dan bangsa." },
-  { author: "Lestari", wishes: "Sukses selalu untuk langkah selanjutnya!" },
-];
+type WishPayload = {
+  doaHarapan: string;
+  namaPenulis: string;
+  submittedAt: string;
+};
+
+type WishCard = {
+  author: string;
+  wishes: string;
+};
+
+function transformWishes(data: WishPayload[]): WishCard[] {
+  return data
+    .map((item) => ({
+      author: item.namaPenulis?.trim() || 'Anonim',
+      wishes: item.doaHarapan?.trim() || '-',
+    }))
+    .filter((item) => item.wishes !== '-');
+}
+
+const wishes = transformWishes(wishesJson as WishPayload[]);
 
 const ELLIPSIS = '…' as const;
+const MOBILE_BREAKPOINT = '(max-width: 767px)';
 
 export default function HarapanPage() {
-  const itemsPerPage = 6;
+  const [itemsPerPage, setItemsPerPage] = useState(() =>
+    typeof window !== 'undefined' && window.matchMedia(MOBILE_BREAKPOINT).matches
+      ? 3
+      : 6,
+  );
   const [page, setPage] = useState(1);
+  const [selectedWish, setSelectedWish] = useState<
+    (WishCard & { id: number }) | null
+  >(null);
 
   const totalPages = Math.ceil(wishes.length / itemsPerPage);
 
@@ -43,9 +59,42 @@ export default function HarapanPage() {
     }
   }, [page, totalPages]);
 
+  useEffect(() => {
+    const mediaQuery = window.matchMedia(MOBILE_BREAKPOINT);
+
+    const updateItemsPerPage = (event: MediaQueryList | MediaQueryListEvent) => {
+      setItemsPerPage(event.matches ? 3 : 6);
+    };
+
+    updateItemsPerPage(mediaQuery);
+    mediaQuery.addEventListener('change', updateItemsPerPage);
+
+    return () => {
+      mediaQuery.removeEventListener('change', updateItemsPerPage);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!selectedWish) return;
+
+    const onEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setSelectedWish(null);
+      }
+    };
+
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', onEscape);
+
+    return () => {
+      document.body.style.overflow = '';
+      window.removeEventListener('keydown', onEscape);
+    };
+  }, [selectedWish]);
+
   const currentWishes = useMemo(
     () => wishes.slice((page - 1) * itemsPerPage, page * itemsPerPage),
-    [page],
+    [itemsPerPage, page],
   );
 
   // build a pages array with ellipses
@@ -53,14 +102,14 @@ export default function HarapanPage() {
     totalPages <= 7
       ? Array.from({ length: totalPages }, (_, i) => i + 1)
       : [
-        1,
-        page > 3 ? ELLIPSIS : 2,
-        page - 1,
-        page,
-        page + 1,
-        page < totalPages - 2 ? ELLIPSIS : totalPages - 1,
-        totalPages,
-      ];
+          1,
+          page > 3 ? ELLIPSIS : 2,
+          page - 1,
+          page,
+          page + 1,
+          page < totalPages - 2 ? ELLIPSIS : totalPages - 1,
+          totalPages,
+        ];
 
   const paginationItems = pages
     .filter((p) => (typeof p === 'number' ? p >= 1 && p <= totalPages : true))
@@ -96,60 +145,68 @@ export default function HarapanPage() {
     );
 
   return (
-    <div className="flex flex-col items-center justify-center self-stretch gap-[28px] p-8 sm:p-16 md:p-[10%] py-32 bg-[#EFDFC4] bg-[url('/images/internal-affairs/syukuran-wisuda/harapan-bg.png')] bg-repeat">
-      <div className="w-full inline-flex flex-col gap-7 p-8 sm:p-16 md:p-24 pb-48 md:pb-32 relative z-10 bg-[url('/images/internal-affairs/syukuran-wisuda/blank-brown-paper-design.png')] bg-cover bg-repeat">
-        <div className="absolute -top-20 -left-20 hidden md:block">
+    <div className="flex flex-col items-center justify-center gap-[28px] self-stretch bg-[#EFDFC4] bg-[url('/images/internal-affairs/syukuran-wisuda/harapan-bg.png')] bg-repeat p-8 py-32 sm:p-16 md:p-[10%]">
+      <div className="relative z-10 inline-flex w-full flex-col gap-7 bg-[url('/images/internal-affairs/syukuran-wisuda/blank-brown-paper-design.png')] bg-cover bg-repeat p-8 pb-48 sm:p-16 md:p-24 md:pb-32">
+        <div className='absolute -top-20 -left-20 hidden md:block'>
           <Image
-            src="/images/internal-affairs/syukuran-wisuda/slytherin.png"
-            alt=""
+            src='/images/internal-affairs/syukuran-wisuda/slytherin.png'
+            alt=''
             width={200}
             height={200}
             priority
-            draggable="false"
-            className="select-none"
+            draggable='false'
+            className='select-none'
           />
         </div>
-        <div className="absolute -top-20 -right-20 hidden md:block">
+        <div className='absolute -top-20 -right-20 hidden md:block'>
           <Image
-            src="/images/internal-affairs/syukuran-wisuda/hufflepuff.png"
-            alt=""
+            src='/images/internal-affairs/syukuran-wisuda/hufflepuff.png'
+            alt=''
             width={200}
             height={200}
             priority
-            draggable="false"
-            className="select-none"
+            draggable='false'
+            className='select-none'
           />
         </div>
-        <div className="absolute -bottom-20 -left-20 hidden md:block">
+        <div className='absolute -bottom-20 -left-20 hidden md:block'>
           <Image
-            src="/images/internal-affairs/syukuran-wisuda/ravenclaw.png"
-            alt=""
+            src='/images/internal-affairs/syukuran-wisuda/ravenclaw.png'
+            alt=''
             width={200}
             height={200}
             priority
-            draggable="false"
-            className="select-none"
+            draggable='false'
+            className='select-none'
           />
         </div>
-        <div className="absolute -bottom-20 -right-20 hidden md:block">
+        <div className='absolute -right-20 -bottom-20 hidden md:block'>
           <Image
-            src="/images/internal-affairs/syukuran-wisuda/gryffindor.png"
-            alt=""
+            src='/images/internal-affairs/syukuran-wisuda/gryffindor.png'
+            alt=''
             width={200}
             height={200}
             priority
-            draggable="false"
-            className="select-none"
+            draggable='false'
+            className='select-none'
           />
         </div>
-        <h1 className="text-[#360000] font-harry-potter text-[80px] font-normal leading-normal">Untaian Doa dan Harapan</h1>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <h1 className='font-harry-potter text-[3.5rem] leading-[1.05] font-normal text-[#360000] sm:text-[4.3rem] md:text-[80px]'>
+          Untaian Doa dan Harapan
+        </h1>
+        <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3'>
           {currentWishes.map((wish, index) => (
             <Box
               key={index}
               id={(page - 1) * itemsPerPage + index}
               wishes={wish.wishes}
               author={wish.author}
+              onClick={() =>
+                setSelectedWish({
+                  ...wish,
+                  id: (page - 1) * itemsPerPage + index,
+                })
+              }
             />
           ))}
         </div>
@@ -183,6 +240,35 @@ export default function HarapanPage() {
           </Pagination>
         )}
       </div>
+
+      {selectedWish && (
+        <div
+          className='fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4'
+          onClick={() => setSelectedWish(null)}
+        >
+          <div
+            className='relative w-full max-w-3xl'
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type='button'
+              onClick={() => setSelectedWish(null)}
+              className='absolute top-3 right-3 z-10 rounded-full bg-black/40 p-2 text-white hover:bg-black/60'
+              aria-label='Tutup popup harapan'
+            >
+              <XIcon size={18} />
+            </button>
+
+            <Box
+              id={selectedWish.id}
+              wishes={selectedWish.wishes}
+              author={selectedWish.author}
+              truncateMessage={false}
+              className='max-h-[80vh]'
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
