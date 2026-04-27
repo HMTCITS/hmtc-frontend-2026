@@ -21,13 +21,13 @@ export default function ProkerPage() {
           </div>
           <h1 className="font-harry-potter text-[clamp(3.5rem,25vw,128px)] font-normal leading-normal tracking-[-6.4px] text-[#FDC100] [text-shadow:0_4px_8px_rgba(254,194,0,0.50)] [-webkit-text-stroke:1px_#7B4100]">Syukuran Wisudawan ke-133</h1>
           <div className="p-1 bg-black/60 flex justify-center items-center gap-2.5">
-            <p className="text-center text-yellow-500 text-xl font-normal font-plus-jakarta-sans">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+            <p className="text-center text-yellow-500 text-sm md:text-xl font-normal font-plus-jakarta-sans">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
           </div>
-          <div className="p-1 bg-black/60 flex flex-wrap justify-center items-center gap-2">
-            <p className="justify-start text-yellow-500 text-xl font-semibold font-plus-jakarta-sans">#SyukuranWisuda133</p>
-            <p className="justify-start text-yellow-500 text-xl font-semibold font-plus-jakarta-sans">#IANiatBaik</p>
-            <p className="justify-start text-yellow-500 text-xl font-semibold font-plus-jakarta-sans">#HMTCNiatBaik26</p>
-            <p className="justify-start text-yellow-500 text-xl font-semibold font-plus-jakarta-sans">#ITSSurabaya</p>
+          <div className="p-1 bg-black/60 flex flex-wrap justify-center items-center gap-2 text-sm md:text-xl">
+            <p className="justify-start text-yellow-500 font-semibold font-plus-jakarta-sans">#SyukuranWisuda133</p>
+            <p className="justify-start text-yellow-500 font-semibold font-plus-jakarta-sans">#IANiatBaik</p>
+            <p className="justify-start text-yellow-500 font-semibold font-plus-jakarta-sans">#HMTCNiatBaik26</p>
+            <p className="justify-start text-yellow-500 font-semibold font-plus-jakarta-sans">#ITSSurabaya</p>
           </div>
           <button className="px-4 py-3 bg-red-950 rounded-lg outline-1 outline-offset-[-1px] outline-amber-800 inline-flex justify-center items-center gap-2 overflow-hidden  text-center text-white text-base font-semibold font-plus-jakarta-sans capitalize leading-4 tracking-tight cursor-pointer">Lihat Gallery</button>
           <div className="w-full max-w-[984px] aspect-video relative flex items-center justify-center mx-auto z-10">
@@ -39,12 +39,13 @@ export default function ProkerPage() {
               className="object-cover object-bottom -z-10 select-none"
               draggable="false"
             />
-            <video
-              className="w-[80%] h-[80%] bg-zinc-300 shadow-lg"
-              controls
-            >
-              {/* <source src="..." type="video/mp4" /> */}
-            </video>
+            <iframe
+              className="w-[80%] h-[80%] bg-transparent shadow-lg"
+              src="https://www.youtube.com/embed/0OVwbbqpEwA"
+              title="Video Syukuran Wisudawan ke-133 TC"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+            ></iframe>
           </div>
         </div>
       </div>
