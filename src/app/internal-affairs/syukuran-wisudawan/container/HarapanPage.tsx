@@ -42,7 +42,8 @@ const MOBILE_BREAKPOINT = '(max-width: 767px)';
 
 export default function HarapanPage() {
   const [itemsPerPage, setItemsPerPage] = useState(() =>
-    typeof window !== 'undefined' && window.matchMedia(MOBILE_BREAKPOINT).matches
+    typeof window !== 'undefined' &&
+    window.matchMedia(MOBILE_BREAKPOINT).matches
       ? 3
       : 6,
   );
@@ -62,7 +63,9 @@ export default function HarapanPage() {
   useEffect(() => {
     const mediaQuery = window.matchMedia(MOBILE_BREAKPOINT);
 
-    const updateItemsPerPage = (event: MediaQueryList | MediaQueryListEvent) => {
+    const updateItemsPerPage = (
+      event: MediaQueryList | MediaQueryListEvent,
+    ) => {
       setItemsPerPage(event.matches ? 3 : 6);
     };
 
