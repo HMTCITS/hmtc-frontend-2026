@@ -44,7 +44,7 @@ export default function HarapanPage() {
   const [itemsPerPage, setItemsPerPage] = useState(() =>
     typeof window !== 'undefined' &&
     window.matchMedia(MOBILE_BREAKPOINT).matches
-      ? 3
+      ? 6
       : 6,
   );
   const [page, setPage] = useState(1);
@@ -66,7 +66,7 @@ export default function HarapanPage() {
     const updateItemsPerPage = (
       event: MediaQueryList | MediaQueryListEvent,
     ) => {
-      setItemsPerPage(event.matches ? 3 : 6);
+      setItemsPerPage(event.matches ? 6 : 6);
     };
 
     updateItemsPerPage(mediaQuery);

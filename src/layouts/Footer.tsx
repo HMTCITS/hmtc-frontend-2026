@@ -32,7 +32,7 @@ const SocialMedia = [
 const ProgramKerja = [
   {
     label: 'Syukuran Wisuda',
-    href: '/coming-soon',
+    href: '/internal-affairs/syukuran-wisudawan',
     offset: -80,
   },
   {
