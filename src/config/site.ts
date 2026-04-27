@@ -7,8 +7,8 @@ export const siteConfig = {
 
   // Kabinet Information
   kabinet: 'Niat Baik',
-  logo: '/logo/hmtc-logo-2025.png',
-  tahun: 2025,
+  logo: '/logo/hmtc-logo-2026.svg',
+  tahun: 2026,
   visi: 'Terwujudnya relevansi HMTC yang berdasar berdampak bagi mahasiswa Teknik Informatika ITS melalui pergerakan yang holistik dan esensial',
   misi: [
     'Menginisiasi pergerakan HMTC yang berdasar berdampak demi meningkatnya relevansi HMTC pada mahasiswa Teknik Informatika.',

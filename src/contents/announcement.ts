@@ -8,7 +8,7 @@ export const ANNOUNCEMENT_CONFIG = {
   textColor: 'text-white',
   dismissible: false, // Allow users to dismiss the announcement
   start: '2026-04-12T13:36:08+0000',
-  end: '2026-05-12T13:36:08+0000',
+  end: '2026-04-12T13:36:08+0000',
   timezone: 'Asia/Jakarta',
 } as const;
 

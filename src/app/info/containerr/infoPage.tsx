@@ -80,10 +80,10 @@ export default function InfoPage() {
       </div>
 
       {/* Judul */}
-      <h1 className='mb-1 text-center text-2xl font-bold text-white'>
+      <h1 className='mb-1 font-plus-jakarta-sans text-center text-2xl font-bold text-white'>
         HMTC ITS
       </h1>
-      <p className='mb-6 text-center text-lg font-normal text-white'>
+      <p className='mb-6 font-plus-jakarta-sans text-center text-lg font-normal text-white'>
         Himpunan Mahasiswa Teknik Computer-Informatika ITS
       </p>
 
