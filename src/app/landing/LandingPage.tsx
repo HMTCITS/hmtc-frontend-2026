@@ -20,6 +20,7 @@ const createDynamicImport = (importer: () => Promise<any>) => {
 
 const About = createDynamicImport(() => import('./components/about/About'));
 const PeopleHMTC = createDynamicImport(() => import('./components/people/PeopleHMTC'));
+const RevealKabinet = createDynamicImport(() => import('./components/RevealKabinet/RevealKabinet'));
 // const GalleryHMTC = createDynamicImport(() => import('./components/gallery/GalleryHMTC'));
 
 
@@ -34,6 +35,7 @@ const HOME_SECTIONS: SectionData[] = [
   { id: 'about', Component: About, Fallback: AboutSkeleton },
   { id: 'showcase', Component: ShowCase, Fallback: ShowCaseSkeleton },
   { id: 'people', Component: PeopleHMTC, Fallback: PeopleSkeleton },
+  { id: 'kabinet', Component: RevealKabinet, Fallback: PeopleSkeleton }
   // { id: 'gallery', Component: GalleryHMTC, Fallback: GallerySkeleton },
 ]
 
@@ -47,7 +49,7 @@ export default function LandingPage() {
   return (
     <main className='relative scroll-smooth'>
       <LoadingScreen onComplete={() => setHeroReady(true)} />
-      <HeaderAnnouncement active={true}/>
+      <HeaderAnnouncement active={true} />
       <div className=''>
         <Cover heroReady={heroReady} />
         <NavbarDefault />
