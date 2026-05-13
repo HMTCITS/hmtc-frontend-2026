@@ -19,7 +19,7 @@ const createDynamicImport = (importer: () => Promise<any>) => {
 }
 
 const About = createDynamicImport(() => import('./components/about/About'));
-const PeopleHMTC = createDynamicImport(() => import('./components/people/PeopleHMTC'));
+// const PeopleHMTC = createDynamicImport(() => import('./components/people/PeopleHMTC'));
 const RevealKabinet = createDynamicImport(() => import('./components/RevealKabinet/RevealKabinet'));
 // const GalleryHMTC = createDynamicImport(() => import('./components/gallery/GalleryHMTC'));
 
@@ -34,7 +34,7 @@ interface SectionData {
 const HOME_SECTIONS: SectionData[] = [
   { id: 'about', Component: About, Fallback: AboutSkeleton },
   { id: 'showcase', Component: ShowCase, Fallback: ShowCaseSkeleton },
-  { id: 'people', Component: PeopleHMTC, Fallback: PeopleSkeleton },
+  // { id: 'people', Component: PeopleHMTC, Fallback: PeopleSkeleton },
   { id: 'kabinet', Component: RevealKabinet, Fallback: PeopleSkeleton }
   // { id: 'gallery', Component: GalleryHMTC, Fallback: GallerySkeleton },
 ]

@@ -475,6 +475,16 @@
   }
 }
 
+@keyframes v5fade {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes rkImgIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
 .text-content {
   display: inline-block;
   position: relative;
