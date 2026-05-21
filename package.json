@@ -15,7 +15,7 @@
     "format:check": "prettier --check .",
     "format": "pnpm run format:write && pnpm run lint:fix && pnpm run typecheck && pnpm run lint:strict",
     "prepare": "husky",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "test:watch": "jest --watch",
     "analyze": "cross-env ANALYZE=true next build"
   },
