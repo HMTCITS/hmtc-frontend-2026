@@ -2260,7 +2260,7 @@ export default function RevealKabinet({
   const active = pi != null ? slide.people[pi] : null;
 
   return (
-    <div className='box-border flex flex-col overflow-hidden bg-[#0B0B0C] p-[28px_44px] py-28 font-sans text-[#EDEAE2] md:px-[16%]'>
+    <div className='box-border flex flex-col overflow-hidden bg-[#121212] p-[28px_44px] py-28 font-sans text-[#EDEAE2] md:px-[16%]'>
       <div className='flex items-center gap-4 border-b border-white/12 pb-3 text-[11px] tracking-[0.18em] text-white/55 uppercase'>
         <span className='font-semibold tracking-[0.22em] text-white'>
           HMTC<span className='px-1 opacity-50'>·</span>ITS
@@ -2435,7 +2435,7 @@ export default function RevealKabinet({
               </li>
             ))}
           </ul>
-          <div className='flex items-center gap-3 pt-3'>
+          <div className='flex items-center gap-3 pt-3 mb-4'>
             <button
               onClick={prev}
               className='h-[36px] w-[36px] cursor-pointer rounded-full border border-white/40 bg-transparent text-[14px] text-white'
