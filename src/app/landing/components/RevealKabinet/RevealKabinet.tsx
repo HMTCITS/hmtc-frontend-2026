@@ -2342,7 +2342,7 @@ export default function RevealKabinet({
                 return (
                   <div
                     key={cellIndex}
-                    className={`transition-colors duration-200 ease-out ${isActive ? 'bg-white/10' : pi != null ? 'bg-black/30' : 'bg-transparent'} ${cellIndex % GRID_COLS !== GRID_COLS - 1 ? 'border-r border-white/8' : ''} ${cellIndex < GRID_CELLS - GRID_COLS ? 'border-b border-white/8' : ''}`}
+                    className={`transition-colors duration-200 ease-out ${isActive ? 'bg-white/10' : pi != null ? 'bg-black/30' : 'bg-transparent'}`}
                   />
                 );
               })}
