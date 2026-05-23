@@ -2315,27 +2315,22 @@ export default function RevealKabinet({
           );
         })}
       </div>
-      <div className='flex flex-1 grid-cols-2 flex-wrap justify-center gap-7'>
+      <div className='flex flex-col lg:flex-row flex-1 justify-center gap-7'>
         <div
           ref={photoRef}
-          className={`relative w-fit cursor-crosshair self-start overflow-hidden rounded-[4px]`}
+          className='relative flex-1 aspect-[4/5] w-full cursor-crosshair self-start overflow-hidden rounded-[4px]'
           onMouseMove={onMove}
           onMouseLeave={() => isHover && setPi(null)}
           onClick={() => !isHover && stepP(1)}
         >
-          <div className='relative h-fit w-fit'>
+          <div className='relative h-full w-full'>
             <Image
               key={slide.id}
               src={slide.photo}
               alt={slide.caption}
-              className='w-full object-contain lg:w-[30dvw]'
-              style={{
-                filter: 'saturate(0.9) contrast(1.03)',
-                objectFit: 'contain',
-                animation: 'rkImgIn 200ms ease',
-              }}
-              width={500}
-              height={300}
+              fill
+              sizes='(min-width: 1024px) 30vw, 100vw'
+              className='object-contain'
               priority
               draggable={false}
             />
@@ -2389,7 +2384,7 @@ export default function RevealKabinet({
                 </a>
               </div>
             )}
-            <div className='pointer-events-none absolute top-3 right-3 border border-white/20 bg-[#0B0B0C]/50 px-2 py-1 text-[1.5vw] tracking-[0.16em] text-white/85 uppercase backdrop-blur-sm sm:top-4 sm:right-5 sm:px-2 sm:py-1 sm:text-[10px]'>
+            <div className='pointer-events-none absolute top-3 right-3 border border-white/20 bg-[#0B0B0C]/50 px-2 py-1 text-[1.5vw] tracking-[0.16em] text-white/85 uppercase backdrop-blur-sm sm:top-4 sm:right-5 sm:px-2 sm:py-1 sm:text-[10px] max-w-[60%] inline-flex text-right text-wrap w-fit'>
               {slide.label}
             </div>
           </div>
