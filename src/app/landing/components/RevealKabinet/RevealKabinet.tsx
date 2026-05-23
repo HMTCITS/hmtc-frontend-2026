@@ -2407,7 +2407,7 @@ export default function RevealKabinet({
               <li
                 key={i}
                 {...bindRow(i)}
-                className={`ease grid grid-cols-[32px_1fr_auto] items-center gap-3 border-b border-white/8 py-3 transition-all duration-200 ${pi === i ? '-mx-2.5 bg-white pr-2.5 pl-2.5 text-[#0B0B0C]' : ''} ${pi != null && pi !== i ? 'opacity-35' : ''}`}
+                className={`ease grid grid-cols-[32px_1fr_auto] items-center gap-3 border-b border-white/8 py-3 transition-all duration-200 transform translate-z-0 ${pi === i ? '-mx-2.5 bg-white pr-2.5 pl-2.5 text-[#0B0B0C]' : ''} ${pi != null && pi !== i ? 'opacity-35' : ''}`}
               >
                 <span className='font-serif text-[16px] italic'>
                   {String(i + 1).padStart(2, '0')}
