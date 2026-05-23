@@ -2091,7 +2091,7 @@ const HMTC_DEPARTMENTS: Department[] = [
     short: 'DPA',
     bureaus: [
       {
-        id: 'dpa-bureau',
+        id: 'dpa-head',
         label: 'Head of Dewan Perwakilan Angkatan',
         photo: '/images/reveal-kabinet/DPA1.png',
         caption: 'Head of Dewan Perwakilan Angkatan',
@@ -2104,7 +2104,7 @@ const HMTC_DEPARTMENTS: Department[] = [
         ],
       },
       {
-        id: 'dpa-bureau',
+        id: 'dpa-vice-head',
         label: 'Vice Head of Dewan Perwakilan Angkatan',
         photo: '/images/reveal-kabinet/DPA2.png',
         caption: 'Vice Head of Dewan Perwakilan Angkatan',
@@ -2308,7 +2308,7 @@ export default function RevealKabinet({
             <Image
               key={slides[idx].id}
               src={slides[idx].photo}
-              alt=""
+              alt=''
               width={500}
               height={300}
             />
