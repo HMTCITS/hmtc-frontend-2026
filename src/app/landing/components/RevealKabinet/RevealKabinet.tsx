@@ -716,7 +716,7 @@ const HMTC_DEPARTMENTS: Department[] = [
         ],
       },
       {
-        id: 'ssd-student-dev-staff',
+        id: 'ssd-staff-1',
         label: 'Staff of Student Social Development Department',
         photo: '/images/reveal-kabinet/SSD5.png',
         caption: 'Staff of Student Social Development Department',
@@ -734,7 +734,7 @@ const HMTC_DEPARTMENTS: Department[] = [
         ],
       },
       {
-        id: 'ssd-social-dev-staff',
+        id: 'ssd-staff-2',
         label: 'Staff of Student Social Development Department',
         photo: '/images/reveal-kabinet/SSD6.png',
         caption: 'Staff of Student Social Development Department',
@@ -753,6 +753,29 @@ const HMTC_DEPARTMENTS: Department[] = [
             name: 'A. Wildan Kevin Assyauqi',
             role: 'Staff of Student Social Development Department',
             ig: 'wildankev',
+          },
+        ],
+      },
+      {
+        id: 'ssd-staff-3',
+        label: 'Staff of Student Social Development Department',
+        photo: '/images/reveal-kabinet/SSD7.png',
+        caption: 'Staff of Student Social Development Department',
+        people: [
+          {
+            name: 'Muhammad Ilyas Rusdi',
+            role: 'Staff of Student Social Development Department',
+            ig: 'm.ilyasr',
+          },
+          {
+            name: 'Izzah Naufalia Adila',
+            role: 'Staff of Student Social Development Department',
+            ig: 'naufadl',
+          },
+          {
+            name: 'Mahendra Agung Darmawan',
+            role: 'Staff of Student Social Development Department',
+            ig: 'mahendraagungd',
           },
         ],
       },
