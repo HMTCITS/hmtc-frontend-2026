@@ -37,6 +37,7 @@ jobs:
         id: tags
         run: |
           image_name="ghcr.io/$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')"
+          echo "image_ref=${image_name}:${{ github.sha }}" >> "$GITHUB_OUTPUT"
           echo "tags<<EOF" >> "$GITHUB_OUTPUT"
           echo "${image_name}:${{ github.sha }}" >> "$GITHUB_OUTPUT"
           if [ "${{ github.ref_name }}" = "main" ]; then
@@ -53,6 +54,16 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: ${{ steps.tags.outputs.tags }}
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: ${{ steps.tags.outputs.image_ref }}
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
 
   deploy:
     runs-on: ubuntu-latest
