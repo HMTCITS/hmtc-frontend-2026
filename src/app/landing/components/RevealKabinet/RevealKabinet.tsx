@@ -716,7 +716,7 @@ const HMTC_DEPARTMENTS: Department[] = [
         ],
       },
       {
-        id: 'ssd-student-dev-staff',
+        id: 'ssd-staff-1',
         label: 'Staff of Student Social Development Department',
         photo: '/images/reveal-kabinet/SSD5.png',
         caption: 'Staff of Student Social Development Department',
@@ -734,7 +734,7 @@ const HMTC_DEPARTMENTS: Department[] = [
         ],
       },
       {
-        id: 'ssd-social-dev-staff',
+        id: 'ssd-staff-2',
         label: 'Staff of Student Social Development Department',
         photo: '/images/reveal-kabinet/SSD6.png',
         caption: 'Staff of Student Social Development Department',
@@ -753,6 +753,29 @@ const HMTC_DEPARTMENTS: Department[] = [
             name: 'A. Wildan Kevin Assyauqi',
             role: 'Staff of Student Social Development Department',
             ig: 'wildankev',
+          },
+        ],
+      },
+      {
+        id: 'ssd-staff-3',
+        label: 'Staff of Student Social Development Department',
+        photo: '/images/reveal-kabinet/SSD7.png',
+        caption: 'Staff of Student Social Development Department',
+        people: [
+          {
+            name: 'Muhammad Ilyas Rusdi',
+            role: 'Staff of Student Social Development Department',
+            ig: 'm.ilyasr',
+          },
+          {
+            name: 'Izzah Naufalia Adila',
+            role: 'Staff of Student Social Development Department',
+            ig: 'naufadl',
+          },
+          {
+            name: 'Mahendra Agung Darmawan',
+            role: 'Staff of Student Social Development Department',
+            ig: 'mahendraagungd',
           },
         ],
       },
@@ -2091,7 +2114,7 @@ const HMTC_DEPARTMENTS: Department[] = [
     short: 'DPA',
     bureaus: [
       {
-        id: 'dpa-bureau',
+        id: 'dpa-head',
         label: 'Head of Dewan Perwakilan Angkatan',
         photo: '/images/reveal-kabinet/DPA1.png',
         caption: 'Head of Dewan Perwakilan Angkatan',
@@ -2104,7 +2127,7 @@ const HMTC_DEPARTMENTS: Department[] = [
         ],
       },
       {
-        id: 'dpa-bureau',
+        id: 'dpa-vice-head',
         label: 'Vice Head of Dewan Perwakilan Angkatan',
         photo: '/images/reveal-kabinet/DPA2.png',
         caption: 'Vice Head of Dewan Perwakilan Angkatan',
@@ -2260,7 +2283,7 @@ export default function RevealKabinet({
   const active = pi != null ? slide.people[pi] : null;
 
   return (
-    <div className='box-border flex flex-col overflow-hidden bg-[#0B0B0C] p-[28px_44px] py-28 font-sans text-[#EDEAE2] md:px-[16%]'>
+    <div className='box-border flex flex-col overflow-hidden bg-[#121212] p-[28px_44px] py-28 font-sans text-[#EDEAE2] md:px-[16%]'>
       <div className='flex items-center gap-4 border-b border-white/12 pb-3 text-[11px] tracking-[0.18em] text-white/55 uppercase'>
         <span className='font-semibold tracking-[0.22em] text-white'>
           HMTC<span className='px-1 opacity-50'>·</span>ITS
@@ -2308,34 +2331,29 @@ export default function RevealKabinet({
             <Image
               key={slides[idx].id}
               src={slides[idx].photo}
-              alt=""
+              alt=''
               width={500}
               height={300}
             />
           );
         })}
       </div>
-      <div className='flex flex-1 grid-cols-2 flex-wrap justify-center gap-7'>
+      <div className='flex flex-col lg:flex-row flex-1 justify-center gap-7'>
         <div
           ref={photoRef}
-          className={`relative w-fit cursor-crosshair self-start overflow-hidden rounded-[4px]`}
+          className='relative flex-1 aspect-[4/5] w-full cursor-crosshair self-start overflow-hidden rounded-[4px]'
           onMouseMove={onMove}
           onMouseLeave={() => isHover && setPi(null)}
           onClick={() => !isHover && stepP(1)}
         >
-          <div className='relative h-fit w-fit'>
+          <div className='relative h-full w-full'>
             <Image
               key={slide.id}
               src={slide.photo}
               alt={slide.caption}
-              className='w-full object-contain lg:w-[30dvw]'
-              style={{
-                filter: 'saturate(0.9) contrast(1.03)',
-                objectFit: 'contain',
-                animation: 'rkImgIn 200ms ease',
-              }}
-              width={500}
-              height={300}
+              fill
+              sizes='(min-width: 1024px) 30vw, 100vw'
+              className='object-contain'
               priority
               draggable={false}
             />
@@ -2347,7 +2365,7 @@ export default function RevealKabinet({
                 return (
                   <div
                     key={cellIndex}
-                    className={`transition-colors duration-200 ease-out ${isActive ? 'bg-white/10' : pi != null ? 'bg-black/30' : 'bg-transparent'} ${cellIndex % GRID_COLS !== GRID_COLS - 1 ? 'border-r border-white/8' : ''} ${cellIndex < GRID_CELLS - GRID_COLS ? 'border-b border-white/8' : ''}`}
+                    className={`transition-colors duration-200 ease-out ${isActive ? 'bg-white/10' : pi != null ? 'bg-black/30' : 'bg-transparent'}`}
                   />
                 );
               })}
@@ -2389,7 +2407,7 @@ export default function RevealKabinet({
                 </a>
               </div>
             )}
-            <div className='pointer-events-none absolute top-3 right-3 border border-white/20 bg-[#0B0B0C]/50 px-2 py-1 text-[1.5vw] tracking-[0.16em] text-white/85 uppercase backdrop-blur-sm sm:top-4 sm:right-5 sm:px-2 sm:py-1 sm:text-[10px]'>
+            <div className='pointer-events-none absolute top-3 right-3 border border-white/20 bg-[#0B0B0C]/50 px-2 py-1 text-[1.5vw] tracking-[0.16em] text-white/85 uppercase backdrop-blur-sm sm:top-4 sm:right-5 sm:px-2 sm:py-1 sm:text-[10px] max-w-[60%] inline-flex text-right text-wrap w-fit'>
               {slide.label}
             </div>
           </div>
@@ -2412,7 +2430,7 @@ export default function RevealKabinet({
               <li
                 key={i}
                 {...bindRow(i)}
-                className={`ease grid grid-cols-[32px_1fr_auto] items-center gap-3 border-b border-white/8 py-3 transition-all duration-200 ${pi === i ? '-mx-2.5 bg-white pr-2.5 pl-2.5 text-[#0B0B0C]' : ''} ${pi != null && pi !== i ? 'opacity-35' : ''}`}
+                className={`ease grid grid-cols-[32px_1fr_auto] items-center gap-3 border-b border-white/8 py-3 transition-all duration-200 transform translate-z-0 ${pi === i ? '-mx-2.5 bg-white pr-2.5 pl-2.5 text-[#0B0B0C]' : ''} ${pi != null && pi !== i ? 'opacity-35' : ''}`}
               >
                 <span className='font-serif text-[16px] italic'>
                   {String(i + 1).padStart(2, '0')}
@@ -2435,7 +2453,7 @@ export default function RevealKabinet({
               </li>
             ))}
           </ul>
-          <div className='flex items-center gap-3 pt-3'>
+          <div className='flex items-center gap-3 pt-3 mb-4'>
             <button
               onClick={prev}
               className='h-[36px] w-[36px] cursor-pointer rounded-full border border-white/40 bg-transparent text-[14px] text-white'
