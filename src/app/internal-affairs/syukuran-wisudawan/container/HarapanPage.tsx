@@ -43,7 +43,7 @@ const MOBILE_BREAKPOINT = '(max-width: 767px)';
 export default function HarapanPage() {
   const [itemsPerPage, setItemsPerPage] = useState(() =>
     typeof window !== 'undefined' &&
-    window.matchMedia(MOBILE_BREAKPOINT).matches
+      window.matchMedia(MOBILE_BREAKPOINT).matches
       ? 6
       : 6,
   );
@@ -51,6 +51,7 @@ export default function HarapanPage() {
   const [selectedWish, setSelectedWish] = useState<
     (WishCard & { id: number }) | null
   >(null);
+  const [isMobile, setIsMobile] = useState(false);
 
   const totalPages = Math.ceil(wishes.length / itemsPerPage);
 
@@ -69,7 +70,12 @@ export default function HarapanPage() {
       setItemsPerPage(event.matches ? 6 : 6);
     };
 
+    const updateIsMobile = (event: MediaQueryList | MediaQueryListEvent) => {
+      setIsMobile(event.matches);
+    };
+
     updateItemsPerPage(mediaQuery);
+    updateIsMobile(mediaQuery);
     mediaQuery.addEventListener('change', updateItemsPerPage);
 
     return () => {
@@ -101,18 +107,55 @@ export default function HarapanPage() {
   );
 
   // build a pages array with ellipses
-  const pages: (number | typeof ELLIPSIS)[] =
-    totalPages <= 7
-      ? Array.from({ length: totalPages }, (_, i) => i + 1)
-      : [
-          1,
-          page > 3 ? ELLIPSIS : 2,
-          page - 1,
-          page,
-          page + 1,
-          page < totalPages - 2 ? ELLIPSIS : totalPages - 1,
-          totalPages,
-        ];
+  const pages: (number | typeof ELLIPSIS)[] = (() => {
+    // --- MOBILE LOGIC ---
+    if (isMobile) {
+      if (totalPages <= 3) {
+        return Array.from({ length: totalPages }, (_, i) => i + 1);
+      }
+
+      if (page === totalPages - 1) {
+        return [page, totalPages];
+      }
+
+      if (page === totalPages) {
+        return [1, ELLIPSIS, totalPages];
+      }
+
+      return [page, ELLIPSIS, totalPages];
+    }
+
+    // --- DESKTOP LOGIC ---
+    if (totalPages <= 7) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+
+    if (page <= 4) {
+      return [1, 2, 3, 4, 5, ELLIPSIS, totalPages];
+    }
+
+    if (page >= totalPages - 3) {
+      return [
+        1,
+        ELLIPSIS,
+        totalPages - 4,
+        totalPages - 3,
+        totalPages - 2,
+        totalPages - 1,
+        totalPages
+      ];
+    }
+
+    return [
+      1,
+      ELLIPSIS,
+      page - 1,
+      page,
+      page + 1,
+      ELLIPSIS,
+      totalPages
+    ];
+  })();
 
   const paginationItems = pages
     .filter((p) => (typeof p === 'number' ? p >= 1 && p <= totalPages : true))
@@ -183,7 +226,7 @@ export default function HarapanPage() {
             className='select-none'
           />
         </div>
-        <div className='absolute -right-20 -bottom-20 hidden md:block'>
+        <div className='absolute -right-20 -bottom-20 hidden md:block pointer-events-none'>
           <Image
             src='/images/internal-affairs/syukuran-wisuda/gryffindor.png'
             alt=''
@@ -214,9 +257,9 @@ export default function HarapanPage() {
           ))}
         </div>
         {totalPages > 1 && (
-          <Pagination className='mt-8 cursor-pointer justify-end'>
+          <Pagination className='mt-8 justify-end'>
             <PaginationContent>
-              <PaginationItem className='mr-6'>
+              <PaginationItem className='mr-2 cursor-pointer'>
                 <PaginationLink
                   onClick={(e) => {
                     e.preventDefault();
@@ -229,7 +272,7 @@ export default function HarapanPage() {
 
               {paginationItems}
 
-              <PaginationItem className='ml-6 cursor-pointer'>
+              <PaginationItem className='ml-2 cursor-pointer'>
                 <PaginationLink
                   onClick={(e) => {
                     e.preventDefault();
