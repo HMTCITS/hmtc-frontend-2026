@@ -6,12 +6,21 @@ import Threads from '@/components/Threads';
 import { Button } from '@/components/ui/button';
 import { ConfirmModal } from '@/components/ui/confirm-modal';
 import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { getCookie, setCookie } from '@/lib/cookies';
 
 type SeminarFormField = {
   id: string;
   label: string;
   placeholder: string;
+  type?: 'input' | 'select';
+  options?: string[];
 };
 
 export type SeminarRegistrationConfig = {
@@ -25,13 +34,14 @@ export type SeminarRegistrationConfig = {
   successMessage?: string;
   rsvpClosesAt?: string;
   closedMessage?: string;
+  attendanceLink?: string;
 };
 
 type SeminarRegistrationFormProps = {
   registration: SeminarRegistrationConfig;
 };
 
-const SEMINAR_ATTENDANCE_LINK = 'its.id/m/SeminarDosen1ETC2026';
+const DEFAULT_ATTENDANCE_LINK = 'its.id/m/SeminarDosen1ETC2026';
 const REGISTRATION_STORAGE_KEY_PREFIX = 'seminar.registration.submitted';
 const REGISTRATION_COOKIE_KEY_PREFIX = 'seminar_registration_submitted';
 
@@ -218,12 +228,12 @@ export default function SeminarRegistrationForm({
               'Pendaftaran diterima. Sampai jumpa di sesi seminar!'}{' '}
             Save this link to attend seminar:{' '}
             <a
-              href='https://its.id/m/SeminarDosen1ETC2026'
+              href={`https://${registration.attendanceLink ?? DEFAULT_ATTENDANCE_LINK}`}
               target='_blank'
               rel='noreferrer'
               className='underline underline-offset-2'
             >
-              {SEMINAR_ATTENDANCE_LINK}
+              {registration.attendanceLink ?? DEFAULT_ATTENDANCE_LINK}
             </a>
           </p>
         ) : null}
@@ -242,16 +252,37 @@ export default function SeminarRegistrationForm({
                 >
                   {field.label}
                 </label>
-                <Input
-                  id={field.id}
-                  name={field.id}
-                  value={formValues[field.id] || ''}
-                  onChange={(event) =>
-                    handleInputChange(field.id, event.currentTarget.value)
-                  }
-                  placeholder={field.placeholder}
-                  className='h-[43px] rounded-lg border-[#6B6B6B] bg-white px-5 font-plus-jakarta-sans text-sm text-[#575757] placeholder:text-[rgba(87,87,87,0.78)] focus-visible:ring-[#0078B4]'
-                />
+                {field.type === 'select' && field.options ? (
+                  <Select
+                    value={formValues[field.id] || ''}
+                    onValueChange={(value) => handleInputChange(field.id, value)}
+                  >
+                    <SelectTrigger
+                      id={field.id}
+                      className='h-[43px] rounded-lg border-[#6B6B6B] bg-white px-5 font-plus-jakarta-sans text-sm text-[#575757] focus:ring-[#0078B4]'
+                    >
+                      <SelectValue placeholder={field.placeholder} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {field.options.map((option) => (
+                        <SelectItem key={option} value={option}>
+                          {option}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <Input
+                    id={field.id}
+                    name={field.id}
+                    value={formValues[field.id] || ''}
+                    onChange={(event) =>
+                      handleInputChange(field.id, event.currentTarget.value)
+                    }
+                    placeholder={field.placeholder}
+                    className='h-[43px] rounded-lg border-[#6B6B6B] bg-white px-5 font-plus-jakarta-sans text-sm text-[#575757] placeholder:text-[rgba(87,87,87,0.78)] focus-visible:ring-[#0078B4]'
+                  />
+                )}
               </div>
             ))
           )}
@@ -300,12 +331,12 @@ export default function SeminarRegistrationForm({
         <p className='font-plus-jakarta-sans text-sm text-black'>
           Save this link to attend seminar:{' '}
           <a
-            href='https://its.id/m/SeminarDosen1ETC2026'
+            href={`https://${registration.attendanceLink ?? DEFAULT_ATTENDANCE_LINK}`}
             target='_blank'
             rel='noreferrer'
             className='font-semibold text-[#0078B4] underline underline-offset-2'
           >
-            {SEMINAR_ATTENDANCE_LINK}
+            {registration.attendanceLink ?? DEFAULT_ATTENDANCE_LINK}
           </a>
         </p>
       </ConfirmModal>

@@ -1,4 +1,3 @@
-const { withContentCollections } = require('@content-collections/next');
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
   enabled: process.env.ANALYZE === 'true',
 });
@@ -98,4 +97,4 @@ const nextConfig = {
   },
 };
 
-module.exports = withContentCollections(nextConfig);
+module.exports = withBundleAnalyzer(nextConfig);
