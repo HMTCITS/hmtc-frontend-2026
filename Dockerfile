@@ -4,6 +4,10 @@
 # syntax=docker.io/docker/dockerfile:1
 
 FROM node:20-alpine AS base
+# Upgrade OS packages to fix known CVEs (e.g. CVE-2026-45447 in libcrypto3/libssl3)
+RUN apk upgrade --no-cache
+# Upgrade npm to fix vulnerabilities in its bundled dependencies (tar, minimatch, glob, cross-spawn)
+RUN npm install -g npm@latest
 
 # Install dependencies only when needed
 FROM base AS deps
