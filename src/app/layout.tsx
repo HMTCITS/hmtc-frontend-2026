@@ -7,6 +7,7 @@ import Providers from '@/app/providers';
 import JsonLd from '@/components/JsonLd';
 import {
   adelphe,
+  archivo,
   harryPotter,
   inter,
   jetbrainsMono,
@@ -15,7 +16,8 @@ import {
   playfairDisplay,
   plusJakartaSans,
   poppins,
-  satoshi} from '@/lib/font';
+  satoshi,
+} from '@/lib/font';
 import { cn } from '@/lib/utils';
 
 export const metadata: Metadata = {
@@ -164,6 +166,7 @@ export default function RootLayout({
           playfairDisplay.variable,
           poppins.variable,
           adelphe.variable,
+          archivo.variable,
           inter.variable,
           jetbrainsMono.variable,
           satoshi.variable,
