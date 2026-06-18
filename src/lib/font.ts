@@ -1,4 +1,5 @@
 import {
+  Archivo,
   JetBrains_Mono,
   Libre_Baskerville,
   Plus_Jakarta_Sans,
@@ -742,4 +743,10 @@ export const harryPotter = localFont({
   ],
   display: 'swap',
   variable: '--font-harry-potter',
+});
+
+export const archivo = Archivo({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: '--font-archivo',
 });
