@@ -61,7 +61,7 @@ const academicResourcesContent: AcademicResourcesContent = {
       year: '2025/2026',
       semester: 'Genap',
       duration: '18:42',
-      tutor: '-',
+      tutor: 'Yoseph Kevin Hendrata',
       desc: `
         Overview Computer, Overview OS, Process and Thread, Concurrency (possible)
         Cheat Sheets: https://drive.google.com/file/d/1gtbRBH52zdWsim7c1nGP86UyObVRd8lm/view?usp=sharing, https://drive.google.com/file/d/19YKkR85G0BvCaYdfBtmRWxVuQrbo054A/view?usp=sharing
