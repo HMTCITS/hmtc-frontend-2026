@@ -104,6 +104,45 @@ const academicResourcesContent: AcademicResourcesContent = {
       `,
       youtubeId: 'rhBxcw5aPZM',
     },
+    {
+      id: 6,
+      course: 'Pemrograman Jaringan',
+      title: 'Tutor EAS Pemrograman Jaringan 2026',
+      type: 'EAS',
+      year: '2025/2026',
+      semester: 'Genap',
+      duration: '1:30:20',
+      tutor: 'Thopaz Givangkara Rosadi',
+      desc: `
+      `,
+      youtubeId: '8w_k1WUjPI8',
+    },
+    {
+      id: 7,
+      course: 'Sistem Operasi',
+      title: 'Tutor EAS Sistem Operasi 2026',
+      type: 'EAS',
+      year: '2025/2026',
+      semester: 'Genap',
+      duration: '1:14:00',
+      tutor: 'Christina Tan',
+      desc: `
+      `,
+      youtubeId: 'NNv0cx67GFo',
+    },
+    {
+      id: 8,
+      course: 'Organisasi Komputer',
+      title: 'Tutor EAS Organisasi Komputer 2026',
+      type: 'EAS',
+      year: '2025/2026',
+      semester: 'Genap',
+      duration: '1:49:53',
+      tutor: 'Uwais Achmad',
+      desc: `
+      `,
+      youtubeId: 'b4zc0T-bIGc',
+    },
   ],
 };
 
