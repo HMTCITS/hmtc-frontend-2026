@@ -171,7 +171,7 @@ function VideoModal({
           </div>
           <button
             onClick={onClose}
-            className='grid h-8 w-8 place-items-center rounded-full text-[#2A2A28] transition-colors hover:bg-[#E6E3DC]'
+            className='grid h-8 w-8 place-items-center rounded-full text-[#2A2A28] cursor-pointer transition-colors hover:bg-[#E6E3DC]'
             aria-label='Tutup'
           >
             <X className='h-4.5 w-4.5' />
@@ -343,7 +343,7 @@ export default function AcademicResourcesTemplate({
                   role='tab'
                   aria-selected={examType === t}
                   onClick={() => setExamType(t)}
-                  className={`rounded-full px-[18px] py-2 font-plus-jakarta-sans text-[12.5px] font-medium uppercase tracking-[0.04em] transition-all ${
+                  className={`rounded-full px-[18px] py-2 cursor-pointer font-plus-jakarta-sans text-[12.5px] font-medium uppercase tracking-[0.04em] transition-all ${
                     examType === t
                       ? 'bg-[#131312] text-white'
                       : 'text-[#6B6A65] hover:text-[#131312]'
@@ -363,7 +363,7 @@ export default function AcademicResourcesTemplate({
                 <select
                   value={year}
                   onChange={(e) => setYear(e.target.value)}
-                  className='w-full min-w-[150px] appearance-none rounded-sm border border-[#E6E3DC] bg-white py-[11px] pl-3.5 pr-9 font-plus-jakarta-sans text-[13px] font-medium text-[#131312] outline-none'
+                  className='w-full min-w-[150px] appearance-none rounded-sm border border-[#E6E3DC] bg-white py-[11px] pl-3.5 pr-9 font-plus-jakarta-sans text-[13px] font-medium text-[#131312] outline-none cursor-pointer'
                 >
                   {availableYears.map((y) => (
                     <option key={y}>{y}</option>
@@ -382,7 +382,7 @@ export default function AcademicResourcesTemplate({
                 <select
                   value={semester}
                   onChange={(e) => setSemester(e.target.value)}
-                  className='w-full min-w-[130px] appearance-none rounded-sm border border-[#E6E3DC] bg-white py-[11px] pl-3.5 pr-9 font-plus-jakarta-sans text-[13px] font-medium text-[#131312] outline-none'
+                  className='w-full min-w-[130px] appearance-none rounded-sm border border-[#E6E3DC] bg-white py-[11px] pl-3.5 pr-9 font-plus-jakarta-sans text-[13px] font-medium text-[#131312] outline-none cursor-pointer'
                 >
                   {SEMESTERS.map((s) => (
                     <option key={s}>{s}</option>
@@ -395,7 +395,7 @@ export default function AcademicResourcesTemplate({
             {/* Reset */}
             <button
               onClick={onReset}
-              className='px-2.5 py-2 font-plus-jakarta-sans text-[12px] font-medium uppercase tracking-[0.08em] text-[#6B6A65] transition-colors hover:text-[#131312]'
+              className='px-2.5 py-2 font-plus-jakarta-sans text-[12px] font-medium uppercase tracking-[0.08em] text-[#6B6A65] transition-colors hover:text-[#131312] cursor-pointer'
             >
               Reset
             </button>
@@ -414,7 +414,7 @@ export default function AcademicResourcesTemplate({
                     Tipe: {examType}
                     <button
                       onClick={() => setExamType('Semua')}
-                      className='text-[#6B6A65] hover:text-[#131312]'
+                      className='text-[#6B6A65] hover:text-[#131312] cursor-pointer'
                       aria-label='Hapus filter tipe'
                     >
                       <X className='h-3 w-3' />
@@ -426,7 +426,7 @@ export default function AcademicResourcesTemplate({
                     Tahun: {year}
                     <button
                       onClick={() => setYear('Semua Tahun')}
-                      className='text-[#6B6A65] hover:text-[#131312]'
+                      className='text-[#6B6A65] hover:text-[#131312] cursor-pointer'
                       aria-label='Hapus filter tahun'
                     >
                       <X className='h-3 w-3' />
@@ -438,7 +438,7 @@ export default function AcademicResourcesTemplate({
                     Semester: {semester}
                     <button
                       onClick={() => setSemester('Semua')}
-                      className='text-[#6B6A65] hover:text-[#131312]'
+                      className='text-[#6B6A65] hover:text-[#131312] cursor-pointer'
                       aria-label='Hapus filter semester'
                     >
                       <X className='h-3 w-3' />
