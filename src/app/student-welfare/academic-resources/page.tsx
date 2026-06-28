@@ -61,7 +61,7 @@ const academicResourcesContent: AcademicResourcesContent = {
       year: '2025/2026',
       semester: 'Genap',
       duration: '18:42',
-      tutor: '-',
+      tutor: 'Yoseph Kevin Hendrata',
       desc: `
         Overview Computer, Overview OS, Process and Thread, Concurrency (possible)
         Cheat Sheets: https://drive.google.com/file/d/1gtbRBH52zdWsim7c1nGP86UyObVRd8lm/view?usp=sharing, https://drive.google.com/file/d/19YKkR85G0BvCaYdfBtmRWxVuQrbo054A/view?usp=sharing
@@ -103,6 +103,45 @@ const academicResourcesContent: AcademicResourcesContent = {
         Tips and Tricks: Belajar yang rajin tentu saja. Jangan sistem kebut semalam. Kalau tidak paham tanya teman, tanya asdos, tanya dosen, tanya siapapun, yang penting jadi paham. Belajar latihan soal ya, jangan cuman hapalin rumus dan teori. Karena hapal belum tentu bisa menerapkan :D
       `,
       youtubeId: 'rhBxcw5aPZM',
+    },
+    {
+      id: 6,
+      course: 'Pemrograman Jaringan',
+      title: 'Tutor EAS Pemrograman Jaringan 2026',
+      type: 'EAS',
+      year: '2025/2026',
+      semester: 'Genap',
+      duration: '1:30:20',
+      tutor: 'Thopaz Givangkara Rosadi',
+      desc: `
+      `,
+      youtubeId: '8w_k1WUjPI8',
+    },
+    {
+      id: 7,
+      course: 'Sistem Operasi',
+      title: 'Tutor EAS Sistem Operasi 2026',
+      type: 'EAS',
+      year: '2025/2026',
+      semester: 'Genap',
+      duration: '1:14:00',
+      tutor: 'Christina Tan',
+      desc: `
+      `,
+      youtubeId: 'NNv0cx67GFo',
+    },
+    {
+      id: 8,
+      course: 'Organisasi Komputer',
+      title: 'Tutor EAS Organisasi Komputer 2026',
+      type: 'EAS',
+      year: '2025/2026',
+      semester: 'Genap',
+      duration: '1:49:53',
+      tutor: 'Uwais Achmad',
+      desc: `
+      `,
+      youtubeId: 'b4zc0T-bIGc',
     },
   ],
 };
