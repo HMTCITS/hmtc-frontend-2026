@@ -49,7 +49,12 @@ const ProgramKerja = [
     label: 'Bluecamp',
     href: '/research-and-technology/bluecamp',
     offset: -80,
-  }
+  },
+  {
+    label: 'TCharity Run',
+    href: '/student-social-development/tcharity-run',
+    offset: -80,
+  },
 ];
 
 function handleSmoothAnchorClick(
