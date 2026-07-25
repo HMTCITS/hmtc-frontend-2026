@@ -68,6 +68,15 @@ export const metadata: Metadata = {
 export default function InfoPage() {
   return (
     <div className='flex min-h-screen flex-col items-center bg-gradient-to-b from-cyan-500 to-blue-900 px-4 py-20'>
+      {/* Kembali ke main */}
+      <Link
+        href='https://hmtc-its.com'
+        className='absolute top-4 left-4 flex gap-2 rounded-full border border-white/50 px-4 py-4 text-center font-poppins text-base font-normal text-white transition-all duration-200 hover:bg-white hover:text-blue-900 md:top-12 md:left-12 md:gap-4 md:px-6 lg:fixed'
+      >
+        <div>&larr;</div>
+        <p>Kembali</p>
+      </Link>
+
       {/* Logo */}
       <div className='mb-4'>
         <Image
