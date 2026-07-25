@@ -1,31 +1,51 @@
 'use client';
 
 import Image from 'next/image';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import Styles from '@/app/student-social-development/tcharity-run/styles.module.css';
 import Footer from '@/layouts/Footer';
+import { getCookie, setCookie } from '@/lib/cookies';
 
 import RibbonWaveBackground from './components/ribbon-wave-bg';
 
 interface FormData {
   namaLengkap: string;
-  email: string;
-  whatsapp: string;
+  alamatEmail: string;
+  nomorWhatsapp: string;
   angkatan: string;
   buktiPembayaran?: File | null;
 }
 
+const REGISTRATION_STORAGE_KEY_PREFIX =
+  'tcharity-run-2026.registration.submitted';
+const REGISTRATION_COOKIE_KEY_PREFIX =
+  'tcharity_run_2026.registration.submitted';
+const ID = 'tcharity-run-2026';
+const RSVP_CLOSES_AT = '2026-09-05T23:59:59+07:00';
+
 export default function TCharityRunPage() {
+  const registrationStorageKey = useMemo(
+    () => `${REGISTRATION_STORAGE_KEY_PREFIX}.${ID}`,
+    [],
+  );
+  const registrationCookieKey = useMemo(
+    () => `${REGISTRATION_COOKIE_KEY_PREFIX}_${ID}`,
+    [],
+  );
+
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3 | 4>(1);
   const [isScrolled, setIsScrolled] = useState<boolean>(false);
   const [formData, setFormData] = useState<FormData>({
     namaLengkap: '',
-    email: '',
-    whatsapp: '',
+    alamatEmail: '',
+    nomorWhatsapp: '',
     angkatan: '',
     buktiPembayaran: null,
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -40,8 +60,54 @@ export default function TCharityRunPage() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const savedLocalStatus = localStorage.getItem(registrationStorageKey);
+    const savedCookieStatus = getCookie(registrationCookieKey);
+    const hasRegistered =
+      savedLocalStatus === 'true' || savedCookieStatus === 'true';
+
+    if (!hasRegistered) {
+      return;
+    }
+
+    setIsSubmitted(true);
+
+    try {
+      localStorage.setItem(registrationStorageKey, 'true');
+    } catch (error) {
+      void error;
+    }
+
+    setCookie(registrationCookieKey, 'true', {
+      maxAge: 60 * 60 * 24 * 30,
+      path: '/',
+      sameSite: 'Lax',
+    });
+  }, [registrationCookieKey, registrationStorageKey]);
+
+  const isRsvpClosed = useMemo(() => {
+    if (!RSVP_CLOSES_AT) {
+      return false;
+    }
+
+    const closeTime = new Date(RSVP_CLOSES_AT).getTime();
+    if (Number.isNaN(closeTime)) {
+      return false;
+    }
+
+    return Date.now() > closeTime;
+  }, []);
+
   const handleStepChange = (step: 1 | 2 | 3 | 4) => {
-    setCurrentStep(step);
+    if (isSubmitted && (step === 2 || step === 3)) {
+      setCurrentStep(4);
+    } else {
+      setCurrentStep(step);
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -58,13 +124,17 @@ export default function TCharityRunPage() {
 
     // Validate file type (JPG/PNG only)
     if (!['image/jpeg', 'image/png'].includes(file.type)) {
-      alert('Format file tidak didukung. Harap upload file JPG atau PNG.');
+      setSubmitError(
+        'Format file tidak didukung. Harap upload file JPG atau PNG.',
+      );
       return;
     }
 
-    // Validate file size (Max 2MB)
-    if (file.size > 2 * 1024 * 1024) {
-      alert('Ukuran file terlalu besar. Maksimal ukuran file adalah 2MB.');
+    // Validate file size (Max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setSubmitError(
+        'Ukuran file terlalu besar. Maksimal ukuran file adalah 5MB.',
+      );
       return;
     }
 
@@ -75,8 +145,108 @@ export default function TCharityRunPage() {
     fileInputRef.current?.click();
   };
 
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setSubmitError(null);
+
+    if (isRsvpClosed) {
+      setSubmitError('Registration Closed, thank you');
+      return;
+    }
+
+    const hasEmptyField =
+      !formData.namaLengkap ||
+      !formData.alamatEmail ||
+      !formData.nomorWhatsapp ||
+      !formData.angkatan ||
+      !formData.buktiPembayaran;
+
+    if (hasEmptyField) {
+      setSubmitError('Semua field wajib diisi sebelum submit.');
+      return;
+    }
+
+    if (!formData.alamatEmail.includes('@')) {
+      setSubmitError('Alamat email tidak valid.');
+      return;
+    }
+
+    if (!/^\d+$/.test(formData.nomorWhatsapp)) {
+      setSubmitError('Nomor WhatsApp tidak valid.');
+      return;
+    }
+
+    if (
+      !formData.angkatan.match(/^\d{4}$/) &&
+      formData.angkatan.toLowerCase() !== 'alumni'
+    ) {
+      setSubmitError(
+        'Angkatan tidak valid. Harap masukkan tahun 4 digit atau "Alumni".',
+      );
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const formDataToSend = new FormData();
+      formDataToSend.append('namaLengkap', formData.namaLengkap);
+      formDataToSend.append('alamatEmail', formData.alamatEmail);
+      formDataToSend.append('nomorWhatsapp', formData.nomorWhatsapp);
+      formDataToSend.append('angkatan', formData.angkatan);
+      if (formData.buktiPembayaran) {
+        formDataToSend.append('buktiPembayaran', formData.buktiPembayaran);
+      }
+
+      const response = await fetch('/api/tcharity-run', {
+        method: 'POST',
+        body: formDataToSend,
+      });
+
+      const result = (await response.json().catch(() => ({}))) as {
+        message?: string;
+      };
+
+      if (!response.ok) {
+        throw new Error(
+          result.message || 'Gagal mengirim pendaftaran. Silakan coba lagi.',
+        );
+      }
+
+      try {
+        localStorage.setItem(registrationStorageKey, 'true');
+      } catch (error) {
+        void error;
+      }
+
+      setCookie(registrationCookieKey, 'true', {
+        maxAge: 60 * 60 * 24 * 30,
+        path: '/',
+        sameSite: 'Lax',
+      });
+
+      setIsSubmitted(true);
+      setFormData({
+        namaLengkap: '',
+        alamatEmail: '',
+        nomorWhatsapp: '',
+        angkatan: '',
+        buktiPembayaran: null,
+      });
+      handleStepChange(4);
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Gagal mengirim pendaftaran. Silakan coba lagi.';
+      setSubmitError(message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
-    <div className='flex min-h-screen flex-col justify-between bg-gray-50 font-sans text-[#0A1931] antialiased'>
+    <div className='flex min-h-screen flex-col justify-between bg-gray-50 font-plus-jakarta-sans text-[#0A1931] antialiased'>
       {/* NAVBAR */}
       <header
         className={`sticky top-0 z-50 w-full transition-all duration-300 ${
@@ -88,6 +258,7 @@ export default function TCharityRunPage() {
         <div className='mx-auto flex h-20 max-w-5xl items-center justify-between px-4'>
           <div className='flex items-center space-x-3'>
             <button
+              type='button'
               onClick={() => handleStepChange(1)}
               className='cursor-pointer text-2xl font-bold tracking-tight text-[#000D3A]'
             >
@@ -96,12 +267,14 @@ export default function TCharityRunPage() {
           </div>
           <nav className='hidden items-center space-x-8 text-sm font-medium text-gray-500 md:flex'>
             <button
+              type='button'
               onClick={() => handleStepChange(1)}
               className={`cursor-pointer border-b-2 pb-1 transition-all ${currentStep === 1 ? 'border-[#000D3A] font-semibold text-[#000D3A]' : 'border-transparent hover:text-gray-800'}`}
             >
               Event Info
             </button>
             <button
+              type='button'
               onClick={() => handleStepChange(2)}
               className={`cursor-pointer border-b-2 pb-1 transition-all ${currentStep === 2 ? 'border-[#000D3A] font-semibold text-[#000D3A]' : 'border-transparent hover:text-gray-800'}`}
             >
@@ -207,7 +380,7 @@ export default function TCharityRunPage() {
                     <div className='rounded-xl bg-blue-50 p-2 text-[#000D3A]'>
                       <Image
                         src='/images/student-social-development/tcharity-run/facility-icon.svg'
-                        alt='Calendar Icon'
+                        alt='Facility Icon'
                         width={24}
                         height={24}
                         className='h-4 w-4'
@@ -296,6 +469,7 @@ export default function TCharityRunPage() {
                   </span>
                 </div>
                 <button
+                  type='button'
                   onClick={() => handleStepChange(2)}
                   className='w-full cursor-pointer rounded-2xl bg-[#000D3A] px-10 py-4 text-center font-bold text-white shadow-lg shadow-blue-900/10 transition hover:bg-[#100D3A]/80 sm:w-auto'
                 >
@@ -347,7 +521,7 @@ export default function TCharityRunPage() {
 
         {/* STEP 2: REGISTRATION FORM */}
         {currentStep === 2 && (
-          <div className='max-w-55xl mx-auto w-full px-4 py-8'>
+          <div className='mx-auto w-full max-w-5xl px-4 py-8'>
             <div
               className={`${Styles.animateFadeIn} mx-auto max-w-3xl space-y-8 rounded-3xl border border-gray-100 bg-gray-50 p-8 shadow-sm md:p-10`}
             >
@@ -384,9 +558,9 @@ export default function TCharityRunPage() {
                   </label>
                   <input
                     type='email'
-                    name='email'
+                    name='alamatEmail'
                     placeholder='example@gmail.com'
-                    value={formData.email}
+                    value={formData.alamatEmail}
                     onChange={handleInputChange}
                     className='w-full rounded-2xl border border-transparent bg-[#F4F5F7] px-5 py-4 text-sm font-medium transition outline-none focus:border-gray-200 focus:bg-gray-50'
                   />
@@ -398,9 +572,9 @@ export default function TCharityRunPage() {
                   </label>
                   <input
                     type='tel'
-                    name='whatsapp'
+                    name='nomorWhatsapp'
                     placeholder='0812xxxxxx'
-                    value={formData.whatsapp}
+                    value={formData.nomorWhatsapp}
                     onChange={handleInputChange}
                     className='w-full rounded-2xl border border-transparent bg-[#F4F5F7] px-5 py-4 text-sm font-medium transition outline-none focus:border-gray-200 focus:bg-gray-50'
                   />
@@ -423,12 +597,14 @@ export default function TCharityRunPage() {
 
               <div className='flex space-x-4 pt-4'>
                 <button
+                  type='button'
                   onClick={() => handleStepChange(1)}
                   className='w-1/3 cursor-pointer rounded-2xl bg-gray-100 px-6 py-4 text-center text-sm font-bold text-gray-600 transition hover:bg-gray-200'
                 >
                   Kembali
                 </button>
                 <button
+                  type='button'
                   onClick={() => handleStepChange(3)}
                   className='w-2/3 cursor-pointer rounded-2xl bg-[#000D3A] px-6 py-4 text-center text-sm font-bold text-white shadow-md transition hover:bg-[#100D3A]/80'
                 >
@@ -441,7 +617,10 @@ export default function TCharityRunPage() {
 
         {/* STEP 3: PAYMENT & QRIS */}
         {currentStep === 3 && (
-          <div className='mx-auto w-full max-w-5xl px-4 py-8'>
+          <form
+            onSubmit={handleSubmit}
+            className='mx-auto w-full max-w-5xl px-4 py-8'
+          >
             <div
               className={`${Styles.animateFadeIn} mx-auto flex max-w-2xl flex-col overflow-hidden rounded-3xl border border-gray-100 bg-gray-50 shadow-sm`}
             >
@@ -499,7 +678,7 @@ export default function TCharityRunPage() {
                     <div className='mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gray-50 text-gray-400 shadow-sm transition group-hover:text-blue-500'>
                       <Image
                         src='/images/student-social-development/tcharity-run/upload-icon.svg'
-                        alt='Calendar Icon'
+                        alt='Upload Icon'
                         width={24}
                         height={24}
                         className='h-4 w-4'
@@ -522,7 +701,7 @@ export default function TCharityRunPage() {
                           Upload Bukti Pembayaran (JPG/PNG)
                         </p>
                         <p className='mt-1 text-xs text-gray-400'>
-                          Maksimal ukuran file 2MB
+                          Maksimal ukuran file 5MB
                         </p>
                       </>
                     )}
@@ -551,23 +730,32 @@ export default function TCharityRunPage() {
                 </div>
 
                 {/* Action Button */}
-                <div className='flex space-x-4 pt-4'>
-                  <button
-                    onClick={() => handleStepChange(2)}
-                    className='w-1/3 cursor-pointer rounded-2xl bg-gray-100 px-6 py-4 text-center text-sm font-bold text-gray-600 transition hover:bg-gray-200'
-                  >
-                    Kembali
-                  </button>
-                  <button
-                    onClick={() => handleStepChange(4)}
-                    className='w-full cursor-pointer rounded-2xl bg-[#000D3A] py-4 text-center text-sm font-bold text-white shadow-md transition hover:bg-[#100D3A]/80'
-                  >
-                    Submit
-                  </button>
+                <div className='flex w-full flex-col items-center'>
+                  {submitError && (
+                    <p className='mt-2 font-sans text-sm text-red-600'>
+                      {submitError}
+                    </p>
+                  )}
+                  <div className='flex w-full space-x-4 pt-4'>
+                    <button
+                      type='button'
+                      onClick={() => handleStepChange(2)}
+                      className='w-1/3 cursor-pointer rounded-2xl bg-gray-100 px-6 py-4 text-center text-sm font-bold text-gray-600 transition hover:bg-gray-200'
+                    >
+                      Kembali
+                    </button>
+                    <button
+                      type='submit'
+                      disabled={isSubmitting}
+                      className='w-full cursor-pointer rounded-2xl bg-[#000D3A] py-4 text-center text-sm font-bold text-white shadow-md transition hover:bg-[#100D3A]/80'
+                    >
+                      {isSubmitting ? 'Mengirim...' : 'Submit'}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          </form>
         )}
 
         {/* STEP 4: SUCCESS PAGE & QR TICKET */}
@@ -614,8 +802,9 @@ export default function TCharityRunPage() {
                 <div className='relative mx-auto flex aspect-square h-full w-full items-center justify-center rounded-xl bg-gray-50 p-4 shadow-inner'>
                   <Image
                     src='/images/student-social-development/tcharity-run/QR Group WhatsApp Peserta TCharity Run.png'
-                    alt='Rute lari'
-                    fill
+                    alt='QR Group WhatsApp Peserta TCharity Run'
+                    width={200}
+                    height={200}
                     priority
                     draggable='false'
                     className='select-none'
@@ -625,20 +814,15 @@ export default function TCharityRunPage() {
               <div>
                 <a
                   href='https://chat.whatsapp.com/KioJFVSGcrM1L0DbX0aqpU?s=cl&p=a&ilr=1'
-                  className='text-sm font-bold text-[#0000FF] hover:underline'
+                  className='text-sm font-bold break-words text-[#0000FF] hover:underline'
                 >
                   https://chat.whatsapp.com/KioJFVSGcrM1L0DbX0aqpU
                 </a>
               </div>
 
               <button
+                type='button'
                 onClick={() => {
-                  setFormData({
-                    namaLengkap: '',
-                    email: '',
-                    whatsapp: '',
-                    angkatan: '',
-                  });
                   handleStepChange(1);
                 }}
                 className='inline-block cursor-pointer pt-4 text-sm font-bold text-[#000D3A] hover:underline'
