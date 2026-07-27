@@ -19,6 +19,7 @@ const footerData = [
       { name: 'Video Tutorial', link: '/student-welfare/academic-resources' },
       { name: 'Seminar Dosen', link: '/research-and-technology/seminar-dosen' },
       { name: 'Bluecamp', link: '#top' },
+      { name: 'TCharity Run', link: '/student-social-development/tcharity-run' },
     ],
   },
   {
