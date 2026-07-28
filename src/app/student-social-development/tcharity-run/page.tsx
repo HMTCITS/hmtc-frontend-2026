@@ -45,6 +45,9 @@ export default function TCharityRunPage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [fieldValidationError, setFieldValidationError] = useState<
+    string | null
+  >(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   useEffect(() => {
@@ -102,7 +105,58 @@ export default function TCharityRunPage() {
     return Date.now() > closeTime;
   }, []);
 
+  const checkHasEmptyField = (data: FormData) => {
+    return (
+      !data.namaLengkap ||
+      !data.alamatEmail ||
+      !data.nomorWhatsapp ||
+      !data.angkatan
+    );
+  };
+
+  const checkHasBuktiPembayaran = (data: FormData) => {
+    return data.buktiPembayaran;
+  };
+
+  const checkIsFieldValid = (data: FormData): string | null => {
+    if (isRsvpClosed) {
+      return 'Registration Closed, thank you';
+    }
+
+    if (checkHasEmptyField(data)) {
+      return 'Semua field wajib diisi.';
+    }
+
+    if (!data.alamatEmail.includes('@')) {
+      return 'Alamat email tidak valid.';
+    }
+
+    if (!/^\d+$/.test(data.nomorWhatsapp)) {
+      return 'Nomor WhatsApp tidak valid.';
+    }
+
+    if (
+      !data.angkatan.match(/^\d{4}$/) &&
+      data.angkatan.toLowerCase() !== 'alumni'
+    ) {
+      return 'Angkatan tidak valid. Harap masukkan tahun 4 digit atau "Alumni".';
+    }
+
+    return null;
+  };
+
+  const handleGoToPembayaran = () => {
+    const fieldValidationError = checkIsFieldValid(formData);
+    if (fieldValidationError) {
+      setFieldValidationError(fieldValidationError);
+      return;
+    }
+    handleStepChange(3);
+  };
+
   const handleStepChange = (step: 1 | 2 | 3 | 4) => {
+    setFieldValidationError(null);
+    setSubmitError(null);
     if (isSubmitted && (step === 2 || step === 3)) {
       setCurrentStep(4);
     } else {
@@ -149,40 +203,16 @@ export default function TCharityRunPage() {
     event.preventDefault();
     setSubmitError(null);
 
-    if (isRsvpClosed) {
-      setSubmitError('Registration Closed, thank you');
+    const fieldValidationError = checkIsFieldValid(formData);
+    if (fieldValidationError) {
+      setSubmitError(fieldValidationError);
       return;
     }
 
-    const hasEmptyField =
-      !formData.namaLengkap ||
-      !formData.alamatEmail ||
-      !formData.nomorWhatsapp ||
-      !formData.angkatan ||
-      !formData.buktiPembayaran;
+    const hasBuktiPembayaran = checkHasBuktiPembayaran(formData);
 
-    if (hasEmptyField) {
-      setSubmitError('Semua field wajib diisi sebelum submit.');
-      return;
-    }
-
-    if (!formData.alamatEmail.includes('@')) {
-      setSubmitError('Alamat email tidak valid.');
-      return;
-    }
-
-    if (!/^\d+$/.test(formData.nomorWhatsapp)) {
-      setSubmitError('Nomor WhatsApp tidak valid.');
-      return;
-    }
-
-    if (
-      !formData.angkatan.match(/^\d{4}$/) &&
-      formData.angkatan.toLowerCase() !== 'alumni'
-    ) {
-      setSubmitError(
-        'Angkatan tidak valid. Harap masukkan tahun 4 digit atau "Alumni".',
-      );
+    if (!hasBuktiPembayaran) {
+      setSubmitError('Silakan upload bukti pembayaran.');
       return;
     }
 
@@ -234,6 +264,7 @@ export default function TCharityRunPage() {
         buktiPembayaran: null,
       });
       handleStepChange(4);
+      setSubmitError(null);
     } catch (error) {
       const message =
         error instanceof Error
@@ -540,7 +571,7 @@ export default function TCharityRunPage() {
               <div className='space-y-6'>
                 <div>
                   <label className='mb-2 block text-xs font-bold tracking-wider text-gray-400 uppercase'>
-                    Nama Lengkap
+                    Nama Lengkap <span className='text-red-600'>*</span>
                   </label>
                   <input
                     type='text'
@@ -549,12 +580,13 @@ export default function TCharityRunPage() {
                     value={formData.namaLengkap}
                     onChange={handleInputChange}
                     className='w-full rounded-2xl border border-transparent bg-[#F4F5F7] px-5 py-4 text-sm font-medium transition outline-none focus:border-gray-200 focus:bg-gray-50'
+                    required
                   />
                 </div>
 
                 <div>
                   <label className='mb-2 block text-xs font-bold tracking-wider text-gray-400 uppercase'>
-                    Alamat Email
+                    Alamat Email <span className='text-red-600'>*</span>
                   </label>
                   <input
                     type='email'
@@ -563,12 +595,13 @@ export default function TCharityRunPage() {
                     value={formData.alamatEmail}
                     onChange={handleInputChange}
                     className='w-full rounded-2xl border border-transparent bg-[#F4F5F7] px-5 py-4 text-sm font-medium transition outline-none focus:border-gray-200 focus:bg-gray-50'
+                    required
                   />
                 </div>
 
                 <div>
                   <label className='mb-2 block text-xs font-bold tracking-wider text-gray-400 uppercase'>
-                    Nomor Whatsapp
+                    Nomor Whatsapp <span className='text-red-600'>*</span>
                   </label>
                   <input
                     type='tel'
@@ -577,12 +610,13 @@ export default function TCharityRunPage() {
                     value={formData.nomorWhatsapp}
                     onChange={handleInputChange}
                     className='w-full rounded-2xl border border-transparent bg-[#F4F5F7] px-5 py-4 text-sm font-medium transition outline-none focus:border-gray-200 focus:bg-gray-50'
+                    required
                   />
                 </div>
 
                 <div>
                   <label className='mb-2 block text-xs font-bold tracking-wider text-gray-400 uppercase'>
-                    Angkatan
+                    Angkatan <span className='text-red-600'>*</span>
                   </label>
                   <input
                     type='text'
@@ -591,25 +625,33 @@ export default function TCharityRunPage() {
                     value={formData.angkatan}
                     onChange={handleInputChange}
                     className='w-full rounded-2xl border border-transparent bg-[#F4F5F7] px-5 py-4 text-sm font-medium transition outline-none focus:border-gray-200 focus:bg-gray-50'
+                    required
                   />
                 </div>
               </div>
 
-              <div className='flex space-x-4 pt-4'>
-                <button
-                  type='button'
-                  onClick={() => handleStepChange(1)}
-                  className='w-1/3 cursor-pointer rounded-2xl bg-gray-100 px-6 py-4 text-center text-sm font-bold text-gray-600 transition hover:bg-gray-200'
-                >
-                  Kembali
-                </button>
-                <button
-                  type='button'
-                  onClick={() => handleStepChange(3)}
-                  className='w-2/3 cursor-pointer rounded-2xl bg-[#000D3A] px-6 py-4 text-center text-sm font-bold text-white shadow-md transition hover:bg-[#100D3A]/80'
-                >
-                  Lanjut ke Pembayaran
-                </button>
+              <div className='flex w-full flex-col items-center'>
+                {fieldValidationError && (
+                  <p className='mt-2 font-sans text-sm text-red-600'>
+                    {fieldValidationError}
+                  </p>
+                )}
+                <div className='flex w-full space-x-4 pt-4'>
+                  <button
+                    type='button'
+                    onClick={() => handleStepChange(1)}
+                    className='w-1/3 cursor-pointer rounded-2xl bg-gray-100 px-6 py-4 text-center text-sm font-bold text-gray-600 transition hover:bg-gray-200'
+                  >
+                    Kembali
+                  </button>
+                  <button
+                    type='button'
+                    onClick={handleGoToPembayaran}
+                    className='w-2/3 cursor-pointer rounded-2xl bg-[#000D3A] px-6 py-4 text-center text-sm font-bold text-white shadow-md transition hover:bg-[#100D3A]/80'
+                  >
+                    Lanjut ke Pembayaran
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -658,7 +700,7 @@ export default function TCharityRunPage() {
                 {/* Upload Bukti */}
                 <div className='space-y-3'>
                   <h4 className='text-sm font-bold text-[#000D3A]'>
-                    Bukti Pembayaran
+                    Bukti Pembayaran <span className='text-red-600'>*</span>
                   </h4>
 
                   {/* Hidden file input */}
@@ -747,7 +789,7 @@ export default function TCharityRunPage() {
                     <button
                       type='submit'
                       disabled={isSubmitting}
-                      className='w-full cursor-pointer rounded-2xl bg-[#000D3A] py-4 text-center text-sm font-bold text-white shadow-md transition hover:bg-[#100D3A]/80'
+                      className='w-2/3 cursor-pointer rounded-2xl bg-[#000D3A] py-4 text-center text-sm font-bold text-white shadow-md transition hover:bg-[#100D3A]/80'
                     >
                       {isSubmitting ? 'Mengirim...' : 'Submit'}
                     </button>
