@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
 
-type TCharityRunPayload = {
+type TCRunPayload = {
   namaLengkap: string;
   alamatEmail: string;
   nomorWhatsapp: string;
   angkatan: string;
+  nominalDonasi?: number;
   buktiPembayaran?: File | null;
   submittedAt?: string;
 };
@@ -32,6 +33,7 @@ function getRequiredEnv() {
     fieldAlamatEmail: 'alamatEmail',
     fieldNomorWhatsapp: 'nomorWhatsapp',
     fieldAngkatan: 'angkatan',
+    fieldNominalDonasi: 'nominalDonasi',
     fieldBuktiPembayaran: 'buktiPembayaran',
     fieldSubmittedAt: 'submittedAt',
   };
@@ -43,20 +45,22 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: env.message }, { status: 500 });
   }
 
-  let body: TCharityRunPayload;
+  let body: TCRunPayload;
   try {
     const payload = await request.formData();
+    const rawNominal = payload.get('nominalDonasi');
     body = {
       namaLengkap: payload.get('namaLengkap') as string,
       alamatEmail: payload.get('alamatEmail') as string,
       nomorWhatsapp: payload.get('nomorWhatsapp') as string,
       angkatan: payload.get('angkatan') as string,
+      nominalDonasi: rawNominal ? Number(rawNominal) : undefined,
       buktiPembayaran: payload.get('buktiPembayaran') as File | null,
       submittedAt: payload.get('submittedAt') as string,
     };
   } catch {
     return NextResponse.json(
-      { message: 'Payload JSON tidak valid.' },
+      { message: 'Payload tidak valid.' },
       { status: 400 },
     );
   }
@@ -65,46 +69,103 @@ export async function POST(request: Request) {
   const alamatEmail = body.alamatEmail?.toString().trim();
   const nomorWhatsapp = body.nomorWhatsapp?.toString().trim();
   const angkatan = body.angkatan?.toString().trim();
-  const buktiPembayaran = body.buktiPembayaran || null;
+
+  const nominalDonasi =
+    body.nominalDonasi !== undefined && !isNaN(body.nominalDonasi)
+      ? body.nominalDonasi
+      : null;
+  const buktiPembayaran =
+    body.buktiPembayaran instanceof File && body.buktiPembayaran.size > 0
+      ? body.buktiPembayaran
+      : null;
+
   const submittedAt =
     body.submittedAt?.toString().trim() || new Date().toISOString();
 
-  if (!(buktiPembayaran instanceof File)) {
+  const hasNominal = nominalDonasi !== null && nominalDonasi > 0;
+  const hasBukti = buktiPembayaran !== null;
+
+  // Mutual dependency validation (optional fields, but if one is filled, both must be filled)
+  if (hasNominal && !hasBukti) {
+    return NextResponse.json(
+      {
+        message: 'Bukti pembayaran wajib diunggah jika mengisi nominal donasi.',
+      },
+      { status: 400 },
+    );
+  }
+
+  if (!hasNominal && hasBukti) {
+    return NextResponse.json(
+      {
+        message: 'Nominal donasi wajib diisi jika mengunggah bukti pembayaran.',
+      },
+      { status: 400 },
+    );
+  }
+
+  if (nominalDonasi !== null && (isNaN(nominalDonasi) || nominalDonasi < 0)) {
+    return NextResponse.json(
+      { message: 'Nominal donasi tidak valid.' },
+      { status: 400 },
+    );
+  }
+
+  if (
+    body.buktiPembayaran !== null &&
+    body.buktiPembayaran !== undefined &&
+    !(body.buktiPembayaran instanceof File)
+  ) {
     return NextResponse.json(
       { message: 'bukti pembayaran tidak valid' },
       { status: 400 },
     );
   }
 
-  if (
-    !namaLengkap ||
-    !angkatan ||
-    !alamatEmail ||
-    !nomorWhatsapp ||
-    !buktiPembayaran ||
-    buktiPembayaran.size === 0 ||
-    !(buktiPembayaran instanceof File)
-  ) {
+  // General required fields (excluding optional donation/payment proof)
+  if (!namaLengkap || !angkatan || !alamatEmail || !nomorWhatsapp) {
     return NextResponse.json(
       { message: 'Semua field wajib diisi.' },
       { status: 400 },
     );
   }
 
-  if (!['image/jpeg', 'image/png'].includes(buktiPembayaran.type)) {
-    return NextResponse.json(
-      {
-        message: 'Format file tidak didukung. Harap upload file JPG atau PNG.',
-      },
-      { status: 400 },
-    );
+  // Max length
+  for (const [key, value] of Object.entries({
+    namaLengkap,
+    angkatan,
+    alamatEmail,
+    nomorWhatsapp,
+  })) {
+    if (value.length > 255) {
+      const readableKey = key
+        .replace(/([A-Z])/g, ' $1')
+        .replace(/^./, (str) => str.toUpperCase());
+      return NextResponse.json(
+        { message: `${readableKey} terlalu panjang. Maksimal 255 karakter.` },
+        { status: 400 },
+      );
+    }
   }
 
-  if (buktiPembayaran.size > 5 * 1024 * 1024) {
-    return NextResponse.json(
-      { message: 'Ukuran file terlalu besar. Maksimal 5MB.' },
-      { status: 400 },
-    );
+  // File validations (only if buktiPembayaran is provided)
+  if (hasBukti) {
+    if (!['image/jpeg', 'image/png'].includes(buktiPembayaran.type)) {
+      return NextResponse.json(
+        {
+          message:
+            'Format file tidak didukung. Harap upload file JPG atau PNG.',
+        },
+        { status: 400 },
+      );
+    }
+
+    if (buktiPembayaran.size > 5 * 1024 * 1024) {
+      return NextResponse.json(
+        { message: 'Ukuran file terlalu besar. Maksimal 5MB.' },
+        { status: 400 },
+      );
+    }
   }
 
   if (!alamatEmail.includes('@')) {
@@ -135,7 +196,7 @@ export async function POST(request: Request) {
 
   let uploadedFileMeta = null;
 
-  if (buktiPembayaran && buktiPembayaran.size > 0) {
+  if (hasBukti) {
     const formData = new FormData();
     formData.append('file', buktiPembayaran);
 
@@ -180,6 +241,10 @@ export async function POST(request: Request) {
     [env.fieldAngkatan]: angkatan,
     [env.fieldSubmittedAt]: submittedAt,
   };
+
+  if (hasNominal) {
+    rowData[env.fieldNominalDonasi] = nominalDonasi;
+  }
 
   if (uploadedFileMeta) {
     const uploadFileArray = [uploadedFileMeta];
