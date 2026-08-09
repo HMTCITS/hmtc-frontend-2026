@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-import Styles from '@/app/student-social-development/tcharity-run/styles.module.css';
+import Styles from '@/app/student-social-development/tc-run/styles.module.css';
 import Footer from '@/layouts/Footer';
 import { getCookie, setCookie } from '@/lib/cookies';
 
@@ -14,17 +14,19 @@ interface FormData {
   alamatEmail: string;
   nomorWhatsapp: string;
   angkatan: string;
+  nominalDonasi?: number;
+  nominalDonasiVisual?: string;
   buktiPembayaran?: File | null;
 }
 
 const REGISTRATION_STORAGE_KEY_PREFIX =
-  'tcharity-run-2026.registration.submitted';
+  'tc-run-2026.registration.submitted';
 const REGISTRATION_COOKIE_KEY_PREFIX =
-  'tcharity_run_2026.registration.submitted';
-const ID = 'tcharity-run-2026';
+  'tc.registration.submitted';
+const ID = 'tc-run-2026';
 const RSVP_CLOSES_AT = '2026-09-05T23:59:59+07:00';
 
-export default function TCharityRunPage() {
+export default function TCRunPage() {
   const registrationStorageKey = useMemo(
     () => `${REGISTRATION_STORAGE_KEY_PREFIX}.${ID}`,
     [],
@@ -41,6 +43,8 @@ export default function TCharityRunPage() {
     alamatEmail: '',
     nomorWhatsapp: '',
     angkatan: '',
+    nominalDonasi: 0,
+    nominalDonasiVisual: 'Rp0',
     buktiPembayaran: null,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -142,6 +146,16 @@ export default function TCharityRunPage() {
       return 'Angkatan tidak valid. Harap masukkan tahun 4 digit atau "Alumni".';
     }
 
+    const MAX_LENGTH = 255;
+    for (const [key, value] of Object.entries(data)) {
+      if (typeof value === 'string' && value.length > MAX_LENGTH) {
+        const readableKey = key
+          .replace(/([A-Z])/g, ' $1')
+          .replace(/^./, (str) => str.toUpperCase());
+        return `${readableKey} terlalu panjang. Maksimal ${MAX_LENGTH} karakter.`;
+      }
+    }
+
     return null;
   };
 
@@ -167,8 +181,50 @@ export default function TCharityRunPage() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const maintainCursorPosition = (
+    input: HTMLInputElement | null,
+    oldValueLength: number,
+    newValue: string,
+  ) => {
+    if (!input) return;
+    const cursorPosition = input.selectionStart || 0;
+
+    requestAnimationFrame(() => {
+      const lengthDifference = newValue.length - oldValueLength;
+      let newCursorPosition = Math.max(3, cursorPosition + lengthDifference);
+      newCursorPosition = Math.min(newCursorPosition, newValue.length);
+      input.setSelectionRange(newCursorPosition, newCursorPosition);
+    });
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    if (name === 'nominalDonasi') {
+      const MAX_DONATION = 1000000000000;
+      const input = inputRef.current;
+      const oldValueLength = value.length;
+
+      let numericValue = value.replace(/\D/g, '');
+      numericValue = numericValue.replace(/^0+/, '');
+
+      if (Number(numericValue) > MAX_DONATION) {
+        numericValue = MAX_DONATION.toString();
+      }
+
+      const formattedValue = numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+      const numericValueVisual = formattedValue ? `Rp${formattedValue}` : 'Rp0';
+
+      setFormData((prev) => ({
+        ...prev,
+        nominalDonasi: Number(numericValue),
+        nominalDonasiVisual: numericValueVisual,
+      }));
+
+      maintainCursorPosition(input, oldValueLength, numericValueVisual);
+      return;
+    }
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -195,6 +251,16 @@ export default function TCharityRunPage() {
     setFormData((prev) => ({ ...prev, buktiPembayaran: file }));
   };
 
+  const handleRemoveFile = (e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    setFormData((prev) => ({ ...prev, buktiPembayaran: null }));
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   const triggerFileSelect = () => {
     fileInputRef.current?.click();
   };
@@ -209,10 +275,20 @@ export default function TCharityRunPage() {
       return;
     }
 
+    const hasNominalDonasi =
+      formData.nominalDonasi && formData.nominalDonasi > 0;
     const hasBuktiPembayaran = checkHasBuktiPembayaran(formData);
 
-    if (!hasBuktiPembayaran) {
-      setSubmitError('Silakan upload bukti pembayaran.');
+    if (hasNominalDonasi && !hasBuktiPembayaran) {
+      setSubmitError(
+        'Bukti pembayaran wajib diunggah jika mengisi nominal donasi.',
+      );
+      return;
+    }
+    if (!hasNominalDonasi && hasBuktiPembayaran) {
+      setSubmitError(
+        'Nominal donasi wajib diisi jika mengunggah bukti pembayaran.',
+      );
       return;
     }
 
@@ -224,11 +300,15 @@ export default function TCharityRunPage() {
       formDataToSend.append('alamatEmail', formData.alamatEmail);
       formDataToSend.append('nomorWhatsapp', formData.nomorWhatsapp);
       formDataToSend.append('angkatan', formData.angkatan);
+      formDataToSend.append(
+        'nominalDonasi',
+        formData.nominalDonasi?.toString() || '0',
+      );
       if (formData.buktiPembayaran) {
         formDataToSend.append('buktiPembayaran', formData.buktiPembayaran);
       }
 
-      const response = await fetch('/api/tcharity-run', {
+      const response = await fetch('/api/tc-run', {
         method: 'POST',
         body: formDataToSend,
       });
@@ -261,6 +341,8 @@ export default function TCharityRunPage() {
         alamatEmail: '',
         nomorWhatsapp: '',
         angkatan: '',
+        nominalDonasi: 0,
+        nominalDonasiVisual: 'Rp0',
         buktiPembayaran: null,
       });
       handleStepChange(4);
@@ -293,7 +375,7 @@ export default function TCharityRunPage() {
               onClick={() => handleStepChange(1)}
               className='cursor-pointer text-2xl font-bold tracking-tight text-[#000D3A]'
             >
-              TCharity Run 2026
+              TC Run 2026
             </button>
           </div>
           <nav className='hidden items-center space-x-8 text-sm font-medium text-gray-500 md:flex'>
@@ -333,19 +415,18 @@ export default function TCharityRunPage() {
               {/* Hero Content Layer */}
               <div className='relative z-10 mx-auto mt-auto max-w-5xl px-4 text-[#000D3A] sm:px-6 lg:px-8'>
                 <h1 className='mb-4 text-3xl font-extrabold tracking-tight sm:text-4xl md:text-5xl'>
-                  TCharity Run 2026
+                  TC Run 2026
                 </h1>
                 <p className='text-sm leading-relaxed text-gray-700 sm:text-base'>
-                  TCharity Run merupakan event lari yang diselenggarakan oleh
-                  HMTC ITS sebagai bentuk ajakan kepada mahasiswa aktif dan
-                  alumni Teknik Informatika ITS untuk menerapkan gaya hidup
-                  sehat sekaligus berkontribusi dalam kegiatan sosial.
-                  Pendapatan yang diperoleh dari acara ini akan didonasikan
-                  kepada pihak yang membutuhkan. TCharity Run akan
-                  diselenggarakan pada 12 September 2026, dengan rangkaian acara
-                  yang meliputi main event berupa kegiatan lari, serta
-                  pasca-event yang diisi dengan sesi Q&amp;A, photo booth, dan
-                  pembagian doorprize.
+                  TC Run merupakan event lari yang diselenggarakan oleh HMTC ITS
+                  sebagai bentuk ajakan kepada mahasiswa aktif dan alumni Teknik
+                  Informatika ITS untuk menerapkan gaya hidup sehat sekaligus
+                  berkontribusi dalam kegiatan sosial. Pendapatan yang diperoleh
+                  dari acara ini akan didonasikan kepada pihak yang membutuhkan.
+                  TC Run akan diselenggarakan pada 12 September 2026, dengan
+                  rangkaian acara yang meliputi main event berupa kegiatan lari,
+                  serta pasca-event yang diisi dengan sesi Q&amp;A, photo booth,
+                  dan pembagian doorprize.
                 </p>
               </div>
             </section>
@@ -358,7 +439,7 @@ export default function TCharityRunPage() {
                   <div className='mb-6 flex items-center space-x-3'>
                     <div className='rounded-xl bg-blue-50 p-2 text-[#000D3A]'>
                       <Image
-                        src='/images/student-social-development/tcharity-run/calendar-icon.svg'
+                        src='/images/student-social-development/tc-run/calendar-icon.svg'
                         alt='Calendar Icon'
                         width={24}
                         height={24}
@@ -410,7 +491,7 @@ export default function TCharityRunPage() {
                   <div className='mb-6 flex items-center space-x-3'>
                     <div className='rounded-xl bg-blue-50 p-2 text-[#000D3A]'>
                       <Image
-                        src='/images/student-social-development/tcharity-run/facility-icon.svg'
+                        src='/images/student-social-development/tc-run/facility-icon.svg'
                         alt='Facility Icon'
                         width={24}
                         height={24}
@@ -457,7 +538,7 @@ export default function TCharityRunPage() {
                   <div className='mb-6 flex items-center space-x-3'>
                     <div className='rounded-xl bg-blue-50 p-0.5 text-[#000D3A]'>
                       <Image
-                        src='/images/student-social-development/tcharity-run/call-icon.svg'
+                        src='/images/student-social-development/tc-run/call-icon.svg'
                         alt='Call Icon'
                         width={34}
                         height={34}
@@ -496,7 +577,7 @@ export default function TCharityRunPage() {
                     Harga Pendaftaran
                   </span>
                   <span className='text-3xl font-extrabold text-[#000D3A]'>
-                    Rp20.000
+                    GRATIS
                   </span>
                 </div>
                 <button
@@ -504,7 +585,7 @@ export default function TCharityRunPage() {
                   onClick={() => handleStepChange(2)}
                   className='w-full cursor-pointer rounded-2xl bg-[#000D3A] px-10 py-4 text-center font-bold text-white shadow-lg shadow-blue-900/10 transition hover:bg-[#100D3A]/80 sm:w-auto'
                 >
-                  Pesan Sekarang
+                  Daftar Sekarang
                 </button>
               </div>
 
@@ -536,7 +617,7 @@ export default function TCharityRunPage() {
                   className='group relative mx-auto flex aspect-[11/13] w-full cursor-pointer flex-col items-center justify-center overflow-hidden rounded-2xl border-4 border-gray-200 bg-gray-100 p-2 transition-all hover:border-blue-200 md:max-w-[50%]'
                 >
                   <Image
-                    src='/images/student-social-development/tcharity-run/Rute Lari.png'
+                    src='/images/student-social-development/tc-run/Rute Lari.png'
                     alt='Rute lari'
                     width={220}
                     height={390}
@@ -569,8 +650,8 @@ export default function TCharityRunPage() {
               <hr className='border-gray-100' />
 
               <div className='space-y-6'>
-                <div>
-                  <label className='mb-2 block text-xs font-bold tracking-wider text-gray-400 uppercase'>
+                <div className='space-y-2'>
+                  <label className='block text-sm font-bold text-[#000D3A]'>
                     Nama Lengkap <span className='text-red-600'>*</span>
                   </label>
                   <input
@@ -584,8 +665,8 @@ export default function TCharityRunPage() {
                   />
                 </div>
 
-                <div>
-                  <label className='mb-2 block text-xs font-bold tracking-wider text-gray-400 uppercase'>
+                <div className='space-y-2'>
+                  <label className='block text-sm font-bold text-[#000D3A]'>
                     Alamat Email <span className='text-red-600'>*</span>
                   </label>
                   <input
@@ -599,8 +680,8 @@ export default function TCharityRunPage() {
                   />
                 </div>
 
-                <div>
-                  <label className='mb-2 block text-xs font-bold tracking-wider text-gray-400 uppercase'>
+                <div className='space-y-2'>
+                  <label className='block text-sm font-bold text-[#000D3A]'>
                     Nomor Whatsapp <span className='text-red-600'>*</span>
                   </label>
                   <input
@@ -614,8 +695,8 @@ export default function TCharityRunPage() {
                   />
                 </div>
 
-                <div>
-                  <label className='mb-2 block text-xs font-bold tracking-wider text-gray-400 uppercase'>
+                <div className='space-y-2'>
+                  <label className='block text-sm font-bold text-[#000D3A]'>
                     Angkatan <span className='text-red-600'>*</span>
                   </label>
                   <input
@@ -649,7 +730,7 @@ export default function TCharityRunPage() {
                     onClick={handleGoToPembayaran}
                     className='w-2/3 cursor-pointer rounded-2xl bg-[#000D3A] px-6 py-4 text-center text-sm font-bold text-white shadow-md transition hover:bg-[#100D3A]/80'
                   >
-                    Lanjut ke Pembayaran
+                    Lanjut
                   </button>
                 </div>
               </div>
@@ -657,28 +738,45 @@ export default function TCharityRunPage() {
           </div>
         )}
 
-        {/* STEP 3: PAYMENT & QRIS */}
+        {/* STEP 3: DONATION & QRIS */}
         {currentStep === 3 && (
           <form
             onSubmit={handleSubmit}
             className='mx-auto w-full max-w-5xl px-4 py-8'
           >
             <div
-              className={`${Styles.animateFadeIn} mx-auto flex max-w-2xl flex-col overflow-hidden rounded-3xl border border-gray-100 bg-gray-50 shadow-sm`}
+              className={`${Styles.animateFadeIn} mx-auto max-w-3xl space-y-8 rounded-3xl border border-gray-100 bg-gray-50 p-8 shadow-sm md:p-10`}
             >
-              {/* Header Ringkasan Pembayaran */}
-              <div className='space-y-4 bg-[#000D3A] p-8 text-white'>
-                <span className='block text-xs font-bold tracking-wider text-white/60 uppercase'>
-                  Ringkasan Pembayaran
-                </span>
-                <div className='text-4xl font-black'>Rp20.000</div>
-                <div className='flex justify-between border-t border-white/10 pt-2 text-sm text-white/80'>
-                  <span>Pendaftaran TCharity Run 2026</span>
-                  <span className='font-bold'>Rp20.000</span>
-                </div>
+              <div>
+                <h2 className='mb-2 text-3xl font-extrabold tracking-tight text-[#000D3A]'>
+                  Data Donasi - Opsional
+                </h2>
+                <p className='text-sm text-gray-500'>
+                  Silakan masukkan nominal donasi dan unggah bukti pembayaran
+                  jika ingin berdonasi.
+                </p>
               </div>
 
-              <div className='space-y-8 p-8'>
+              <hr className='border-gray-100' />
+
+              <div className='space-y-6'>
+                {/* Nominal Donasi Field */}
+                <div className='space-y-2'>
+                  <label className='block text-sm font-bold text-[#000D3A]'>
+                    Nominal Donasi{' '}
+                    <sup className='text-xs text-sky-900'>(opsional)</sup>
+                  </label>
+                  <input
+                    ref={inputRef}
+                    type='text'
+                    name='nominalDonasi'
+                    inputMode='numeric'
+                    value={formData.nominalDonasiVisual}
+                    onChange={handleInputChange}
+                    className='w-full rounded-2xl border border-transparent bg-[#F4F5F7] px-5 py-4 text-sm font-medium transition outline-none focus:border-gray-200 focus:bg-gray-50'
+                  />
+                </div>
+
                 {/* QRIS Scan Placeholder */}
                 <div className='space-y-4 text-center'>
                   <h3 className='text-lg font-bold text-[#000D3A]'>
@@ -686,8 +784,8 @@ export default function TCharityRunPage() {
                   </h3>
                   <div className='group relative mx-auto flex aspect-[11/16] w-full flex-col items-center justify-center overflow-hidden rounded-2xl border-4 border-gray-200 bg-gray-100 p-2 transition-all md:max-w-[50%]'>
                     <Image
-                      src='/images/student-social-development/tcharity-run/QRIS TCharity Run 2026.jpg'
-                      alt='QRIS TCharity Run 2026'
+                      src='/images/student-social-development/tc-run/QRIS TC Run 2026.jpg'
+                      alt='QRIS TC Run 2026'
                       width={330}
                       height={480}
                       priority
@@ -698,10 +796,11 @@ export default function TCharityRunPage() {
                 </div>
 
                 {/* Upload Bukti */}
-                <div className='space-y-3'>
-                  <h4 className='text-sm font-bold text-[#000D3A]'>
-                    Bukti Pembayaran <span className='text-red-600'>*</span>
-                  </h4>
+                <div className='space-y-2'>
+                  <label className='block text-sm font-bold text-[#000D3A]'>
+                    Bukti Pembayaran{' '}
+                    <sup className='text-xs text-sky-900'>(opsional)</sup>
+                  </label>
 
                   {/* Hidden file input */}
                   <input
@@ -719,7 +818,7 @@ export default function TCharityRunPage() {
                   >
                     <div className='mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gray-50 text-gray-400 shadow-sm transition group-hover:text-blue-500'>
                       <Image
-                        src='/images/student-social-development/tcharity-run/upload-icon.svg'
+                        src='/images/student-social-development/tc-run/upload-icon.svg'
                         alt='Upload Icon'
                         width={24}
                         height={24}
@@ -730,9 +829,18 @@ export default function TCharityRunPage() {
                     {/* Dynamically show file name if uploaded */}
                     {formData.buktiPembayaran ? (
                       <div>
-                        <p className='mx-auto max-w-xs truncate text-sm font-bold text-blue-600'>
-                          {formData.buktiPembayaran.name}
-                        </p>
+                        <div className='relative flex items-center justify-center space-x-2'>
+                          <p className='max-w-xs truncate text-sm font-bold text-blue-600'>
+                            {formData.buktiPembayaran.name}
+                          </p>
+                          <button
+                            type='button'
+                            onClick={handleRemoveFile}
+                            className='flex cursor-pointer items-center justify-center text-red-500 hover:text-red-700 hover:underline'
+                          >
+                            ✕
+                          </button>
+                        </div>
                         <p className='mt-1 text-xs text-gray-400'>
                           Klik untuk mengganti file
                         </p>
@@ -770,30 +878,30 @@ export default function TCharityRunPage() {
                     proses verifikasi oleh panitia.
                   </p>
                 </div>
+              </div>
 
-                {/* Action Button */}
-                <div className='flex w-full flex-col items-center'>
-                  {submitError && (
-                    <p className='mt-2 font-sans text-sm text-red-600'>
-                      {submitError}
-                    </p>
-                  )}
-                  <div className='flex w-full space-x-4 pt-4'>
-                    <button
-                      type='button'
-                      onClick={() => handleStepChange(2)}
-                      className='w-1/3 cursor-pointer rounded-2xl bg-gray-100 px-6 py-4 text-center text-sm font-bold text-gray-600 transition hover:bg-gray-200'
-                    >
-                      Kembali
-                    </button>
-                    <button
-                      type='submit'
-                      disabled={isSubmitting}
-                      className='w-2/3 cursor-pointer rounded-2xl bg-[#000D3A] py-4 text-center text-sm font-bold text-white shadow-md transition hover:bg-[#100D3A]/80'
-                    >
-                      {isSubmitting ? 'Mengirim...' : 'Submit'}
-                    </button>
-                  </div>
+              {/* Action Button */}
+              <div className='flex w-full flex-col items-center'>
+                {submitError && (
+                  <p className='mt-2 font-sans text-sm text-red-600'>
+                    {submitError}
+                  </p>
+                )}
+                <div className='flex w-full space-x-4 pt-4'>
+                  <button
+                    type='button'
+                    onClick={() => handleStepChange(2)}
+                    className='w-1/3 cursor-pointer rounded-2xl bg-gray-100 px-6 py-4 text-center text-sm font-bold text-gray-600 transition hover:bg-gray-200'
+                  >
+                    Kembali
+                  </button>
+                  <button
+                    type='submit'
+                    disabled={isSubmitting}
+                    className='w-2/3 cursor-pointer rounded-2xl bg-[#000D3A] py-4 text-center text-sm font-bold text-white shadow-md transition hover:bg-[#100D3A]/80'
+                  >
+                    {isSubmitting ? 'Mengirim...' : 'Submit'}
+                  </button>
                 </div>
               </div>
             </div>
@@ -816,8 +924,8 @@ export default function TCharityRunPage() {
                   Pendaftaran Berhasil!
                 </h2>
                 <p className='px-4 text-sm text-gray-500'>
-                  Terima kasih telah mendaftar di TCharity Run 2026. Jangan lupa
-                  untuk join Group WhatsApp di bawah ini yaa.
+                  Terima kasih telah mendaftar di TC Run 2026. Jangan lupa untuk
+                  join Group WhatsApp di bawah ini yaa.
                 </p>
               </div>
 
@@ -831,7 +939,7 @@ export default function TCharityRunPage() {
                   <div>
                     <span className='block text-white/40'>Event</span>
                     <span className='text-xs font-bold text-white'>
-                      TCharity Run 2026
+                      TC Run 2026
                     </span>
                   </div>
                   <div className='text-right'>
@@ -843,8 +951,8 @@ export default function TCharityRunPage() {
                 {/* Ticket QR Code Body */}
                 <div className='relative mx-auto flex aspect-square h-full w-full items-center justify-center rounded-xl bg-gray-50 p-4 shadow-inner'>
                   <Image
-                    src='/images/student-social-development/tcharity-run/QR Group WhatsApp Peserta TCharity Run.png'
-                    alt='QR Group WhatsApp Peserta TCharity Run'
+                    src='/images/student-social-development/tc-run/QR Group WhatsApp Peserta TC Run.png'
+                    alt='QR Group WhatsApp Peserta TC Run'
                     width={200}
                     height={200}
                     priority
