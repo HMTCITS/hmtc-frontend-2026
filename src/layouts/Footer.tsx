@@ -51,8 +51,8 @@ const ProgramKerja = [
     offset: -80,
   },
   {
-    label: 'TCharity Run',
-    href: '/student-social-development/tcharity-run',
+    label: 'TC Run',
+    href: '/student-social-development/tc-run',
     offset: -80,
   },
 ];
