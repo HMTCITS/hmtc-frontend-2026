@@ -4,7 +4,7 @@ import { useEffect,useState } from 'react';
 const NAV_ITEMS = [
   { label: 'Tentang', href: '#tentang' },
   { label: 'Dokumentasi', href: '#dokumentasi' },
-  { label: 'Detail Program', href: '#program' },
+  // { label: 'Detail Program', href: '#program' },
   { label: 'Feedback', href: '#feedback' },
 ];
 
