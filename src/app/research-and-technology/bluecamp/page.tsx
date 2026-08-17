@@ -1,24 +1,24 @@
 'use client';
-import '@/app/research-and-technology/bluecamp/style.css';
+import Footer from '@/layouts/Footer';
 
 import About from './components/About';
-// import Gallery from './components/Gallery';
 // import Timeline from './components/Timeline';
-// import Feedback from './components/Feedback';
-import Footer from './components/Footer';
+import Feedback from './components/Feedback';
+import Gallery from './components/Gallery';
+// import Footer from './components/Footer';
 import Hero from './components/Hero';
 import Navbar from './components/Navbar';
 
 export default function Page() {
   return (
-    <div className="bg-white text-[#14181f] font-archivo">
+    <main className='bg-white font-archivo text-[#14181f]'>
       <Navbar />
       <Hero />
       <About />
-      {/* <Gallery />
-      <Timeline />
-      <Feedback /> */}
+      <Gallery />
+      {/* <Timeline /> */}
+      <Feedback />
       <Footer />
-    </div>
+    </main>
   );
 }
