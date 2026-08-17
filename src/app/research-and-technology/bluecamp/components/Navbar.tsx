@@ -1,10 +1,12 @@
 import Image from 'next/image';
 import { useEffect,useState } from 'react';
 
+import styles from '@/app/research-and-technology/bluecamp/styles.module.css';
+
 const NAV_ITEMS = [
   { label: 'Tentang', href: '#tentang' },
   { label: 'Dokumentasi', href: '#dokumentasi' },
-  { label: 'Detail Program', href: '#program' },
+  // { label: 'Detail Program', href: '#program' },
   { label: 'Feedback', href: '#feedback' },
 ];
 
@@ -80,7 +82,7 @@ export default function Navbar() {
       </button>
 
       {menuOpen && (
-        <nav className='animate-fadeIn absolute top-full right-0 left-0 flex flex-col gap-[18px] bg-[#073A76] p-[22px] px-6 text-white shadow-lg md:hidden'>
+        <nav className={`${styles.animateFadeIn} absolute top-full right-0 left-0 flex flex-col gap-[18px] bg-[#073A76] p-[22px] px-6 text-white shadow-lg md:hidden`}>
           {NAV_ITEMS.map((item) => (
             <a
               key={item.href}

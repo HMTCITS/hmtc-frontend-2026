@@ -1,33 +1,45 @@
 const FEEDBACK_DATA = [
   {
-    text: 'Bluecamp 2026 benar-benar membuka cara pandang saya terhadap proses riset. Materinya runtut dan sesinya membuat saya berani mencoba ide sendiri.',
+    name: 'Muhammad Farhan',
+    title: 'Apa dampak jangka panjang yang kamu harapkan dapat dirasakan oleh peserta Bluecamp ini?',
+    text: 'Efek jangka panjangnya aku harap mahasiswa angkatan 25 yang mengikuti Bluecamp jadi punya persiapan atau pengetahuan lebih dalam mengikuti lomba, riset dan segala hal yang berkaitan dengan Keilmiahan sehingga mereka lebih berani dalam mengambil kesempatan di bidang Keilmiahan dan juga percaya diri dalam mengikuti kegiatan kegiatan di Keilmiahan itu sendiri.',
     color: '#1561BD',
-    dept: 'Teknik Informatika · 2024',
+    role: 'Panitia Bluecamp',
   },
   {
-    text: 'Diskusi kelompoknya seru. Saya jadi terbiasa menyampaikan gagasan dan menerima masukan dari teman maupun mentor.',
+    name: 'Kartika Nana',
+    title: 'Bagian mana dari Bluecamp yang menurutmu paling berguna bagi para peserta?',
+    text: 'Saat mereka dibagi kelompok dan harus membuat suatu penelitian untuk dipresentasikan pada hari terakhir. Aku rasa pada saat ini, peserta akan belajar langsung untuk menerapkan materi-materi yang telah diterima dari Bluecamp yang kemudian dikombinasikan dengan kerjasama tim. Apalagi untuk tim yang berhasil memenangkan apresiasi, menunjukkan mereka berhasil menerapkan target yang panitia ingin capai pada saat pelaksanaan acara. Mungkin, bagi tim yang dapat apresiasi, hal ini juga menjadi salah satu hal paling membekas sebagai penutup acara Bluecamp',
     color: '#E88E00',
-    dept: 'Teknik Komputer · 2024',
+    role: 'Panitia Bluecamp',
   },
   {
-    text: 'Awalnya ragu, tapi suasananya hangat dan tidak menggurui. Pematerinya sabar membimbing dari nol sampai paham.',
+    name: 'Levina',
+    title: 'Apa momen yang paling berkesan dalam rangkaian kegiatan Bluecamp ini?',
+    text: 'Momen yang paling bikin aku merasa bahwa riset itu ternyata ga sekaku yang aku bayangkan adalah saat sesi materi Studi Literatur dan Rumusan Masalah. Waktu itu aku melihat langsung bagaimana cara penggunaan Mendeley yang menurut aku cukup menarik. Melihat bagaimana sitasi dan daftar pustaka bisa tersusun secara otomatis bikin aku sadar kalau ternyata ada banyak hal dalam penelitian yang bisa dilakukan dengan lebih praktis. Dari situ aku jadi melihat kalau riset bukan hanya soal teori dan penulisan, tapi juga ada berbagai tools yang membantu prosesnya.',
     color: '#0A4A98',
-    dept: 'Sistem Informasi · 2025',
+    role: 'Peserta Bluecamp',
   },
   {
-    text: 'Bagian paling berkesan adalah workshop pengembangan ide. Dari rasa penasaran kecil bisa tumbuh jadi proyek yang nyata.',
+    name: 'Ryu',
+    title: 'Apa momen yang paling berkesan dalam rangkaian kegiatan Bluecamp ini?',
+    text: 'Momen paling seru itu pas sesi penjelasan tentang perumusan masalah. Penyampaian dari pemateri sangat jelas, praktis, dan applicable banget. Sesi itu benar-benar membuka perspektif baru bagi saya bahwa menyusun riset atau inovasi ternyata bisa se-eksploratif itu dan gak sekaku yang dibayangkan.',
     color: '#3978C4',
-    dept: 'Teknik Informatika · 2025',
+    role: 'Peserta Bluecamp',
   },
   {
-    text: 'Alur kegiatannya tertata, jadi mudah mengikuti dari hari pertama sampai presentasi akhir. Banyak relasi baru juga.',
+    name: 'Haziq',
+    title: 'Apa momen yang paling berkesan dalam rangkaian kegiatan Bluecamp ini?',
+    text: 'Hari kedua bluecamp di mana pematerinya itu kak luna, lupa di sesi apa, tapi yang jelas hari itu langsung bikin aku melek dan jadi semangat banget untuk terjun ke dunia riset berkat pemaparan materi dan pengalaman yang diberikan oleh kak luna itu. Aku jadi sadar kalo riset itu sebenarnya menyenangkan banget dan memang sesuai sama passion aku dari dulu',
     color: '#B56F00',
-    dept: 'Teknik Elektro · 2024',
+    role: 'Peserta Bluecamp',
   },
   {
-    text: 'Mentoringnya personal dan membangun. Saya pulang dengan pemahaman penelitian yang jauh lebih utuh.',
-    color: '#073A76',
-    dept: 'Teknik Komputer · 2025',
+    name: 'Lathifah Sahda',
+    title: 'Satu tips agar ide riset dapat dieksekusi dengan baik.',
+    text: "Buat deadline palsu yang lebih mepet dari deadline aslinya, dan treat it like it's real. Karena kalo deadline jauh = nggak ada urgensi = ide nggak jalan. Selain itu, setiap deliverable harus ada satu nama yang bertanggung jawab, kalau nggak ada yang namanya nempel di satu output, nggak akan ada yang ngerasa perlu mastiin itu selesai.",
+    color: '#B56F00',
+    role: 'Pemateri Bluecamp',
   },
 ];
 
@@ -61,27 +73,18 @@ export default function Feedback() {
               key={idx}
               className='group relative mb-[22px] break-inside-avoid rounded-[6px] border border-[#e4e9f0] bg-white p-[26px_26px_24px] shadow-md shadow-[#073a76]/5'
             >
-              <span className='absolute top-[18px] right-[22px] text-[#eaf1fa] transition-colors duration-300 group-hover:text-[#5D92D0]/20'>
+              <span className='relative flex gap-8 text-[#eaf1fa] transition-colors duration-300 group-hover:text-[#5D92D0]/20'>
+                <h3 className='mb-3.5 text-[1.1rem] font-bold text-[#14181f]'>
+                  {feed.title}
+                </h3>
                 <svg
-                  className='h-10 w-10'
+                  className='h-10 w-10 flex-shrink-0'
                   viewBox='0 0 24 24'
                   fill='currentColor'
                 >
                   <path d='M7 7H3v7h4l-2 4h3l2-4V7H7zm11 0h-4v7h4l-2 4h3l2-4V7h-3z'></path>
                 </svg>
               </span>
-              <div className='mb-3.5 flex gap-[3px] text-[#FFB23A]'>
-                {[...Array(5)].map((_, i) => (
-                  <svg
-                    key={i}
-                    className='h-4 w-4'
-                    viewBox='0 0 24 24'
-                    fill='currentColor'
-                  >
-                    <path d='M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.8 6 21.4l1.4-6.8L2.3 9.1l6.9-.8z'></path>
-                  </svg>
-                ))}
-              </div>
               <p className='m-0 mb-[22px] text-[1.0rem] leading-[1.66] text-wrap text-[#3a424e]'>
                 {feed.text}
               </p>
@@ -90,14 +93,14 @@ export default function Feedback() {
                   className='grid h-[46px] w-[46px] flex-shrink-0 place-items-center rounded-full text-[1.05rem] font-black text-white'
                   style={{ backgroundColor: feed.color }}
                 >
-                  P
+                  {feed.name.charAt(0)}
                 </span>
                 <div>
                   <span className='block text-[0.98rem] leading-tight font-bold text-[#14181f]'>
-                    Peserta Bluecamp
+                    {feed.name}
                   </span>
                   <span className='mt-0.5 block text-[0.82rem] text-[#6b7585]'>
-                    {feed.dept}
+                    {feed.role}
                   </span>
                 </div>
               </div>

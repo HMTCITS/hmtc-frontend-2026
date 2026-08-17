@@ -1,5 +1,7 @@
 import Image from 'next/image';
 
+import styles from '@/app/research-and-technology/bluecamp/styles.module.css';
+
 const HERO_META = [
   { label: 'Program', value: 'Academic Exploration' },
   { label: 'Fokus', value: 'Riset & Teknologi' },
@@ -21,7 +23,7 @@ export default function Hero() {
         <span className='inline-flex items-center gap-[0.6em] text-[0.72rem] font-bold tracking-[0.22em] text-[#cfe0f6] uppercase'>
           <span className='inline-flex gap-[3px]'>
             <svg
-              className='h-4 w-4 animate-[chev_1.6s_infinite] text-[#FFB23A]'
+              className={`h-4 w-4 ${styles.animateChev1} text-[#FFB23A]`}
               viewBox='0 0 24 24'
               fill='none'
               stroke='currentColor'
@@ -30,7 +32,7 @@ export default function Hero() {
               <path d='M8 5l7 7-7 7'></path>
             </svg>
             <svg
-              className='h-4 w-4 animate-[chev_1.6s_0.18s_infinite] text-[#FFB23A]'
+              className={`h-4 w-4 ${styles.animateChev2} text-[#FFB23A]`}
               viewBox='0 0 24 24'
               fill='none'
               stroke='currentColor'
@@ -39,7 +41,7 @@ export default function Hero() {
               <path d='M8 5l7 7-7 7'></path>
             </svg>
             <svg
-              className='h-4 w-4 animate-[chev_1.6s_0.36s_infinite] text-[#FFB23A]'
+              className={`h-4 w-4 ${styles.animateChev3} text-[#FFB23A]`}
               viewBox='0 0 24 24'
               fill='none'
               stroke='currentColor'
@@ -48,7 +50,9 @@ export default function Hero() {
               <path d='M8 5l7 7-7 7'></path>
             </svg>
           </span>
-          Dokumentasi · Eksplorasi Keilmiahan
+          <span className='text-[clamp(0.55rem,1.5vw,0.85rem)] font-bold tracking-[0.22em] text-[#cfe0f6] uppercase'>
+            Dokumentasi · Eksplorasi Keilmiahan
+          </span>
         </span>
         <h1 className='mt-6 text-left leading-[0.95] font-black tracking-tight uppercase'>
           <Image
@@ -82,7 +86,9 @@ export default function Hero() {
       </div>
       <div className='absolute bottom-[26px] left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-2 text-[0.64rem] font-bold tracking-[0.24em] text-[#bcd3f0] uppercase'>
         <span>Gulir</span>
-        <span className='h-[34px] w-[1px] animate-[cue_1.8s_cubic-bezier(.22,.61,.36,1)_infinite] bg-gradient-to-b from-[#bcd3f0] to-transparent'></span>
+        <span
+          className={`h-[34px] w-[1px] ${styles.animateCue} bg-gradient-to-b from-[#bcd3f0] to-transparent`}
+        ></span>
       </div>
     </section>
   );
