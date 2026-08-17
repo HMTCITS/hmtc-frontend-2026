@@ -43,6 +43,22 @@
   }
 }
 
-.animate-fadeIn {
+.animateFadeIn {
   animation: fadeIn 0.25s ease-out forwards;
+}
+
+.animateChev1 {
+  animation: chev 1.6s infinite;
+}
+
+.animateChev2 {
+  animation: chev 1.6s 0.18s infinite;
+}
+
+.animateChev3 {
+  animation: chev 1.6s 0.36s infinite;
+}
+
+.animateCue {
+  animation: cue 1.8s cubic-bezier(.22, .61, .36, 1) infinite;
 }
