@@ -44,7 +44,7 @@ export default function TCRunPage() {
     nomorWhatsapp: '',
     angkatan: '',
     nominalDonasi: 0,
-    nominalDonasiVisual: 'Rp0',
+    nominalDonasiVisual: '',
     buktiPembayaran: null,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -342,7 +342,7 @@ export default function TCRunPage() {
         nomorWhatsapp: '',
         angkatan: '',
         nominalDonasi: 0,
-        nominalDonasiVisual: 'Rp0',
+        nominalDonasiVisual: '',
         buktiPembayaran: null,
       });
       handleStepChange(4);
@@ -749,11 +749,13 @@ export default function TCRunPage() {
             >
               <div>
                 <h2 className='mb-2 text-3xl font-extrabold tracking-tight text-[#000D3A]'>
-                  Data Donasi - Opsional
+                  Yuk, Berbagi melalui TC Run
                 </h2>
+                <p className='text-sm text-gray-500 mb-2'>
+                  Pendaftaran TC Run 2026 gratis! Bagi kamu yang ingin ikut berbagi, yuk sisihkan sedikit untuk berdonasi kepada Yayasan Himmatun Ayat melalui QRIS berikut.
+                </p>
                 <p className='text-sm text-gray-500'>
-                  Silakan masukkan nominal donasi dan unggah bukti pembayaran
-                  jika ingin berdonasi.
+                  Donasi bersifat sukarela dan dapat diberikan sesuai kemampuan masing-masing.
                 </p>
               </div>
 
@@ -763,8 +765,7 @@ export default function TCRunPage() {
                 {/* Nominal Donasi Field */}
                 <div className='space-y-2'>
                   <label className='block text-sm font-bold text-[#000D3A]'>
-                    Nominal Donasi{' '}
-                    <sup className='text-xs text-sky-900'>(opsional)</sup>
+                    Nominal Donasi
                   </label>
                   <input
                     ref={inputRef}
@@ -772,6 +773,7 @@ export default function TCRunPage() {
                     name='nominalDonasi'
                     inputMode='numeric'
                     value={formData.nominalDonasiVisual}
+                    placeholder='Masukkan nominal donasi. Contoh: 10000'
                     onChange={handleInputChange}
                     className='w-full rounded-2xl border border-transparent bg-[#F4F5F7] px-5 py-4 text-sm font-medium transition outline-none focus:border-gray-200 focus:bg-gray-50'
                   />
@@ -780,11 +782,11 @@ export default function TCRunPage() {
                 {/* QRIS Scan Placeholder */}
                 <div className='space-y-4 text-center'>
                   <h3 className='text-lg font-bold text-[#000D3A]'>
-                    Scan QRIS Untuk Melakukan Pembayaran
+                    Scan QRIS Untuk Berdonasi
                   </h3>
                   <div className='group relative mx-auto flex aspect-[11/16] w-full flex-col items-center justify-center overflow-hidden rounded-2xl border-4 border-gray-200 bg-gray-100 p-2 transition-all md:max-w-[50%]'>
                     <Image
-                      src='/images/student-social-development/tc-run/QRIS TC Run 2026.jpg'
+                      src='/images/student-social-development/tc-run/QRIS TC Run 2026.jpeg'
                       alt='QRIS TC Run 2026'
                       width={330}
                       height={480}
@@ -793,13 +795,15 @@ export default function TCRunPage() {
                       className='aspect-[11/16] h-full w-full rounded-2xl border-4 border-gray-200 object-cover select-none'
                     />
                   </div>
+                  <p className='text-sm text-[#000D3A]'>
+                    Donasi akan disalurkan kepada Yayasan Himmatun Ayat.
+                  </p>
                 </div>
 
                 {/* Upload Bukti */}
-                <div className='space-y-2'>
+                <div className='space-y-2 mb-2'>
                   <label className='block text-sm font-bold text-[#000D3A]'>
-                    Bukti Pembayaran{' '}
-                    <sup className='text-xs text-sky-900'>(opsional)</sup>
+                    Bukti Donasi
                   </label>
 
                   {/* Hidden file input */}
@@ -848,7 +852,7 @@ export default function TCRunPage() {
                     ) : (
                       <>
                         <p className='text-sm font-bold text-gray-700'>
-                          Upload Bukti Pembayaran (JPG/PNG)
+                          Upload Bukti Donasi (JPG/PNG)
                         </p>
                         <p className='mt-1 text-xs text-gray-400'>
                           Maksimal ukuran file 5MB
@@ -857,9 +861,12 @@ export default function TCRunPage() {
                     )}
                   </div>
                 </div>
+                <p className='text-xs text-[#000D3A]'>
+                  Opsional — unggah jika kamu melakukan donasi.
+                </p>
 
                 {/* Alert Warning Box */}
-                <div className='flex items-start space-x-3 rounded-2xl border border-blue-100 bg-blue-50/70 p-4 text-xs leading-relaxed text-blue-800'>
+                <div className='flex items-center space-x-3 rounded-2xl border border-blue-100 bg-blue-50/70 p-4 text-xs leading-relaxed text-blue-800'>
                   <svg
                     className='mt-0.5 h-5 w-5 shrink-0 text-blue-600'
                     fill='none'
@@ -874,8 +881,7 @@ export default function TCRunPage() {
                     />
                   </svg>
                   <p>
-                    Pastikan mengunggah bukti yang valid untuk mempercepat
-                    proses verifikasi oleh panitia.
+                    Jika melakukan donasi, pastikan bukti yang diunggah terlihat jelas untuk memudahkan proses verifikasi oleh panitia.
                   </p>
                 </div>
               </div>

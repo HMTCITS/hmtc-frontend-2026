@@ -29,7 +29,7 @@ export default function Lightbox({ item, onClose }: LightboxProps) {
           {item.image ? (
             <Image
               src={item.image}
-              alt={item.title}
+              alt='Gambar Dokumentasi Bluecamp'
               fill
               className="object-cover"
             />
@@ -39,7 +39,6 @@ export default function Lightbox({ item, onClose }: LightboxProps) {
         </div>
 
         <div className='mt-5 flex items-center justify-between gap-4 text-white'>
-          <h3 className='text-lg font-bold'>{item.title}</h3>
           <span className='text-xs font-bold tracking-widest text-[#FFB23A] uppercase'>
             {categoryLabel}
           </span>

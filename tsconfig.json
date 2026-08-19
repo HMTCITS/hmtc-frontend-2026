@@ -30,9 +30,6 @@
       "~/*": [
         "./public/*"
       ],
-      "content-collections": [
-        "./.content-collections/generated"
-      ]
     }
   },
   "include": [

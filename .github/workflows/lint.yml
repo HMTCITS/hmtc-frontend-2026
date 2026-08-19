@@ -54,9 +54,6 @@ jobs:
       - name: ⚡ Install Dependencies (pnpm)
         run: pnpm install
 
-      - name: ⚙️ Build content-collections
-        run: npx content-collections build
-
       - name: 🔎 Run Type Check
         run: pnpm typecheck
 
