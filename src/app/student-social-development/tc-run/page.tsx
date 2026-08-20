@@ -362,11 +362,10 @@ export default function TCRunPage() {
     <div className='flex min-h-screen flex-col justify-between bg-gray-50 font-plus-jakarta-sans text-[#0A1931] antialiased'>
       {/* NAVBAR */}
       <header
-        className={`sticky top-0 z-50 w-full transition-all duration-300 ${
-          !isScrolled && currentStep == 1
+        className={`sticky top-0 z-50 w-full transition-all duration-300 ${!isScrolled && currentStep == 1
             ? 'bg-transparent'
             : 'bg-gray-50 shadow-sm'
-        }`}
+          }`}
       >
         <div className='mx-auto flex h-20 max-w-5xl items-center justify-between px-4'>
           <div className='flex items-center space-x-3'>
@@ -784,15 +783,15 @@ export default function TCRunPage() {
                   <h3 className='text-lg font-bold text-[#000D3A]'>
                     Scan QRIS Untuk Berdonasi
                   </h3>
-                  <div className='group relative mx-auto flex aspect-[11/16] w-full flex-col items-center justify-center overflow-hidden rounded-2xl border-4 border-gray-200 bg-gray-100 p-2 transition-all md:max-w-[50%]'>
+                  <div className='group relative mx-auto flex aspect-[1632/2892] w-full flex-col items-center justify-center overflow-hidden rounded-2xl border-4 border-gray-200 bg-gray-100 p-2 transition-all md:max-w-[50%]'>
                     <Image
-                      src='/images/student-social-development/tc-run/QRIS TC Run 2026.jpeg'
+                      src='/images/student-social-development/tc-run/Ver. 8.png'
                       alt='QRIS TC Run 2026'
-                      width={330}
-                      height={480}
+                      width={1632}
+                      height={2892}
                       priority
                       draggable='false'
-                      className='aspect-[11/16] h-full w-full rounded-2xl border-4 border-gray-200 object-cover select-none'
+                      className='h-full w-full rounded-2xl border-4 border-gray-200 object-contain select-none'
                     />
                   </div>
                   <p className='text-sm text-[#000D3A]'>
