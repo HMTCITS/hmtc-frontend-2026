@@ -42,7 +42,11 @@ function getRequiredEnv() {
 export async function POST(request: Request) {
   const env = getRequiredEnv();
   if (!env.ok) {
-    return NextResponse.json({ message: env.message }, { status: 500 });
+    console.error(env.message);
+    return NextResponse.json(
+      { message: 'Gagal mengirim pendaftaran. Silakan coba lagi nanti.' },
+      { status: 500 },
+    );
   }
 
   let body: TCRunPayload;
@@ -185,13 +189,36 @@ export async function POST(request: Request) {
     );
   }
 
-  if (!/^\d+$/.test(nomorWhatsapp)) {
+  if (!/^\d{10,13}$/.test(nomorWhatsapp)) {
     return NextResponse.json(
       {
-        message: 'Nomor WhatsApp tidak valid. Harap masukkan nomor yang benar.',
+        message: 'Nomor WhatsApp tidak valid. Harap masukkan 10-13 digit angka.',
       },
       { status: 400 },
     );
+  }
+
+  const MAX_REGISTRANTS = 230;
+  try {
+    const countEndpoint = new URL(
+      `/api/v2/tables/${encodeURIComponent(env.tableId)}/records/count`,
+      env.baseUrl,
+    );
+    const countResponse = await fetch(countEndpoint.toString(), {
+      headers: { 'xc-token': env.apiToken },
+      cache: 'no-store',
+    });
+    if (countResponse.ok) {
+      const countResult = (await countResponse.json()) as { count?: number };
+      if ((countResult.count ?? 0) >= MAX_REGISTRANTS) {
+        return NextResponse.json(
+          { message: 'Pendaftaran sudah ditutup karena kuota peserta penuh.' },
+          { status: 403 },
+        );
+      }
+    }
+  } catch {
+    // ponytail: count check best-effort, don't block submission if NocoDB count endpoint is unreachable
   }
 
   let uploadedFileMeta = null;

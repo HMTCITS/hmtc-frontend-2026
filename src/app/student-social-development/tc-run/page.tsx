@@ -14,6 +14,7 @@ interface FormData {
   alamatEmail: string;
   nomorWhatsapp: string;
   angkatan: string;
+  berkenanDonasi: '' | 'ya' | 'tidak';
   nominalDonasi?: number;
   nominalDonasiVisual?: string;
   buktiPembayaran?: File | null;
@@ -43,6 +44,7 @@ export default function TCRunPage() {
     alamatEmail: '',
     nomorWhatsapp: '',
     angkatan: '',
+    berkenanDonasi: '',
     nominalDonasi: 0,
     nominalDonasiVisual: '',
     buktiPembayaran: null,
@@ -114,7 +116,8 @@ export default function TCRunPage() {
       !data.namaLengkap ||
       !data.alamatEmail ||
       !data.nomorWhatsapp ||
-      !data.angkatan
+      !data.angkatan ||
+      !data.berkenanDonasi
     );
   };
 
@@ -135,8 +138,8 @@ export default function TCRunPage() {
       return 'Alamat email tidak valid.';
     }
 
-    if (!/^\d+$/.test(data.nomorWhatsapp)) {
-      return 'Nomor WhatsApp tidak valid.';
+    if (!/^\d{10,13}$/.test(data.nomorWhatsapp)) {
+      return 'Nomor WhatsApp tidak valid. Harap masukkan 10-13 digit angka.';
     }
 
     if (
@@ -159,12 +162,18 @@ export default function TCRunPage() {
     return null;
   };
 
-  const handleGoToPembayaran = () => {
+  const handleGoToPembayaran = async () => {
     const fieldValidationError = checkIsFieldValid(formData);
     if (fieldValidationError) {
       setFieldValidationError(fieldValidationError);
       return;
     }
+
+    if (formData.berkenanDonasi === 'tidak') {
+      await submitRegistration();
+      return;
+    }
+
     handleStepChange(3);
   };
 
@@ -265,8 +274,7 @@ export default function TCRunPage() {
     fileInputRef.current?.click();
   };
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const submitRegistration = async () => {
     setSubmitError(null);
 
     const fieldValidationError = checkIsFieldValid(formData);
@@ -275,21 +283,17 @@ export default function TCRunPage() {
       return;
     }
 
-    const hasNominalDonasi =
-      formData.nominalDonasi && formData.nominalDonasi > 0;
-    const hasBuktiPembayaran = checkHasBuktiPembayaran(formData);
+    if (formData.berkenanDonasi === 'ya') {
+      const hasNominalDonasi =
+        formData.nominalDonasi && formData.nominalDonasi > 0;
+      const hasBuktiPembayaran = checkHasBuktiPembayaran(formData);
 
-    if (hasNominalDonasi && !hasBuktiPembayaran) {
-      setSubmitError(
-        'Bukti pembayaran wajib diunggah jika mengisi nominal donasi.',
-      );
-      return;
-    }
-    if (!hasNominalDonasi && hasBuktiPembayaran) {
-      setSubmitError(
-        'Nominal donasi wajib diisi jika mengunggah bukti pembayaran.',
-      );
-      return;
+      if (!hasNominalDonasi || !hasBuktiPembayaran) {
+        setSubmitError(
+          'Nominal donasi dan bukti pembayaran wajib diisi karena kamu memilih untuk berdonasi.',
+        );
+        return;
+      }
     }
 
     setIsSubmitting(true);
@@ -341,6 +345,7 @@ export default function TCRunPage() {
         alamatEmail: '',
         nomorWhatsapp: '',
         angkatan: '',
+        berkenanDonasi: '',
         nominalDonasi: 0,
         nominalDonasiVisual: '',
         buktiPembayaran: null,
@@ -689,6 +694,8 @@ export default function TCRunPage() {
                     placeholder='0812xxxxxx'
                     value={formData.nomorWhatsapp}
                     onChange={handleInputChange}
+                    minLength={10}
+                    maxLength={13}
                     className='w-full rounded-2xl border border-transparent bg-[#F4F5F7] px-5 py-4 text-sm font-medium transition outline-none focus:border-gray-200 focus:bg-gray-50'
                     required
                   />
@@ -708,12 +715,47 @@ export default function TCRunPage() {
                     required
                   />
                 </div>
+
+                <div className='space-y-2'>
+                  <label className='block text-sm font-bold text-[#000D3A]'>
+                    Berkenan Berdonasi? <span className='text-red-600'>*</span>
+                  </label>
+                  <div className='flex gap-4'>
+                    <label className='flex flex-1 cursor-pointer items-center justify-center rounded-2xl border border-transparent bg-[#F4F5F7] px-5 py-4 text-sm font-medium transition has-[:checked]:border-[#000D3A] has-[:checked]:bg-blue-50'>
+                      <input
+                        type='radio'
+                        name='berkenanDonasi'
+                        value='ya'
+                        checked={formData.berkenanDonasi === 'ya'}
+                        onChange={handleInputChange}
+                        className='sr-only'
+                      />
+                      Ya, saya berkenan
+                    </label>
+                    <label className='flex flex-1 cursor-pointer items-center justify-center rounded-2xl border border-transparent bg-[#F4F5F7] px-5 py-4 text-sm font-medium transition has-[:checked]:border-[#000D3A] has-[:checked]:bg-blue-50'>
+                      <input
+                        type='radio'
+                        name='berkenanDonasi'
+                        value='tidak'
+                        checked={formData.berkenanDonasi === 'tidak'}
+                        onChange={handleInputChange}
+                        className='sr-only'
+                      />
+                      Tidak
+                    </label>
+                  </div>
+                </div>
               </div>
 
               <div className='flex w-full flex-col items-center'>
                 {fieldValidationError && (
                   <p className='mt-2 font-sans text-sm text-red-600'>
                     {fieldValidationError}
+                  </p>
+                )}
+                {submitError && (
+                  <p className='mt-2 font-sans text-sm text-red-600'>
+                    {submitError}
                   </p>
                 )}
                 <div className='flex w-full space-x-4 pt-4'>
@@ -726,10 +768,11 @@ export default function TCRunPage() {
                   </button>
                   <button
                     type='button'
+                    disabled={isSubmitting}
                     onClick={handleGoToPembayaran}
                     className='w-2/3 cursor-pointer rounded-2xl bg-[#000D3A] px-6 py-4 text-center text-sm font-bold text-white shadow-md transition hover:bg-[#100D3A]/80'
                   >
-                    Lanjut
+                    {isSubmitting ? 'Mengirim...' : 'Lanjut'}
                   </button>
                 </div>
               </div>
@@ -740,7 +783,10 @@ export default function TCRunPage() {
         {/* STEP 3: DONATION & QRIS */}
         {currentStep === 3 && (
           <form
-            onSubmit={handleSubmit}
+            onSubmit={(event) => {
+              event.preventDefault();
+              submitRegistration();
+            }}
             className='mx-auto w-full max-w-5xl px-4 py-8'
           >
             <div
