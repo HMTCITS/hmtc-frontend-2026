@@ -42,7 +42,6 @@ function getRequiredEnv() {
 export async function POST(request: Request) {
   const env = getRequiredEnv();
   if (!env.ok) {
-    console.error(env.message);
     return NextResponse.json(
       { message: 'Gagal mengirim pendaftaran. Silakan coba lagi nanti.' },
       { status: 500 },
