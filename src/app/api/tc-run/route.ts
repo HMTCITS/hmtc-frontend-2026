@@ -197,7 +197,8 @@ export async function POST(request: Request) {
     );
   }
 
-  const MAX_REGISTRANTS = 230;
+  // const MAX_REGISTRANTS = 230;
+  const MAX_REGISTRANTS = 999999999;
   try {
     const countEndpoint = new URL(
       `/api/v2/tables/${encodeURIComponent(env.tableId)}/records/count`,

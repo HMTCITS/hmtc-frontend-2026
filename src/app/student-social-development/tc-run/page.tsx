@@ -162,20 +162,40 @@ export default function TCRunPage() {
     return null;
   };
 
-  const handleGoToPembayaran = async () => {
-    const fieldValidationError = checkIsFieldValid(formData);
-    if (fieldValidationError) {
-      setFieldValidationError(fieldValidationError);
+  const handleDonationAnswer = () => {
+    if (isRsvpClosed) {
+      setFieldValidationError('Registration Closed, thank you');
       return;
     }
 
-    if (formData.berkenanDonasi === 'tidak') {
-      await submitRegistration();
+    if (!formData.berkenanDonasi) {
+      setFieldValidationError('Silakan pilih salah satu opsi.');
       return;
     }
 
-    handleStepChange(3);
+    setFieldValidationError(null);
+
+    if (formData.berkenanDonasi === 'ya') {
+      handleStepChange(3);
+    } else {
+      handleStepChange(1);
+    }
   };
+
+  // const handleGoToPembayaran = async () => {
+  //   const fieldValidationError = checkIsFieldValid(formData);
+  //   if (fieldValidationError) {
+  //     setFieldValidationError(fieldValidationError);
+  //     return;
+  //   }
+  //
+  //   if (formData.berkenanDonasi === 'tidak') {
+  //     await submitRegistration();
+  //     return;
+  //   }
+  //
+  //   handleStepChange(3);
+  // };
 
   const handleStepChange = (step: 1 | 2 | 3 | 4) => {
     setFieldValidationError(null);
@@ -635,9 +655,109 @@ export default function TCRunPage() {
           </div>
         )}
 
-        {/* STEP 2: REGISTRATION FORM */}
+        {/* STEP 2: DONATION QUESTION */}
         {currentStep === 2 && (
           <div className='mx-auto w-full max-w-5xl px-4 py-8'>
+            <div
+              className={`${Styles.animateFadeIn} mx-auto max-w-3xl space-y-8 rounded-3xl border border-gray-100 bg-gray-50 p-8 shadow-sm md:p-10`}
+            >
+              {/* PERINGATAN KUOTA PENUH */}
+              <div className='flex items-center gap-3 rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700'>
+                <svg
+                  xmlns='http://www.w3.org/2000/svg'
+                  className='h-5 w-5 flex-shrink-0'
+                  viewBox='0 0 20 20'
+                  fill='currentColor'
+                >
+                  <path
+                    fillRule='evenodd'
+                    d='M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l6.518 11.59c.75 1.334-.213 2.987-1.743 2.987H3.482c-1.53 0-2.493-1.653-1.743-2.987l6.518-11.59zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z'
+                    clipRule='evenodd'
+                  />
+                </svg>
+                <p className='font-medium'>
+                  Mohon maaf, kuota pendaftaran sudah penuh.
+                </p>
+              </div>
+
+              <div>
+                <h2 className='mb-2 text-3xl font-extrabold tracking-tight text-[#000D3A]'>
+                  Berdonasi Yuk!
+                </h2>
+                <p className='text-sm text-gray-500'>
+                  Sebelum lanjut mengisi data diri, apakah kamu berkenan untuk
+                  berdonasi?
+                </p>
+              </div>
+
+              <hr className='border-gray-100' />
+
+              <div className='space-y-2'>
+                <label className='block text-sm font-bold text-[#000D3A]'>
+                  Berkenan Berdonasi? <span className='text-red-600'>*</span>
+                </label>
+                <div className='flex gap-4'>
+                  <label className='flex flex-1 cursor-pointer items-center justify-center rounded-2xl border border-transparent bg-[#F4F5F7] px-5 py-4 text-sm font-medium transition has-[:checked]:border-[#000D3A] has-[:checked]:bg-blue-50'>
+                    <input
+                      type='radio'
+                      name='berkenanDonasi'
+                      value='ya'
+                      checked={formData.berkenanDonasi === 'ya'}
+                      onChange={handleInputChange}
+                      className='sr-only'
+                    />
+                    Ya, saya berkenan
+                  </label>
+                  <label className='flex flex-1 cursor-pointer items-center justify-center rounded-2xl border border-transparent bg-[#F4F5F7] px-5 py-4 text-sm font-medium transition has-[:checked]:border-[#000D3A] has-[:checked]:bg-blue-50'>
+                    <input
+                      type='radio'
+                      name='berkenanDonasi'
+                      value='tidak'
+                      checked={formData.berkenanDonasi === 'tidak'}
+                      onChange={handleInputChange}
+                      className='sr-only'
+                    />
+                    Tidak
+                  </label>
+                </div>
+              </div>
+
+              <div className='flex w-full flex-col items-center'>
+                {fieldValidationError && (
+                  <p className='mt-2 font-sans text-sm text-red-600'>
+                    {fieldValidationError}
+                  </p>
+                )}
+                <div className='flex w-full space-x-4 pt-4'>
+                  <button
+                    type='button'
+                    onClick={() => handleStepChange(1)}
+                    className='w-1/3 cursor-pointer rounded-2xl bg-gray-100 px-6 py-4 text-center text-sm font-bold text-gray-600 transition hover:bg-gray-200'
+                  >
+                    Kembali
+                  </button>
+                  <button
+                    type='button'
+                    onClick={handleDonationAnswer}
+                    className='w-2/3 cursor-pointer rounded-2xl bg-[#000D3A] px-6 py-4 text-center text-sm font-bold text-white shadow-md transition hover:bg-[#100D3A]/80'
+                  >
+                    Lanjut
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* STEP 3: DATA PESERTA & DONASI */}
+        {currentStep === 3 && (
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              submitRegistration();
+            }}
+            className='mx-auto w-full max-w-5xl px-4 py-8'
+          >
             <div
               className={`${Styles.animateFadeIn} mx-auto max-w-3xl space-y-8 rounded-3xl border border-gray-100 bg-gray-50 p-8 shadow-sm md:p-10`}
             >
@@ -715,99 +835,22 @@ export default function TCRunPage() {
                     required
                   />
                 </div>
-
-                <div className='space-y-2'>
-                  <label className='block text-sm font-bold text-[#000D3A]'>
-                    Berkenan Berdonasi? <span className='text-red-600'>*</span>
-                  </label>
-                  <div className='flex gap-4'>
-                    <label className='flex flex-1 cursor-pointer items-center justify-center rounded-2xl border border-transparent bg-[#F4F5F7] px-5 py-4 text-sm font-medium transition has-[:checked]:border-[#000D3A] has-[:checked]:bg-blue-50'>
-                      <input
-                        type='radio'
-                        name='berkenanDonasi'
-                        value='ya'
-                        checked={formData.berkenanDonasi === 'ya'}
-                        onChange={handleInputChange}
-                        className='sr-only'
-                      />
-                      Ya, saya berkenan
-                    </label>
-                    <label className='flex flex-1 cursor-pointer items-center justify-center rounded-2xl border border-transparent bg-[#F4F5F7] px-5 py-4 text-sm font-medium transition has-[:checked]:border-[#000D3A] has-[:checked]:bg-blue-50'>
-                      <input
-                        type='radio'
-                        name='berkenanDonasi'
-                        value='tidak'
-                        checked={formData.berkenanDonasi === 'tidak'}
-                        onChange={handleInputChange}
-                        className='sr-only'
-                      />
-                      Tidak
-                    </label>
-                  </div>
-                </div>
-              </div>
-
-              <div className='flex w-full flex-col items-center'>
-                {fieldValidationError && (
-                  <p className='mt-2 font-sans text-sm text-red-600'>
-                    {fieldValidationError}
-                  </p>
-                )}
-                {submitError && (
-                  <p className='mt-2 font-sans text-sm text-red-600'>
-                    {submitError}
-                  </p>
-                )}
-                <div className='flex w-full space-x-4 pt-4'>
-                  <button
-                    type='button'
-                    onClick={() => handleStepChange(1)}
-                    className='w-1/3 cursor-pointer rounded-2xl bg-gray-100 px-6 py-4 text-center text-sm font-bold text-gray-600 transition hover:bg-gray-200'
-                  >
-                    Kembali
-                  </button>
-                  <button
-                    type='button'
-                    disabled={isSubmitting}
-                    onClick={handleGoToPembayaran}
-                    className='w-2/3 cursor-pointer rounded-2xl bg-[#000D3A] px-6 py-4 text-center text-sm font-bold text-white shadow-md transition hover:bg-[#100D3A]/80'
-                  >
-                    {isSubmitting ? 'Mengirim...' : 'Lanjut'}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* STEP 3: DONATION & QRIS */}
-        {currentStep === 3 && (
-          <form
-            onSubmit={(event) => {
-              event.preventDefault();
-              submitRegistration();
-            }}
-            className='mx-auto w-full max-w-5xl px-4 py-8'
-          >
-            <div
-              className={`${Styles.animateFadeIn} mx-auto max-w-3xl space-y-8 rounded-3xl border border-gray-100 bg-gray-50 p-8 shadow-sm md:p-10`}
-            >
-              <div>
-                <h2 className='mb-2 text-3xl font-extrabold tracking-tight text-[#000D3A]'>
-                  Yuk, Berbagi melalui TC Run
-                </h2>
-                <p className='text-sm text-gray-500 mb-2'>
-                  Pendaftaran TC Run 2026 gratis! Bagi kamu yang ingin ikut berbagi, yuk sisihkan sedikit untuk berdonasi kepada Yayasan Himmatun Ayat melalui QRIS berikut.
-                </p>
-                <p className='text-sm text-gray-500'>
-                  Donasi bersifat sukarela dan dapat diberikan sesuai kemampuan masing-masing.
-                </p>
               </div>
 
               <hr className='border-gray-100' />
 
               <div className='space-y-6'>
-                {/* Nominal Donasi Field */}
+                <div>
+                  <h3 className='mb-2 text-xl font-bold text-[#000D3A]'>
+                    Yuk, Berbagi melalui TC Run
+                  </h3>
+                  <p className='text-sm text-gray-500'>
+                    Sisihkan sedikit untuk berdonasi kepada Yayasan Himmatun Ayat
+                    melalui QRIS berikut. Donasi bersifat sukarela dan dapat
+                    diberikan sesuai kemampuan masing-masing.
+                  </p>
+                </div>
+
                 <div className='space-y-2'>
                   <label className='block text-sm font-bold text-[#000D3A]'>
                     Nominal Donasi
@@ -824,7 +867,6 @@ export default function TCRunPage() {
                   />
                 </div>
 
-                {/* QRIS Scan Placeholder */}
                 <div className='space-y-4 text-center'>
                   <h3 className='text-lg font-bold text-[#000D3A]'>
                     Scan QRIS Untuk Berdonasi
@@ -845,13 +887,11 @@ export default function TCRunPage() {
                   </p>
                 </div>
 
-                {/* Upload Bukti */}
                 <div className='space-y-2 mb-2'>
                   <label className='block text-sm font-bold text-[#000D3A]'>
                     Bukti Donasi
                   </label>
 
-                  {/* Hidden file input */}
                   <input
                     type='file'
                     ref={fileInputRef}
@@ -860,7 +900,6 @@ export default function TCRunPage() {
                     className='hidden'
                   />
 
-                  {/* Clickable upload box */}
                   <div
                     onClick={triggerFileSelect}
                     className='group cursor-pointer rounded-2xl border-2 border-dashed border-gray-200 bg-[#F8F9FA] p-8 text-center transition hover:border-blue-400'
@@ -875,7 +914,6 @@ export default function TCRunPage() {
                       />
                     </div>
 
-                    {/* Dynamically show file name if uploaded */}
                     {formData.buktiPembayaran ? (
                       <div>
                         <div className='relative flex items-center justify-center space-x-2'>
@@ -910,7 +948,6 @@ export default function TCRunPage() {
                   Opsional — unggah jika kamu melakukan donasi.
                 </p>
 
-                {/* Alert Warning Box */}
                 <div className='flex items-center space-x-3 rounded-2xl border border-blue-100 bg-blue-50/70 p-4 text-xs leading-relaxed text-blue-800'>
                   <svg
                     className='mt-0.5 h-5 w-5 shrink-0 text-blue-600'
@@ -926,13 +963,18 @@ export default function TCRunPage() {
                     />
                   </svg>
                   <p>
-                    Jika melakukan donasi, pastikan bukti yang diunggah terlihat jelas untuk memudahkan proses verifikasi oleh panitia.
+                    Jika melakukan donasi, pastikan bukti yang diunggah terlihat
+                    jelas untuk memudahkan proses verifikasi oleh panitia.
                   </p>
                 </div>
               </div>
 
-              {/* Action Button */}
               <div className='flex w-full flex-col items-center'>
+                {fieldValidationError && (
+                  <p className='mt-2 font-sans text-sm text-red-600'>
+                    {fieldValidationError}
+                  </p>
+                )}
                 {submitError && (
                   <p className='mt-2 font-sans text-sm text-red-600'>
                     {submitError}
@@ -959,7 +1001,7 @@ export default function TCRunPage() {
           </form>
         )}
 
-        {/* STEP 4: SUCCESS PAGE & QR TICKET */}
+        {/* STEP 4: SUCCESS PAGE */}
         {currentStep === 4 && (
           <div className='mx-auto w-full max-w-5xl px-4 py-8'>
             <div
@@ -969,58 +1011,11 @@ export default function TCRunPage() {
               <div className='mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-3xl text-emerald-600 shadow-sm'>
                 ✓
               </div>
-
               <div className='space-y-2'>
                 <h2 className='text-3xl font-extrabold tracking-tight text-[#000D3A]'>
-                  Pendaftaran Berhasil!
+                  Terima Kasih atas donasinya!
                 </h2>
-                <p className='px-4 text-sm text-gray-500'>
-                  Terima kasih telah mendaftar di TC Run 2026. Jangan lupa untuk
-                  join Group WhatsApp di bawah ini yaa.
-                </p>
               </div>
-
-              {/* Ticket Graphic Placeholder */}
-              <div className='relative mx-auto w-72 overflow-hidden rounded-2xl bg-[#000D3A] p-6 text-left text-white shadow-xl'>
-                {/* Ticket Side Cuts */}
-                <div className='absolute top-1/2 -left-3 h-6 w-6 rounded-full bg-gray-50'></div>
-                <div className='absolute top-1/2 -right-3 h-6 w-6 rounded-full bg-gray-50'></div>
-
-                <div className='mb-6 flex items-start justify-between text-[10px] font-bold tracking-wider text-white/50 uppercase'>
-                  <div>
-                    <span className='block text-white/40'>Event</span>
-                    <span className='text-xs font-bold text-white'>
-                      TC Run 2026
-                    </span>
-                  </div>
-                  <div className='text-right'>
-                    <span className='block text-white/40'>Category</span>
-                    <span className='text-xs font-bold text-white'>5K</span>
-                  </div>
-                </div>
-
-                {/* Ticket QR Code Body */}
-                <div className='relative mx-auto flex aspect-square h-full w-full items-center justify-center rounded-xl bg-gray-50 p-4 shadow-inner'>
-                  <Image
-                    src='/images/student-social-development/tc-run/QR Group WhatsApp Peserta TC Run.png'
-                    alt='QR Group WhatsApp Peserta TC Run'
-                    width={200}
-                    height={200}
-                    priority
-                    draggable='false'
-                    className='select-none'
-                  />
-                </div>
-              </div>
-              <div>
-                <a
-                  href='https://chat.whatsapp.com/KioJFVSGcrM1L0DbX0aqpU?s=cl&p=a&ilr=1'
-                  className='text-sm font-bold break-words text-[#0000FF] hover:underline'
-                >
-                  https://chat.whatsapp.com/KioJFVSGcrM1L0DbX0aqpU
-                </a>
-              </div>
-
               <button
                 type='button'
                 onClick={() => {
