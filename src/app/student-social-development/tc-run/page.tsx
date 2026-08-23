@@ -25,7 +25,7 @@ const REGISTRATION_STORAGE_KEY_PREFIX =
 const REGISTRATION_COOKIE_KEY_PREFIX =
   'tc.registration.submitted';
 const ID = 'tc-run-2026';
-const RSVP_CLOSES_AT = '2026-09-05T23:59:59+07:00';
+const RSVP_CLOSES_AT = '2026-08-23T00:00:00+07:00';
 
 export default function TCRunPage() {
   const registrationStorageKey = useMemo(
@@ -202,6 +202,8 @@ export default function TCRunPage() {
     setSubmitError(null);
     if (isSubmitted && (step === 2 || step === 3)) {
       setCurrentStep(4);
+    } else if (isRsvpClosed && (step === 2 || step === 3)) {
+      setCurrentStep(1);
     } else {
       setCurrentStep(step);
     }
@@ -607,9 +609,10 @@ export default function TCRunPage() {
                 <button
                   type='button'
                   onClick={() => handleStepChange(2)}
-                  className='w-full cursor-pointer rounded-2xl bg-[#000D3A] px-10 py-4 text-center font-bold text-white shadow-lg shadow-blue-900/10 transition hover:bg-[#100D3A]/80 sm:w-auto'
+                  disabled={isRsvpClosed}
+                  className='w-full cursor-pointer rounded-2xl bg-[#000D3A] px-10 py-4 text-center font-bold text-white shadow-lg shadow-blue-900/10 transition hover:bg-[#100D3A]/80 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:shadow-none sm:w-auto'
                 >
-                  Daftar Sekarang
+                  {isRsvpClosed ? 'Pendaftaran Ditutup' : 'Daftar Sekarang'}
                 </button>
               </div>
 
