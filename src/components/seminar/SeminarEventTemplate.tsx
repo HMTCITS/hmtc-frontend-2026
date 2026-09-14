@@ -1,5 +1,13 @@
 'use client';
-import { ArrowRight, BrainCircuit, Cog, RefreshCcw } from 'lucide-react';
+import {
+  ArrowRight,
+  BookOpen,
+  BrainCircuit,
+  Cog,
+  Gamepad2,
+  Glasses,
+  RefreshCcw,
+} from 'lucide-react';
 
 import NextImage from '@/components/NextImage';
 import PixelBlast from '@/components/PixelBlast';
@@ -32,7 +40,13 @@ type SeminarSpeaker = {
 type SeminarTopic = {
   title: string;
   description: string;
-  iconKey: 'brainCircuit' | 'cog' | 'refreshCcw';
+  iconKey:
+    | 'brainCircuit'
+    | 'cog'
+    | 'refreshCcw'
+    | 'gamepad2'
+    | 'glasses'
+    | 'bookOpen';
 };
 
 type SeminarMetaItem = {
@@ -107,6 +121,9 @@ function TopicCard({ topic }: { topic: SeminarTopic }) {
     brainCircuit: BrainCircuit,
     cog: Cog,
     refreshCcw: RefreshCcw,
+    gamepad2: Gamepad2,
+    glasses: Glasses,
+    bookOpen: BookOpen,
   } as const;
 
   const Icon = iconMap[topic.iconKey];

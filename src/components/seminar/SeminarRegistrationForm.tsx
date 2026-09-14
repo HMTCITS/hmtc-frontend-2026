@@ -35,13 +35,13 @@ export type SeminarRegistrationConfig = {
   rsvpClosesAt?: string;
   closedMessage?: string;
   attendanceLink?: string;
+  quota?: number;
 };
 
 type SeminarRegistrationFormProps = {
   registration: SeminarRegistrationConfig;
 };
 
-const DEFAULT_ATTENDANCE_LINK = 'its.id/m/SeminarDosen1ETC2026';
 const REGISTRATION_STORAGE_KEY_PREFIX = 'seminar.registration.submitted';
 const REGISTRATION_COOKIE_KEY_PREFIX = 'seminar_registration_submitted';
 
@@ -75,6 +75,7 @@ export default function SeminarRegistrationForm({
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [isQuotaFull, setIsQuotaFull] = useState(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -106,6 +107,41 @@ export default function SeminarRegistrationForm({
     });
   }, [registrationCookieKey, registrationStorageKey]);
 
+  useEffect(() => {
+    if (typeof window === 'undefined' || !registration.quota) {
+      return;
+    }
+
+    let cancelled = false;
+
+    async function checkQuota() {
+      try {
+        const response = await fetch(registration.apiEndpoint, {
+          method: 'GET',
+          cache: 'no-store',
+        });
+        if (!response.ok) {
+          return;
+        }
+
+        const data = (await response.json().catch(() => ({}))) as {
+          isFull?: boolean;
+        };
+        if (!cancelled && data.isFull === true) {
+          setIsQuotaFull(true);
+        }
+      } catch {
+        // Gagal baca kuota → form tetap terbuka (fail-open).
+      }
+    }
+
+    void checkQuota();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [registration.apiEndpoint, registration.quota]);
+
   const isRsvpClosed = useMemo(() => {
     if (!registration.rsvpClosesAt) {
       return false;
@@ -119,6 +155,8 @@ export default function SeminarRegistrationForm({
     return Date.now() > closeTime;
   }, [registration.rsvpClosesAt]);
 
+  const isClosed = isRsvpClosed || isQuotaFull;
+
   const handleInputChange = (fieldId: string, value: string) => {
     setFormValues((prev) => ({
       ...prev,
@@ -130,7 +168,7 @@ export default function SeminarRegistrationForm({
     event.preventDefault();
     setSubmitError(null);
 
-    if (isRsvpClosed) {
+    if (isClosed) {
       setSubmitError(registration.closedMessage || 'RSVP Closed, thank you');
       return;
     }
@@ -225,21 +263,26 @@ export default function SeminarRegistrationForm({
         {isSubmitted ? (
           <p className='mt-6 rounded-lg border border-[#C7E2CD] bg-[#E8F6EB] px-4 py-3 font-plus-jakarta-sans text-sm font-semibold text-[#216E39]'>
             {registration.successMessage ||
-              'Pendaftaran diterima. Sampai jumpa di sesi seminar!'}{' '}
-            Save this link to attend seminar:{' '}
-            <a
-              href={`https://${registration.attendanceLink ?? DEFAULT_ATTENDANCE_LINK}`}
-              target='_blank'
-              rel='noreferrer'
-              className='underline underline-offset-2'
-            >
-              {registration.attendanceLink ?? DEFAULT_ATTENDANCE_LINK}
-            </a>
+              'Pendaftaran diterima. Sampai jumpa di sesi seminar!'}
+            {registration.attendanceLink ? (
+              <>
+                {' '}
+                Save this link to attend seminar:{' '}
+                <a
+                  href={`https://${registration.attendanceLink}`}
+                  target='_blank'
+                  rel='noreferrer'
+                  className='underline underline-offset-2'
+                >
+                  {registration.attendanceLink}
+                </a>
+              </>
+            ) : null}
           </p>
         ) : null}
 
         <form className='mt-6 space-y-4' onSubmit={handleSubmit}>
-          {isRsvpClosed ? (
+          {isClosed ? (
             <p className='rounded-lg border border-[#D3D3D3] bg-white/70 px-4 py-3 font-plus-jakarta-sans text-sm font-semibold text-black'>
               {registration.closedMessage || 'RSVP Closed, thank you'}
             </p>
@@ -289,10 +332,10 @@ export default function SeminarRegistrationForm({
 
           <Button
             type='submit'
-            disabled={isSubmitting || isRsvpClosed || isSubmitted}
+            disabled={isSubmitting || isClosed || isSubmitted}
             className='mt-2 h-[50px] w-full rounded-lg bg-[#0078B4] font-plus-jakarta-sans text-base font-bold text-white hover:bg-[#02699f]'
           >
-            {isRsvpClosed
+            {isClosed
               ? 'RSVP Closed'
               : isSubmitted
                 ? 'Sudah Terdaftar'
@@ -328,17 +371,19 @@ export default function SeminarRegistrationForm({
         closeOnEsc
         primaryOnEnter
       >
-        <p className='font-plus-jakarta-sans text-sm text-black'>
-          Save this link to attend seminar:{' '}
-          <a
-            href={`https://${registration.attendanceLink ?? DEFAULT_ATTENDANCE_LINK}`}
-            target='_blank'
-            rel='noreferrer'
-            className='font-semibold text-[#0078B4] underline underline-offset-2'
-          >
-            {registration.attendanceLink ?? DEFAULT_ATTENDANCE_LINK}
-          </a>
-        </p>
+        {registration.attendanceLink ? (
+          <p className='font-plus-jakarta-sans text-sm text-black'>
+            Save this link to attend seminar:{' '}
+            <a
+              href={`https://${registration.attendanceLink}`}
+              target='_blank'
+              rel='noreferrer'
+              className='font-semibold text-[#0078B4] underline underline-offset-2'
+            >
+              {registration.attendanceLink}
+            </a>
+          </p>
+        ) : null}
       </ConfirmModal>
     </section>
   );

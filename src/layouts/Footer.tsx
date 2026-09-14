@@ -51,6 +51,11 @@ const ProgramKerja = [
     offset: -80,
   },
   {
+    label: 'Seminar Dosen 3',
+    href: '/research-and-technology/seminar-dosen-3',
+    offset: -80,
+  },
+  {
     label: 'Bluecamp',
     href: '/research-and-technology/bluecamp',
     offset: -80,
