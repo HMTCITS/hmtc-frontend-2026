@@ -1,5 +1,6 @@
 'use client';
 
+import { Info } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
 import Threads from '@/components/Threads';
@@ -28,6 +29,7 @@ export type SeminarRegistrationConfig = {
   eyebrow: string;
   title: string;
   description: string;
+  eligibilityNote?: string;
   fields: SeminarFormField[];
   submitLabel: string;
   apiEndpoint: string;
@@ -259,6 +261,15 @@ export default function SeminarRegistrationForm({
         <p className='mt-2 font-plus-jakarta-sans text-sm text-black md:text-base'>
           {registration.description}
         </p>
+
+        {registration.eligibilityNote ? (
+          <div className='mt-4 flex items-start gap-3 rounded-lg border border-[#C0D5FF] bg-[#EAF1FF] px-4 py-3'>
+            <Info className='mt-0.5 h-5 w-5 shrink-0 text-[#2F6FED]' />
+            <p className='font-plus-jakarta-sans text-sm font-medium text-[#1B2B4B]'>
+              {registration.eligibilityNote}
+            </p>
+          </div>
+        ) : null}
 
         {isSubmitted ? (
           <p className='mt-6 rounded-lg border border-[#C7E2CD] bg-[#E8F6EB] px-4 py-3 font-plus-jakarta-sans text-sm font-semibold text-[#216E39]'>

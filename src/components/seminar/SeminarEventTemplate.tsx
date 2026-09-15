@@ -3,6 +3,7 @@ import {
   ArrowRight,
   BookOpen,
   BrainCircuit,
+  CircleCheck,
   Cog,
   Gamepad2,
   Glasses,
@@ -41,12 +42,12 @@ type SeminarTopic = {
   title: string;
   description: string;
   iconKey:
-    | 'brainCircuit'
-    | 'cog'
-    | 'refreshCcw'
-    | 'gamepad2'
-    | 'glasses'
-    | 'bookOpen';
+  | 'brainCircuit'
+  | 'cog'
+  | 'refreshCcw'
+  | 'gamepad2'
+  | 'glasses'
+  | 'bookOpen';
 };
 
 type SeminarMetaItem = {
@@ -79,6 +80,7 @@ export type SeminarEventContent = {
   speaker: SeminarSpeaker;
   metaItems: SeminarMetaItem[];
   topics: SeminarTopic[];
+  benefits?: string[];
   registration: SeminarRegistration;
 };
 
@@ -136,6 +138,17 @@ function TopicCard({ topic }: { topic: SeminarTopic }) {
       </h3>
       <p className='font-plus-jakarta-sans text-sm leading-relaxed text-[#212121]'>
         {topic.description}
+      </p>
+    </article>
+  );
+}
+
+function BenefitCard({ benefit }: { benefit: string }) {
+  return (
+    <article className='flex items-start gap-4 rounded-lg border border-[#CED4DA] bg-white p-6 shadow-[4px_4px_8px_0_rgba(0,0,0,0.05)]'>
+      <CircleCheck className='mt-0.5 h-6 w-6 shrink-0 text-[#2F6FED]' />
+      <p className='font-plus-jakarta-sans text-sm leading-relaxed text-[#212121] md:text-base'>
+        {benefit}
       </p>
     </article>
   );
@@ -303,6 +316,24 @@ export default function SeminarEventTemplate({
             </div>
           </div>
         </section>
+
+        {content.benefits && content.benefits.length > 0 ? (
+          <section className='bg-[#E9ECEF] px-4 py-12 sm:px-8 lg:px-20 lg:py-16'>
+            <div className='mx-auto max-w-6xl'>
+              <h2 className='text-center font-jetbrains-mono text-2xl font-bold tracking-tight text-black sm:text-3xl'>
+                <span className='text-[#2F6FED]'>Benefits</span> of Joining
+              </h2>
+              <p className='mx-auto mt-3 max-w-2xl text-center font-plus-jakarta-sans text-sm text-[#212121] sm:text-base'>
+                Here&apos;s what you&apos;ll gain from attending this session.
+              </p>
+              <div className='mt-8 grid gap-5 md:grid-cols-2'>
+                {content.benefits.map((benefit) => (
+                  <BenefitCard key={benefit} benefit={benefit} />
+                ))}
+              </div>
+            </div>
+          </section>
+        ) : null}
 
         <SeminarRegistrationForm registration={content.registration} />
       </main>

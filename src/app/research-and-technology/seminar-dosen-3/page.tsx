@@ -58,12 +58,20 @@ const seminarDosen3Content: SeminarEventContent = {
       iconKey: 'bookOpen',
     },
   ],
+  benefits: [
+    'Gain first-hand insight into the research currently being conducted by the lecturers.',
+    'Get direct access to discuss research topics with the lecturers.',
+    'Discover opportunities to join the lecturers’ research or projects.',
+    'Get a clear picture of the right supervisor for the research field you are interested in.',
+  ],
   registration: {
     id: 'seminar-registration-3',
     eyebrow: 'Seminar Dosen',
     title: 'Secure Your Spot',
     description:
       'Registration is mandatory to attend this session. Please fill out the form below to secure your spot. Note that the seminar is limited to 80 participants, so register early to ensure your place.',
+    eligibilityNote:
+      'Please note that this seminar is exclusively for active students of the Informatics Department, ITS.',
     fields: [
       { id: 'fullName', label: 'Nama', placeholder: 'Laila S. Chudori' },
       { id: 'nrp', label: 'NRP', placeholder: '50XXXXXXX' },
