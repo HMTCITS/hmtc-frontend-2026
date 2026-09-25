@@ -35,7 +35,7 @@ const seminarDosen3Content: SeminarEventContent = {
   },
   metaItems: [
     { label: 'Date', value: '2 Oktober 2026' },
-    { label: 'Place', value: 'Offline, IF-105 Department of Informatics' },
+    { label: 'Place', value: 'Offline, Department of Informatics (TBA)' },
     { label: 'RSVP', value: 'Required (Limited to 80 People)' },
   ],
   topics: [
