@@ -107,7 +107,7 @@ export default function Footer() {
           </span>
         </BaseLink>
 
-        <div className='font-secondary flex w-full justify-between md:grid md:w-auto md:grid-cols-3 md:gap-x-6'>
+        <div className='font-secondary flex w-full justify-between px-2 md:grid md:w-auto md:grid-cols-3 md:gap-x-6 md:px-0'>
           <div className='flex w-fit flex-col items-start gap-y-2.5 md:w-[187px]'>
             <div onClick={toggleApaIni} className='flex items-center gap-2'>
               <Typography
@@ -156,7 +156,12 @@ export default function Footer() {
                     aria-label={`Menuju halaman ${name}`}
                     className='font-secondary hover:text-base-nav cursor-pointer text-white-main transition-colors duration-75'
                   >
-                    <Typography font='satoshi'>{name}</Typography>
+                    <Typography
+                      font='satoshi'
+                      className='text-base-icon text-sm hover:text-white md:text-base'
+                    >
+                      {name}
+                    </Typography>
                   </Link>
                 ),
               )}
