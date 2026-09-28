@@ -89,7 +89,7 @@ const seminarDosen3Content: SeminarEventContent = {
     successMessage: 'Pendaftaran diterima. Sampai jumpa di sesi seminar!',
     rsvpClosesAt: '2026-10-02T23:59:59+07:00',
     closedMessage: 'RSVP Closed, thank you',
-    quota: 80,
+    quota: 90,
   },
 };
 
