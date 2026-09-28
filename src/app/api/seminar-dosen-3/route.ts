@@ -41,8 +41,8 @@ function getRequiredEnv() {
 
 function getQuota(): number {
   const raw = process.env.NOCODB_SEMINAR_DOSEN_3_QUOTA;
-  const parsed = raw ? Number.parseInt(raw, 10) : 80;
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : 80;
+  const parsed = raw ? Number.parseInt(raw, 10) : 90;
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 90;
 }
 
 async function fetchRecordCount(params: {
