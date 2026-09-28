@@ -79,7 +79,7 @@ export default function Footer() {
   return (
     <footer
       className={cn(
-        'w-full px-6 py-12 md:px-24',
+        'w-full px-3 py-12 md:px-24',
         'flex flex-col items-center gap-6 bg-text-black text-white md:gap-6',
       )}
     >
@@ -107,8 +107,8 @@ export default function Footer() {
           </span>
         </BaseLink>
 
-        <div className='font-secondary grid w-full grid-cols-3 gap-x-4 md:w-auto md:gap-x-6'>
-          <div className='flex w-full flex-col items-start gap-y-2.5 md:w-[187px]'>
+        <div className='font-secondary flex w-full justify-between md:grid md:w-auto md:grid-cols-3 md:gap-x-6'>
+          <div className='flex w-fit flex-col items-start gap-y-2.5 md:w-[187px]'>
             <div onClick={toggleApaIni} className='flex items-center gap-2'>
               <Typography
                 variant='s2'
@@ -118,7 +118,7 @@ export default function Footer() {
               </Typography>
               <ChevronDown
                 className={cn(
-                  'text-white md:hidden',
+                  'shrink-0 text-white md:hidden',
                   'transition-transform duration-200 ease-in-out',
                   isApaIniOpen && 'rotate-180',
                 )}
@@ -126,7 +126,7 @@ export default function Footer() {
             </div>
             <div
               className={cn(
-                'flex flex-col items-start gap-3',
+                'flex w-full flex-col items-start gap-3 [contain:inline-size]',
                 'overflow-y-hidden transition-all duration-300 ease-in-out',
                 isApaIniOpen
                   ? 'max-h-96 opacity-100'
@@ -162,7 +162,7 @@ export default function Footer() {
               )}
             </div>
           </div>
-          <div className='flex w-full flex-col items-start gap-y-2.5 md:w-[187px]'>
+          <div className='flex w-fit flex-col items-start gap-y-2.5 md:w-[187px]'>
             <div
               onClick={toggleProgramKerja}
               className='flex items-center gap-2'
@@ -175,7 +175,7 @@ export default function Footer() {
               </Typography>
               <ChevronDown
                 className={cn(
-                  'text-white md:hidden',
+                  'shrink-0 text-white md:hidden',
                   'transition-transform duration-200 ease-in-out',
                   isProgramKerjaOpen && 'rotate-180',
                 )}
@@ -183,7 +183,7 @@ export default function Footer() {
             </div>
             <div
               className={cn(
-                'flex flex-col items-start gap-3',
+                'flex w-full flex-col items-start gap-3 [contain:inline-size]',
                 'overflow-y-hidden transition-all duration-300 ease-in-out',
                 isProgramKerjaOpen
                   ? 'max-h-96 opacity-100'
@@ -208,7 +208,7 @@ export default function Footer() {
               ))}
             </div>
           </div>
-          <div className='flex w-full flex-col items-start gap-y-2.5 md:w-[187px]'>
+          <div className='flex w-fit flex-col items-start gap-y-2.5 md:w-[187px]'>
             <div onClick={toggleInfo} className='flex items-center gap-2'>
               <Typography
                 variant='s2'
@@ -218,7 +218,7 @@ export default function Footer() {
               </Typography>
               <ChevronDown
                 className={cn(
-                  'text-white md:hidden',
+                  'shrink-0 text-white md:hidden',
                   'transition-transform duration-200 ease-in-out',
                   isInfoOpen && 'rotate-180',
                 )}
@@ -226,7 +226,7 @@ export default function Footer() {
             </div>
             <div
               className={cn(
-                'flex flex-col items-start gap-3',
+                'flex w-full flex-col items-start gap-3 [contain:inline-size]',
                 'overflow-y-hidden transition-all duration-300 ease-in-out',
                 isInfoOpen
                   ? 'max-h-96 opacity-100'
