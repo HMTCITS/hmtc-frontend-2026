@@ -14,57 +14,34 @@ import React from 'react';
 import BaseLink from '@/components/links/BaseLink';
 import NextImage from '@/components/NextImage';
 import Typography from '@/components/Typography';
-import { NAVBAR_LINKS as ApaIni } from '@/contents/layout';
+import { NAVBAR_LINKS, PROGRAM_KERJA_LINKS } from '@/contents/layout';
 import SocialCard from '@/layouts/components/Social';
 import { cn } from '@/lib/utils';
 
+const ApaIni = NAVBAR_LINKS.filter(({ name }) => name !== 'Info');
+
 const SocialMedia = [
-  { icon: Twitter, href: 'https://twitter.com/hmtc_its' },
-  { icon: Instagram, href: 'https://www.instagram.com/hmtc_its/' },
-  { icon: Youtube, href: 'https://www.youtube.com/@bluepresshmtc' },
+  { label: 'Twitter', icon: Twitter, href: 'https://twitter.com/hmtc_its' },
   {
+    label: 'Instagram',
+    icon: Instagram,
+    href: 'https://www.instagram.com/hmtc_its/',
+  },
+  {
+    label: 'Youtube',
+    icon: Youtube,
+    href: 'https://www.youtube.com/@bluepresshmtc',
+  },
+  {
+    label: 'LinkedIn',
     icon: Linkedin,
     href: 'https://www.linkedin.com/company/himpunan-mahasiswa-teknik-computer-informatika/',
   },
-  { icon: Link2, href: '/info' },
 ];
 
-const ProgramKerja = [
-  {
-    label: 'Syukuran Wisuda',
-    href: '/internal-affairs/syukuran-wisudawan',
-    offset: -80,
-  },
-  {
-    label: 'Video Tutorial',
-    href: '/student-welfare/academic-resources',
-    offset: -80,
-  },
-  {
-    label: 'Seminar Dosen 1',
-    href: '/research-and-technology/seminar-dosen',
-    offset: -80,
-  },
-  {
-    label: 'Seminar Dosen 2',
-    href: '/research-and-technology/seminar-dosen-2',
-    offset: -80,
-  },
-  {
-    label: 'Seminar Dosen 3',
-    href: '/research-and-technology/seminar-dosen-3',
-    offset: -80,
-  },
-  {
-    label: 'Bluecamp',
-    href: '/research-and-technology/bluecamp',
-    offset: -80,
-  },
-  {
-    label: 'TC Run',
-    href: '/student-social-development/tc-run',
-    offset: -80,
-  },
+const InfoLinks = [
+  { label: 'Media Partner', href: 'https://intip.in/RequestMedparHMTC2026/' },
+  ...SocialMedia.map(({ label, href }) => ({ label, href })),
 ];
 
 function handleSmoothAnchorClick(
@@ -94,8 +71,10 @@ function handleSmoothAnchorClick(
 export default function Footer() {
   const [isApaIniOpen, setIsApaIniOpen] = React.useState(false);
   const [isProgramKerjaOpen, setIsProgramKerjaOpen] = React.useState(false);
+  const [isInfoOpen, setIsInfoOpen] = React.useState(false);
   const toggleApaIni = () => setIsApaIniOpen((prev) => !prev);
   const toggleProgramKerja = () => setIsProgramKerjaOpen((prev) => !prev);
+  const toggleInfo = () => setIsInfoOpen((prev) => !prev);
 
   return (
     <footer
@@ -128,8 +107,8 @@ export default function Footer() {
           </span>
         </BaseLink>
 
-        <div className='font-secondary grid grid-cols-2 gap-x-6'>
-          <div className='flex w-full flex-col items-start gap-y-2.5 md:w-[187px]'>
+        <div className='font-secondary grid w-full grid-cols-3 gap-x-6 md:w-auto'>
+          <div className='flex w-full flex-col items-center gap-y-2.5 md:w-[187px] md:items-start'>
             <div onClick={toggleApaIni} className='flex items-center gap-2'>
               <Typography
                 variant='s2'
@@ -147,7 +126,7 @@ export default function Footer() {
             </div>
             <div
               className={cn(
-                'flex flex-col items-start gap-3',
+                'flex flex-col items-center gap-3 text-center md:items-start md:text-left',
                 'overflow-y-hidden transition-all duration-300 ease-in-out',
                 isApaIniOpen
                   ? 'max-h-96 opacity-100'
@@ -183,7 +162,7 @@ export default function Footer() {
               )}
             </div>
           </div>
-          <div className='flex w-full flex-col items-start gap-y-2.5 md:w-[187px]'>
+          <div className='flex w-full flex-col items-center gap-y-2.5 md:w-[187px] md:items-start'>
             <div
               onClick={toggleProgramKerja}
               className='flex items-center gap-2'
@@ -204,20 +183,64 @@ export default function Footer() {
             </div>
             <div
               className={cn(
-                'flex flex-col items-start gap-3',
+                'flex flex-col items-center gap-3 text-center md:items-start md:text-left',
                 'overflow-y-hidden transition-all duration-300 ease-in-out',
                 isProgramKerjaOpen
                   ? 'max-h-96 opacity-100'
                   : 'max-h-0 opacity-0 md:max-h-96 md:opacity-100',
               )}
             >
-              {ProgramKerja.map(({ label, href, offset }, index) => (
+              {PROGRAM_KERJA_LINKS.map(({ label, href, offset }, index) => (
                 <a
                   key={index}
                   href={href}
                   aria-label={`Scroll ke bagian ${label}`}
                   className='font-secondary hover:text-base-nav cursor-pointer text-white-main transition-colors duration-75'
                   onClick={(e) => handleSmoothAnchorClick(e, offset ?? -80)}
+                >
+                  <Typography
+                    font='satoshi'
+                    className='text-base-icon text-sm hover:text-white md:text-base'
+                  >
+                    {label}
+                  </Typography>
+                </a>
+              ))}
+            </div>
+          </div>
+          <div className='flex w-full flex-col items-center gap-y-2.5 md:w-[187px] md:items-start'>
+            <div onClick={toggleInfo} className='flex items-center gap-2'>
+              <Typography
+                variant='s2'
+                className='cursor-pointer font-plus-jakarta-sans font-bold uppercase md:pb-5'
+              >
+                info
+              </Typography>
+              <ChevronDown
+                className={cn(
+                  'text-white md:hidden',
+                  'transition-transform duration-200 ease-in-out',
+                  isInfoOpen && 'rotate-180',
+                )}
+              />
+            </div>
+            <div
+              className={cn(
+                'flex flex-col items-center gap-3 text-center md:items-start md:text-left',
+                'overflow-y-hidden transition-all duration-300 ease-in-out',
+                isInfoOpen
+                  ? 'max-h-96 opacity-100'
+                  : 'max-h-0 opacity-0 md:max-h-96 md:opacity-100',
+              )}
+            >
+              {InfoLinks.map(({ label, href }) => (
+                <a
+                  key={href}
+                  href={href}
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  aria-label={`Buka ${label}`}
+                  className='font-secondary hover:text-base-nav cursor-pointer text-white-main transition-colors duration-75'
                 >
                   <Typography
                     font='satoshi'
@@ -242,9 +265,11 @@ export default function Footer() {
           &copy; HMTC ITS 2026 | NIAT BAIK
         </Typography>
         <div className='order-1 flex items-center gap-x-4 md:order-2'>
-          {SocialMedia.map(({ icon: Icon, href }, index) => (
-            <SocialCard key={index} href={href} icon={Icon} />
-          ))}
+          {[...SocialMedia, { icon: Link2, href: '/info' }].map(
+            ({ icon: Icon, href }, index) => (
+              <SocialCard key={index} href={href} icon={Icon} />
+            ),
+          )}
         </div>
       </div>
     </footer>
