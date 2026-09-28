@@ -53,9 +53,9 @@ export function ProgramKerjaDesktopMenu() {
             <Link
               href={href}
               aria-label={`Menuju halaman ${label}`}
-              className='font-secondary cursor-pointer text-sm text-white-main transition-colors duration-75'
+              className='cursor-pointer text-white-main transition-colors duration-75'
             >
-              {label}
+              <Typography font='satoshi'>{label}</Typography>
             </Link>
           </DropdownMenuItem>
         ))}
