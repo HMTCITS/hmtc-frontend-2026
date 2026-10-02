@@ -1,0 +1,84 @@
+{
+  "hero": {
+    "title": "Event Title",
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam non urna vitae ligula volutpat tincidunt. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam non urna vitae ligula volutpat tincidunt. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam non urna vitae ligula volutpat tincidunt."
+  },
+  "hashtags": [
+    "#Event2024",
+    "#Conference",
+    "#Networking",
+    "#Innovation",
+    "#Technology",
+    "#Networking"
+  ],
+  "about": {
+    "heading": "About the Event",
+    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque sit amet accumsan arcu. Proin ac consequat ex. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque sit amet accumsan arcu. Proin ac consequat ex. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque sit amet accumsan arcu. Proin ac consequat ex. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque sit amet accumsan arcu. Proin ac consequat ex."
+  },
+  "gallery": {
+    "images": [
+      {
+        "title": "Image Title (opsional)",
+        "src": "",
+        "alt": "Gallery Image 1"
+      },
+      {
+        "title": "Image Title (opsional)",
+        "src": "",
+        "alt": "Gallery Image 2"
+      },
+      {
+        "title": "Image Title (opsional)",
+        "src": "",
+        "alt": "Gallery Image 3"
+      },
+      {
+        "title": "Image Title (opsional)",
+        "src": "",
+        "alt": "Gallery Image 4"
+      },
+      {
+        "title": "Image Title (opsional)",
+        "src": "",
+        "alt": "Gallery Image 5"
+      },
+      {
+        "title": "Image Title (opsional)",
+        "src": "",
+        "alt": "Gallery Image 6"
+      }
+    ]
+  },
+  "feedback": [
+    {
+      "title": "Feedback Title 1",
+      "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce et risus ultrices, ullamcorper elit vel, interdum urna.",
+      "author": "John Doe",
+      "role": "Staff"
+    },
+    {
+      "title": "Feedback Title 2",
+      "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce et risus ultrices, ullamcorper elit vel, interdum urna.",
+      "author": "John Doe",
+      "role": "Staff"
+    },
+    {
+      "title": "Feedback Title 3",
+      "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce et risus ultrices, ullamcorper elit vel, interdum urna. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce et risus ultrices, ullamcorper elit vel, interdum urna. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce et risus ultrices, ullamcorper elit vel, interdum urna.",
+      "author": "John Doe",
+      "role": "Staff"
+    },
+    {
+      "title": "Feedback Title 4",
+      "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce et risus ultrices, ullamcorper elit vel, interdum urna.",
+      "author": "John Doe",
+      "role": "Staff"
+    },
+    {
+      "title": "Feedback Title 5",
+      "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce et risus ultrices, ullamcorper elit vel, interdum urna.",
+      "author": "John Doe",
+      "role": "Staff"
+    }
+  ]
+}
