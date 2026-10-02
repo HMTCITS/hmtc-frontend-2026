@@ -8,6 +8,10 @@ import Button from '@/components/buttons/Button';
 import NextImage from '@/components/NextImage';
 import Typography from '@/components/Typography';
 import { NAVBAR_LINKS } from '@/contents/layout';
+import {
+  ProgramKerjaDesktopMenu,
+  ProgramKerjaMobileMenu,
+} from '@/layouts/components/ProgramKerjaMenu';
 import { cn } from '@/lib/utils';
 
 function scrollToId(id: string, offset = 0) {
@@ -243,31 +247,32 @@ export default function Navbar() {
         />
 
         <nav className='hidden items-center gap-6 min-lg:flex'>
-          {NAVBAR_LINKS.map(({ id, name, href, offset }) =>
-            href.startsWith('#') ? (
-              <a
-                key={id}
-                href={href}
-                aria-label={`Scroll ke ${name}`}
-                className='font-secondary hover:text-base-nav cursor-pointer p-2.5 text-white-main transition-colors duration-75'
-                tabIndex={0}
-                onClick={(e) =>
-                  handleAnchorClick(e, href.replace('#', ''), offset)
-                }
-              >
-                <Typography font='satoshi'>{name}</Typography>
-              </a>
-            ) : (
-              <Link
-                key={id}
-                href={href}
-                aria-label={`Menuju halaman ${name}`}
-                className='font-secondary hover:text-base-nav cursor-pointer p-2.5 text-white-main transition-colors duration-75'
-              >
-                <Typography font='satoshi'>{name}</Typography>
-              </Link>
-            ),
-          )}
+          {NAVBAR_LINKS.map(({ id, name, href, offset }) => (
+            <React.Fragment key={id}>
+              {href.startsWith('#') ? (
+                <a
+                  href={href}
+                  aria-label={`Scroll ke ${name}`}
+                  className='font-secondary hover:text-base-nav cursor-pointer p-2.5 text-white-main transition-colors duration-75'
+                  tabIndex={0}
+                  onClick={(e) =>
+                    handleAnchorClick(e, href.replace('#', ''), offset)
+                  }
+                >
+                  <Typography font='satoshi'>{name}</Typography>
+                </a>
+              ) : (
+                <Link
+                  href={href}
+                  aria-label={`Menuju halaman ${name}`}
+                  className='font-secondary hover:text-base-nav cursor-pointer p-2.5 text-white-main transition-colors duration-75'
+                >
+                  <Typography font='satoshi'>{name}</Typography>
+                </Link>
+              )}
+              {name === 'Academic Resources' && <ProgramKerjaDesktopMenu />}
+            </React.Fragment>
+          ))}
         </nav>
       </div>
 
@@ -300,36 +305,39 @@ export default function Navbar() {
           </Link>
 
           <div className='flex flex-col items-center gap-8'>
-            {NAVBAR_LINKS.map(({ id, name, href, offset }) =>
-              href.startsWith('#') ? (
-                <a
-                  key={id}
-                  href={href}
-                  aria-label={`Scroll ke ${name}`}
-                  className='text-base-white cursor-pointer'
-                  onClick={(e) =>
-                    handleAnchorClick(e, href.replace('#', ''), offset)
-                  }
-                  tabIndex={0}
-                >
-                  <Typography as='h6' font='satoshi'>
-                    {name}
-                  </Typography>
-                </a>
-              ) : (
-                <Link
-                  key={id}
-                  href={href}
-                  className='text-base-white cursor-pointer'
-                  aria-label={`Menuju halaman ${name}`}
-                  onClick={closeSidebar}
-                >
-                  <Typography as='h6' font='satoshi'>
-                    {name}
-                  </Typography>
-                </Link>
-              ),
-            )}
+            {NAVBAR_LINKS.map(({ id, name, href, offset }) => (
+              <React.Fragment key={id}>
+                {href.startsWith('#') ? (
+                  <a
+                    href={href}
+                    aria-label={`Scroll ke ${name}`}
+                    className='text-base-white cursor-pointer'
+                    onClick={(e) =>
+                      handleAnchorClick(e, href.replace('#', ''), offset)
+                    }
+                    tabIndex={0}
+                  >
+                    <Typography as='h6' font='satoshi'>
+                      {name}
+                    </Typography>
+                  </a>
+                ) : (
+                  <Link
+                    href={href}
+                    className='text-base-white cursor-pointer'
+                    aria-label={`Menuju halaman ${name}`}
+                    onClick={closeSidebar}
+                  >
+                    <Typography as='h6' font='satoshi'>
+                      {name}
+                    </Typography>
+                  </Link>
+                )}
+                {name === 'Academic Resources' && (
+                  <ProgramKerjaMobileMenu onNavigate={closeSidebar} />
+                )}
+              </React.Fragment>
+            ))}
           </div>
         </div>
 

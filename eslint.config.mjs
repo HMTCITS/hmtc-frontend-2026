@@ -76,6 +76,7 @@ export default [
       '**/tailwind.config.js',
       '**/node_modules/',
       '**/.next/',
+      '**/.content-collections/',
       '**/next.config.js',
       '**/next-env.d.ts',
     ],

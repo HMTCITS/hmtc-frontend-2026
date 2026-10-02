@@ -302,6 +302,30 @@ void main(){
 
 const MAX_CLICKS = 10;
 
+// Firefox returns null (not "") from getProgramInfoLog/getShaderInfoLog for a
+// successfully linked program. three.js < r173 calls .trim() on that result
+// unguarded and crashes (see three.js PR #31438). Normalizing to "" at the
+// WebGL boundary fixes the crash without disabling shader error checking.
+let infoLogShimInstalled = false;
+
+const installWebGLInfoLogShim = () => {
+  if (infoLogShimInstalled || typeof window === 'undefined') return;
+  infoLogShimInstalled = true;
+  for (const Context of [
+    window.WebGLRenderingContext,
+    window.WebGL2RenderingContext
+  ]) {
+    if (!Context) continue;
+    for (const method of ['getProgramInfoLog', 'getShaderInfoLog']) {
+      const original = Context.prototype[method];
+      if (typeof original !== 'function') continue;
+      Context.prototype[method] = function (...args) {
+        return original.apply(this, args) ?? '';
+      };
+    }
+  }
+};
+
 const PixelBlast = ({
   variant = 'square',
   pixelSize = 3,
@@ -335,6 +359,7 @@ const PixelBlast = ({
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
+    installWebGLInfoLogShim();
     speedRef.current = speed;
     const needsReinitKeys = ['antialias', 'liquid', 'noiseAmount'];
     const cfg = { antialias, liquid, noiseAmount };
