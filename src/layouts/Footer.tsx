@@ -107,7 +107,7 @@ export default function Footer() {
           </span>
         </BaseLink>
 
-        <div className='font-secondary flex w-full justify-between px-2 md:grid md:w-auto md:grid-cols-3 md:gap-x-6 md:px-0'>
+        <div className='flex w-full justify-between px-2 md:grid md:w-auto md:grid-cols-3 md:gap-x-6 md:px-0'>
           <div className='flex w-fit flex-col items-start gap-y-2.5 md:w-[187px]'>
             <div onClick={toggleApaIni} className='flex items-center gap-2'>
               <Typography
@@ -139,12 +139,12 @@ export default function Footer() {
                     key={index}
                     href={href}
                     aria-label={`Scroll ke bagian ${name}`}
-                    className='font-secondary hover:text-base-nav cursor-pointer text-white-main transition-colors duration-75'
+                    className='cursor-pointer text-white-main transition-colors duration-75'
                     onClick={(e) => handleSmoothAnchorClick(e, offset ?? -80)}
                   >
                     <Typography
                       font='satoshi'
-                      className='text-base-icon text-sm hover:text-white md:text-base'
+                      className='text-sm hover:text-white md:text-base'
                     >
                       {name}
                     </Typography>
@@ -154,11 +154,11 @@ export default function Footer() {
                     key={index}
                     href={href}
                     aria-label={`Menuju halaman ${name}`}
-                    className='font-secondary hover:text-base-nav cursor-pointer text-white-main transition-colors duration-75'
+                    className='cursor-pointer text-white-main transition-colors duration-75'
                   >
                     <Typography
                       font='satoshi'
-                      className='text-base-icon text-sm hover:text-white md:text-base'
+                      className='text-sm hover:text-white md:text-base'
                     >
                       {name}
                     </Typography>
@@ -200,12 +200,12 @@ export default function Footer() {
                   key={index}
                   href={href}
                   aria-label={`Scroll ke bagian ${label}`}
-                  className='font-secondary hover:text-base-nav cursor-pointer text-white-main transition-colors duration-75'
+                  className='cursor-pointer text-white-main transition-colors duration-75'
                   onClick={(e) => handleSmoothAnchorClick(e, offset ?? -80)}
                 >
                   <Typography
                     font='satoshi'
-                    className='text-base-icon text-sm hover:text-white md:text-base'
+                    className='text-sm hover:text-white md:text-base'
                   >
                     {label}
                   </Typography>
@@ -245,11 +245,11 @@ export default function Footer() {
                   target='_blank'
                   rel='noopener noreferrer'
                   aria-label={`Buka ${label}`}
-                  className='font-secondary hover:text-base-nav cursor-pointer text-white-main transition-colors duration-75'
+                  className='cursor-pointer text-white-main transition-colors duration-75'
                 >
                   <Typography
                     font='satoshi'
-                    className='text-base-icon text-sm hover:text-white md:text-base'
+                    className='text-sm hover:text-white md:text-base'
                   >
                     {label}
                   </Typography>
@@ -265,7 +265,7 @@ export default function Footer() {
       <div className='flex w-full flex-col items-center justify-center gap-y-6 md:flex-row md:justify-between'>
         <Typography
           variant='s2'
-          className='font-secondary text-base-icon order-2 font-satoshi text-sm uppercase md:order-1 md:text-center'
+          className='order-2 font-satoshi text-sm uppercase md:order-1 md:text-center'
         >
           &copy; HMTC ITS 2026 | NIAT BAIK
         </Typography>

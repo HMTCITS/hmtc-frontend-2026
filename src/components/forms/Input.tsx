@@ -55,10 +55,7 @@ export default function Input({
   return (
     <div className={containerClassName}>
       {withLabel && (
-        <label
-          className={cn('text-typo-main font-bold', labelClassName)}
-          htmlFor={id}
-        >
+        <label className={cn('font-bold', labelClassName)} htmlFor={id}>
           {label}
         </label>
       )}
@@ -84,7 +81,7 @@ export default function Input({
         {LeftIcon && (
           <div className='pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5'>
             {typeof LeftIcon === 'string' ? (
-              <p className='text-typo-main'>{LeftIcon}</p>
+              <p>{LeftIcon}</p>
             ) : (
               <LeftIcon size='1em' className='text-xl text-stone-500' />
             )}
@@ -104,7 +101,7 @@ export default function Input({
           className={cn(
             'flex w-full rounded-xl shadow-none',
             'min-h-[2.25rem] md:min-h-[2.5rem]',
-            'text-typo-dark border border-gray-300 px-3.5 py-0 caret-stone-600',
+            'border border-gray-300 px-3.5 py-0 caret-stone-600',
             'ring-stone-400 focus:ring-2 focus:ring-offset-2 focus:outline-none',
             (readOnly || disabled) && [
               'cursor-not-allowed border-gray-300 bg-gray-100 focus:border-gray-300 focus:ring-0',

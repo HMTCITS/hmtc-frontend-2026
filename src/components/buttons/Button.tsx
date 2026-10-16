@@ -7,8 +7,8 @@ import { cn } from '@/lib/utils';
 export type ButtonVariant =
   | 'primary'
   | 'secondary'
-  | 'warning'
   | 'netral'
+  /** Intentionally renders with no variant styling; pass your own className. */
   | 'unstyled'
   | 'light';
 export type ButtonSize = 'small' | 'base' | 'large';
@@ -122,9 +122,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         )}
         {Icon && <Icon className={cn(iconClassName)} />}
         {LeftIcon && !Icon && <LeftIcon className={cn(leftIconClassName)} />}
-        {!Icon && (
-          <p className={cn('font-secondary', textClassName)}>{children}</p>
-        )}
+        {!Icon && <p className={cn(textClassName)}>{children}</p>}
         {RightIcon && !Icon && <RightIcon className={cn(rightIconClassName)} />}
       </button>
     );

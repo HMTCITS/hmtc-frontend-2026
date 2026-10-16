@@ -51,10 +51,7 @@ export default function Textarea({
   return (
     <div className={containerClassName}>
       {withLabel && (
-        <label
-          className={cn('text-typo-main font-bold', labelClassName)}
-          htmlFor={id}
-        >
+        <label className={cn('font-bold', labelClassName)} htmlFor={id}>
           {label}
         </label>
       )}

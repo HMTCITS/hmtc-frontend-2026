@@ -11,7 +11,7 @@ const VisiMisi: React.FC<TextComponentProps> = ({ text1, text2 }) => {
   return (
     <div className='mx-auto flex w-full flex-col items-start gap-4 md:gap-5'>
       <Typography
-        as='h1'
+        as='h2'
         variant='i1'
         className='font-adelphe text-5xl leading-[110%] font-bold text-white md:text-5xl md:leading-14 lg:mb-4'
       >

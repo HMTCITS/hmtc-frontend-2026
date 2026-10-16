@@ -218,7 +218,7 @@ export default function Navbar() {
         <Link
           href='/'
           aria-label='Kembali ke beranda HMTC ITS'
-          className='relative flex flex-row items-center h-13 w-32 cursor-pointer'
+          className='relative flex h-13 w-32 cursor-pointer flex-row items-center'
           tabIndex={0}
           onClick={(e) => handleAnchorClick(e, 'home', 0)}
         >
@@ -253,7 +253,7 @@ export default function Navbar() {
                 <a
                   href={href}
                   aria-label={`Scroll ke ${name}`}
-                  className='font-secondary hover:text-base-nav cursor-pointer p-2.5 text-white-main transition-colors duration-75'
+                  className='cursor-pointer p-2.5 text-white-main transition-colors duration-75'
                   tabIndex={0}
                   onClick={(e) =>
                     handleAnchorClick(e, href.replace('#', ''), offset)
@@ -265,7 +265,7 @@ export default function Navbar() {
                 <Link
                   href={href}
                   aria-label={`Menuju halaman ${name}`}
-                  className='font-secondary hover:text-base-nav cursor-pointer p-2.5 text-white-main transition-colors duration-75'
+                  className='cursor-pointer p-2.5 text-white-main transition-colors duration-75'
                 >
                   <Typography font='satoshi'>{name}</Typography>
                 </Link>
@@ -278,6 +278,8 @@ export default function Navbar() {
 
       <nav
         aria-label='Navigasi seluler'
+        aria-hidden={!isSidebarOpen}
+        inert={!isSidebarOpen}
         className={cn(
           'fixed inset-0 grid h-full w-full grid-rows-2 bg-black-main text-white transition-transform duration-200 ease-in-out min-lg:hidden',
           isSidebarOpen
@@ -311,7 +313,7 @@ export default function Navbar() {
                   <a
                     href={href}
                     aria-label={`Scroll ke ${name}`}
-                    className='text-base-white cursor-pointer'
+                    className='cursor-pointer'
                     onClick={(e) =>
                       handleAnchorClick(e, href.replace('#', ''), offset)
                     }
@@ -324,7 +326,7 @@ export default function Navbar() {
                 ) : (
                   <Link
                     href={href}
-                    className='text-base-white cursor-pointer'
+                    className='cursor-pointer'
                     aria-label={`Menuju halaman ${name}`}
                     onClick={closeSidebar}
                   >

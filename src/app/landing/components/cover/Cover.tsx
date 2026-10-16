@@ -86,28 +86,30 @@ export default function Cover({ heroReady }: { heroReady?: boolean }) {
         {/* ── Hero body ─────────────────────────────────────────────── */}
         <div className='relative flex flex-1 flex-col px-8 pt-10 pb-8 lg:px-14 lg:pt-14 xl:px-20'>
           <motion.div
+            aria-hidden='true'
             variants={fadeOnly(1.05)}
             className='absolute top-1/2 right-3.5 hidden -translate-y-1/2 rotate-90 lg:block'
           >
-            <span className='font-plus-jakarta-sans text-[9px] tracking-[0.3em] whitespace-nowrap text-white/28 uppercase'>
+            <span className='font-plus-jakarta-sans text-[9px] tracking-[0.3em] whitespace-nowrap text-white/40 uppercase'>
               TEKNIK INFORMATIKA - ITS
             </span>
           </motion.div>
 
           {/* ── Giant headline ──────────────────────────────────────── */}
-          <div className='mt-8 flex flex-1 flex-col justify-center lg:mt-6'>
+          {/* Exactly one <h1> per page — the four animated lines are spans inside it. */}
+          <h1 className='mt-8 flex flex-1 flex-col justify-center lg:mt-6'>
             {HEADLINE_LINES.map((line, i) => (
-              <div key={line} className='overflow-hidden'>
-                <motion.h1
+              <span key={line} className='block overflow-hidden'>
+                <motion.span
                   custom={i}
                   variants={lineReveal}
-                  className='font-helveticaNeue text-[clamp(2.6rem,9.5vw,8.5rem)] leading-[0.9] font-thin tracking-[-0.01em] text-white'
+                  className='block font-adelphe text-[clamp(2.6rem,9.5vw,8.5rem)] leading-[0.9] font-normal tracking-tight text-white'
                 >
                   {line}
-                </motion.h1>
-              </div>
+                </motion.span>
+              </span>
             ))}
-          </div>
+          </h1>
 
           {/* ── Bottom row ─────────────────────────────────────────── */}
           <div className='mt-10 flex items-end justify-between gap-6'>
@@ -146,10 +148,10 @@ export default function Cover({ heroReady }: { heroReady?: boolean }) {
               variants={fadeSlideUp(1.1 + i * 0.07)}
               className='flex flex-col gap-1.5 border-r border-b border-white/10 px-8 py-6 last:border-r-0 sm:border-b-0'
             >
-              <span className='font-helveticaNeue text-[2rem] leading-none font-thin text-white lg:text-[2.6rem]'>
+              <span className='font-adelphe text-[2rem] leading-none font-normal text-white lg:text-[2.6rem]'>
                 {value}
               </span>
-              <span className='font-satoshi text-[10px] tracking-[0.22em] text-white/40 uppercase'>
+              <span className='font-adelphe text-[10px] tracking-[0.22em] text-white/40 uppercase'>
                 {label}
               </span>
             </motion.div>

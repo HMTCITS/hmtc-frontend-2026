@@ -62,7 +62,7 @@ export default function NavbarGallery() {
                 href={`/#${anchor}`}
                 aria-label='Scroll to section'
                 scroll={false}
-                className='font-secondary hover:text-base-nav p-2.5 text-white-main transition-colors duration-75'
+                className='p-2.5 text-white-main transition-colors duration-75'
               >
                 <Typography
                   font='satoshi'
@@ -115,7 +115,6 @@ export default function NavbarGallery() {
                   aria-label='Scroll to section'
                   scroll={false}
                   onClick={() => setIsSidebarOpen(false)}
-                  className='text-base-white'
                 >
                   <Typography
                     as='h6'

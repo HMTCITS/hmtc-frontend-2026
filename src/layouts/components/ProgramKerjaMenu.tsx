@@ -15,7 +15,7 @@ import { PROGRAM_KERJA_LINKS } from '@/contents/layout';
 import { cn } from '@/lib/utils';
 
 const TRIGGER_CLASS =
-  'font-secondary hover:text-base-nav flex cursor-pointer items-center gap-1 p-2.5 text-white-main transition-colors duration-75';
+  'flex cursor-pointer items-center gap-1 p-2.5 text-white-main transition-colors duration-75';
 
 export function ProgramKerjaDesktopMenu() {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -42,7 +42,7 @@ export function ProgramKerjaDesktopMenu() {
       <DropdownMenuContent
         align='start'
         sideOffset={8}
-        className='font-secondary z-[110] min-w-56 rounded-md border-white/10 bg-black p-2 text-white shadow-lg'
+        className='z-[110] min-w-56 rounded-md border-white/10 bg-black p-2 text-white shadow-lg'
       >
         {PROGRAM_KERJA_LINKS.map(({ id, label, href }) => (
           <DropdownMenuItem
@@ -81,7 +81,7 @@ export function ProgramKerjaMobileMenu({
         aria-controls='program-kerja-mobile-panel'
         aria-label='Buka menu Program Kerja'
         onClick={() => setIsOpen((prev) => !prev)}
-        className='text-base-white flex cursor-pointer items-center gap-2'
+        className='flex cursor-pointer items-center gap-2'
       >
         <Typography as='h6' font='satoshi'>
           Program Kerja
@@ -108,7 +108,7 @@ export function ProgramKerjaMobileMenu({
             href={href}
             aria-label={`Menuju halaman ${label}`}
             onClick={onNavigate}
-            className='text-base-white cursor-pointer'
+            className='cursor-pointer'
           >
             <Typography as='h6' font='satoshi'>
               {label}

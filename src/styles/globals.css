@@ -1,8 +1,31 @@
 @import 'tailwindcss';
 
-/* @plugin 'tailwindcss-animate'; */
-
-@custom-variant dark (&:where(.dark, .dark *));
+/*
+ * Font tokens use `@theme inline` on purpose.
+ *
+ * `next/font` (src/lib/font.ts) declares these CSS variables on the <body>
+ * element in src/app/layout.tsx. Declaring them in a normal `@theme` block makes
+ * Tailwind re-emit them into `:root`, which turns `--font-poppins: var(--font-poppins)`
+ * into a self-reference cycle. A cyclic custom property is invalid at
+ * computed-value time, so anything reading it from <html> silently falls back to
+ * the UA font. `inline` stops the re-emission and removes the cycle.
+ *
+ * See DESIGN.md §10 B1.
+ */
+@theme inline {
+  --font-poppins: var(--font-poppins);
+  --font-satoshi: var(--font-satoshi);
+  --font-adelphe: var(--font-adelphe);
+  --font-libre: var(--font-libreCaslon);
+  --font-libre-baskerville: var(--font-libre-baskerville);
+  --font-plus-jakarta-sans: var(--font-plus-jakarta-sans);
+  --font-jetbrains-mono: var(--font-jetbrains-mono);
+  --font-inter: var(--font-inter);
+  --font-helveticaNeue: var(--font-helveticaNeue);
+  --font-playfair-display: var(--font-PlayfairDisplay);
+  --font-harry-potter: var(--font-harry-potter);
+  --font-archivo: var(--font-archivo);
+}
 
 /* Convert theme colors to @theme directive */
 @theme {
@@ -13,78 +36,35 @@
   --color-white: #ffffff;
   --color-black: #000000;
 
-  /* Navy Shades */
-  --color-navy-50: #e6e9ec;
-  --color-navy-100: #b0bcc3;
-  --color-navy-200: #8a9ba5;
-  --color-navy-300: #556e7c;
-  --color-navy-400: #345163;
+  /*
+   * Only the ramp steps below are referenced anywhere in src/.
+   * The remaining navy / french-blue / cerulean-blue steps were removed as unused
+   * (DESIGN.md §10 A1). Re-add a step here before using it — do not inline the hex.
+   */
   --color-navy-500: #01263c;
-  --color-navy-600: #012337;
-  --color-navy-700: #011b2b;
-  --color-navy-800: #011521;
-  --color-navy-900: #001019;
-
-  /* French Blue Shades */
-  --color-french-blue-50: #e6f1f9;
   --color-french-blue-100: #b0d5eb;
-  --color-french-blue-200: #8ac0e2;
-  --color-french-blue-300: #54a3d5;
-  --color-french-blue-400: #3391cd;
-  --color-french-blue-500: #0076c0;
-  --color-french-blue-600: #006ba8;
-  --color-french-blue-700: #005488;
-  --color-french-blue-800: #004166;
-  --color-french-blue-900: #003251;
 
-  /* Cerulean Blue Shades */
-  --color-cerulean-blue-50: #e6f7fd;
-  --color-cerulean-blue-100: #d0e5f8;
-  --color-cerulean-blue-200: #8ad8fd;
-  --color-cerulean-blue-300: #54c6ef;
-  --color-cerulean-blue-400: #33bcee;
-  --color-cerulean-blue-500: #00aae7;
-  --color-cerulean-blue-600: #009bd2;
-  --color-cerulean-blue-700: #0079a4;
-  --color-cerulean-blue-800: #005e7f;
-  --color-cerulean-blue-900: #004761;
-
-  /* White Shades */
-  --color-white-50: #ffffff;
-  --color-white-100: #ffffff;
-  --color-white-200: #ffffff;
-  --color-white-300: #ffffff;
-  --color-white-400: #ffffff;
-  --color-white-500: #ffffff;
-  --color-white-600: #e8e8e8;
-  --color-white-700: #b5b5b5;
-  --color-white-800: #8c8c8c;
-  --color-white-900: #6b6b6b;
-
-  /* Black Shades */
+  /* Black Shades (50–500 in use) */
   --color-black-50: #e6e6e6;
   --color-black-100: #b0b0b0;
   --color-black-200: #8a8a8a;
   --color-black-300: #545454;
   --color-black-400: #333333;
   --color-black-500: #000000;
-  --color-black-600: #000000;
-  --color-black-700: #000000;
-  --color-black-800: #000000;
-  --color-black-900: #000000;
 
   /* Text Colors */
   --color-text-black: #212121;
   --color-text-white: #ffffff;
-  --color-text-link: #0094d8;
-  --color-text-gray: #8a8a94;
-  --color-text-light-gray: #c9c8d3;
   --color-text-disabled: #c5c0db;
-  --color-text-validation: #ffb82e;
   --color-text-error: #f93232;
+  /*
+   * Reserved: not currently referenced, but these are the only success/warning
+   * semantic colours in the system. Kept deliberately — see DESIGN.md §10 A1.
+   */
   --color-text-success: #439f6e;
+  --color-text-validation: #ffb82e;
 
-  /* Original theme colors maintained */
+  /* shadcn/ui semantic tokens (see DESIGN.md §8) */
   --color-background: oklch(0.96 0.01 80);
   --color-foreground: oklch(0.21 0.02 240);
   --color-card: oklch(1 0 0);
@@ -100,17 +80,9 @@
   --color-accent: oklch(0.96 0.04 240);
   --color-accent-foreground: oklch(0.21 0.02 240);
   --color-destructive: oklch(0.54 0.24 25);
-  --color-destructive-foreground: oklch(1 0 0);
   --color-border: oklch(0.91 0.03 240);
   --color-input: oklch(0.91 0.03 240);
   --color-ring: oklch(0.56 0.21 260);
-
-  /* Chart colors */
-  --color-chart-1: oklch(0.61 0.18 25);
-  --color-chart-2: oklch(0.53 0.14 185);
-  --color-chart-3: oklch(0.37 0.09 215);
-  --color-chart-4: oklch(0.74 0.18 90);
-  --color-chart-5: oklch(0.67 0.22 60);
 
   /* Border radius */
   --radius-sm: 0.1875rem;
@@ -118,42 +90,12 @@
   --radius-lg: 0.5rem;
   --radius-xl: 0.75rem;
 
-  /* Font families */
-  --font-poppins: var(--font-poppins);
-  --font-satoshi: var(--font-satoshi);
-  --font-adelphe: var(--font-adelphe);
-  --font-libre: var(--font-libreCaslon);
-  --font-libre-baskerville: var(--font-libre-baskerville);
-  --font-plus-jakarta-sans: var(--font-plus-jakarta-sans);
-  --font-jakarta: var(--font-plus-jakarta-sans);
-  --font-jetbrains-mono: var(--font-jetbrains-mono);
-  --font-inter: var(--font-inter);
-  --font-helveticaNeue: var(--font-helveticaNeue);
-  --font-playfair-display: var(--font-PlayfairDisplay);
-  --font-harry-potter: var(--font-harry-potter);
-  --font-archivo: var(--font-archivo);
-
   /* Original color variants */
-  --color-white-light-1: #ffffff;
-  --color-white-light-2: #fefefd;
-  --color-white-light-3: #fefdfa;
-  --color-white-light-4: #fefcf8;
-  --color-white-light-5: #fefbf4;
   --color-white-main: #fdfaf0;
-  --color-white-dark-1: #ede8db;
-  --color-white-dark-2: #dcd7c6;
-  --color-white-dark-3: #cbc6b1;
-  --color-white-dark-4: #b9b49c;
-  --color-white-dark-5: #a8a287;
 
   --color-black-main: #31393c;
   --color-blue-main: #2176ff;
-  --color-yellow-main: #fdca40;
-  --color-red-main: #e82c2c;
-  --color-green-main: #34b53c;
-  --color-purple-main: #8a33fd;
   --color-orange-main: #f56f1c;
-  --color-teal-main: #1cada6;
 
   /* Animations */
   @keyframes spin {
@@ -162,67 +104,11 @@
     }
   }
 
-  @keyframes ping {
-
-    75%,
-    100% {
-      transform: scale(2);
-      opacity: 0;
-    }
-  }
-
   @keyframes pulse {
     50% {
       opacity: 0.5;
     }
   }
-
-  @keyframes bounce {
-
-    0%,
-    100% {
-      transform: translateY(-25%);
-      animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
-    }
-
-    50% {
-      transform: none;
-      animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
-    }
-  }
-
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
-
-    to {
-      opacity: 1;
-    }
-  }
-
-  @keyframes slideIn {
-    from {
-      transform: translateY(20px);
-      opacity: 0;
-    }
-
-    to {
-      transform: translateY(0);
-      opacity: 1;
-    }
-  }
-
-  --animate-spin: spin 1s linear infinite;
-  --animate-ping: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
-
-  /* Move utility classes out of @theme (only custom props and keyframes allowed inside @theme) */
-  --animate-pulse: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  --animate-bounce: bounce 1s infinite;
-
-  /* Ease functions */
-  --ease-fluid: cubic-bezier(0.3, 0, 0, 1);
-  --ease-snappy: cubic-bezier(0.2, 0, 0, 1);
 
   @keyframes gradient {
     0% {
@@ -249,6 +135,8 @@
     }
   }
 
+  --animate-spin: spin 1s linear infinite;
+  --animate-pulse: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   --animate-gradient: gradient 8s linear infinite;
 }
 
@@ -262,43 +150,24 @@
 }
 
 @layer base {
-
-  /* Base styles for the dark mode variant */
-  @variant dark {
-    :root {
-      --color-background: oklch(0.18 0.04 240);
-      --color-foreground: oklch(0.96 0.01 80);
-      --color-card: oklch(0.18 0.04 240);
-      --color-card-foreground: oklch(0.96 0.01 80);
-      --color-popover: oklch(0.18 0.04 240);
-      --color-popover-foreground: oklch(0.96 0.01 80);
-      --color-muted: oklch(0.27 0.05 240);
-      --color-muted-foreground: oklch(0.65 0.08 240);
-      --color-accent: oklch(0.27 0.05 240);
-      --color-accent-foreground: oklch(0.96 0.01 80);
-      --color-border: oklch(0.27 0.05 240);
-      --color-input: oklch(0.27 0.05 240);
-
-      /* Chart colors for dark mode */
-      --color-chart-1: oklch(0.5 0.18 260);
-      --color-chart-2: oklch(0.45 0.15 180);
-      --color-chart-3: oklch(0.55 0.2 60);
-      --color-chart-4: oklch(0.6 0.17 300);
-      --color-chart-5: oklch(0.55 0.19 355);
-    }
-  }
-
   * {
     @apply border-border;
   }
 
+  /*
+   * Base surface + base font.
+   *
+   * The font is declared on <body> (not <html>) because `next/font` puts the font
+   * variables on the <body> element, so <html> can never resolve them.
+   * See DESIGN.md §10 B1.
+   *
+   * Satoshi, not Poppins: Satoshi is the de-facto body font of this design system
+   * (~144 explicit usages vs 0 for Poppins). Poppins survives only as the
+   * `Typography` default for legacy call sites — see DESIGN.md §2.2 and §10 F4.
+   */
   body {
     @apply bg-background text-foreground;
-  }
-
-  /* Font declarations - use Tailwind v4 class syntax */
-  html {
-    font-family: var(--font-poppins);
+    font-family: var(--font-satoshi);
   }
 
   /* Custom autofill override for transparent inputs */
@@ -314,31 +183,38 @@
   }
 }
 
+/*
+ * Global reduced-motion baseline (DESIGN.md §10 B2).
+ *
+ * Covers CSS transitions and keyframe animations. Motion driven from JavaScript
+ * (motion/react, GSAP, WebGL canvases such as LiquidEther/GlassSurface) is NOT
+ * covered here and still needs a per-component guard.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 /* Custom utilities */
 @utility text-mid {
   font-size: 15px;
   line-height: 22px;
 }
 
-@utility text-macro {
-  font-size: 17px;
-  line-height: 26px;
-}
-
-@utility leading-110 {
-  line-height: 1.1;
-}
-
 @utility text-gradient {
-  background-image: linear-gradient(270deg,
-      var(--color-cerulean-blue) 40%,
-      var(--color-french-blue) 65%);
+  background-image: linear-gradient(
+    270deg,
+    var(--color-cerulean-blue) 40%,
+    var(--color-french-blue) 65%
+  );
   background-clip: text;
   color: transparent;
-}
-
-@utility drop-shadow-glow {
-  filter: drop-shadow(0 0 20px rgba(0, 0, 255, 0.8)) drop-shadow(0 0 40px rgba(0, 0, 128, 0.8)) drop-shadow(0 0 60px rgba(0, 0, 255, 0.8));
 }
 
 @utility layout {
@@ -348,26 +224,18 @@
   width: 91.6666%;
 }
 
-@utility bg-gradient-radial {
-  background-image: radial-gradient(var(--tw-gradient-stops));
-}
-
-@utility bg-gradient-conic {
-  background-image: conic-gradient(from 180deg at 50% 50%,
-      var(--tw-gradient-stops));
-}
-
 @utility bg-blue-gradient {
-  background-image: linear-gradient(270deg,
-      var(--color-cerulean-blue) 40%,
-      var(--color-french-blue) 65%);
+  background-image: linear-gradient(
+    270deg,
+    var(--color-cerulean-blue) 40%,
+    var(--color-french-blue) 65%
+  );
 }
 
 /* Additional CSS that doesn't fit into utility classes */
 @layer components {
-
   /* Swiper styles */
-  @media only screen and (min-width: 769px) {
+  @media only screen and (min-width: 768px) {
     .swiper-slide:first-child {
       transition: transform 100ms;
       padding: 0 !important;
@@ -415,84 +283,16 @@
     margin-top: 0;
     line-height: 1.2;
   }
-
-  /* Font class */
-  .adelphe-fructidor {
-    font-family: var(--font-adelphe);
-  }
-}
-
-.animated-gradient-text {
-  position: relative;
-  margin: 0 auto;
-  display: flex;
-  max-width: fit-content;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  font-weight: 500;
-  overflow: hidden;
-}
-
-.gradient-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-size: 300% 100%;
-  animation: gradient linear infinite;
-  border-radius: inherit;
-  z-index: 0;
-  pointer-events: none;
-}
-
-.gradient-overlay::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  border-radius: inherit;
-  width: calc(100% - 2px);
-  height: calc(100% - 2px);
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  background-color: #060010;
-  z-index: -1;
-}
-
-@keyframes gradient {
-  0% {
-    background-position: 0% 50%;
-  }
-
-  50% {
-    background-position: 100% 50%;
-  }
-
-  100% {
-    background-position: 0% 50%;
-  }
 }
 
 @keyframes v5fade {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
 
-@keyframes rkImgIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-.text-content {
-  display: inline-block;
-  position: relative;
-  z-index: 2;
-  background-size: 300% 100%;
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-  animation: gradient linear infinite;
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

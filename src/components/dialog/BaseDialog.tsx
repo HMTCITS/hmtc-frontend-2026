@@ -110,14 +110,12 @@ export default function BaseDialog({
                 <div className='mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left'>
                   <Dialog.Title
                     as='h3'
-                    className='text-base-primary font-secondary text-lg leading-6 font-semibold'
+                    className='text-lg leading-6 font-semibold'
                   >
                     {title}
                   </Dialog.Title>
                   <div className='mt-2'>
-                    <p className='text-base-secondary font-secondary text-sm'>
-                      {description}
-                    </p>
+                    <p className='text-sm'>{description}</p>
                   </div>
                 </div>
               </div>
