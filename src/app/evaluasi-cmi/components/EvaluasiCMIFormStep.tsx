@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -322,7 +323,6 @@ export default function EvaluasiCMIFormStep() {
 
         // Submit to API
         submitMutation.mutate(data);
-
       } catch (error) {
         if (error instanceof z.ZodError) {
           const errors: Record<string, string> = {};
@@ -465,7 +465,7 @@ export default function EvaluasiCMIFormStep() {
           <div className='space-y-8'>
             {section.questions.map((question, index) => (
               <div key={index} className='flex flex-col gap-6'>
-                <Label className='text-md text-white'>
+                <Label className='text-white'>
                   {formatQuestionText(question)}
                 </Label>
                 <div className='flex items-center justify-between'>
@@ -583,7 +583,7 @@ export default function EvaluasiCMIFormStep() {
           <div className='space-y-8'>
             {biroSection.questions.map((question, index) => (
               <div key={index} className='flex flex-col gap-6'>
-                <Label className='text-md text-white'>
+                <Label className='text-white'>
                   {formatQuestionText(question)}
                 </Label>
                 <div className='flex items-center justify-between'>
@@ -645,7 +645,7 @@ export default function EvaluasiCMIFormStep() {
               const isOptional = index === UMPAN_BALIK.questions.length - 1;
               return (
                 <div key={index} className='space-y-2'>
-                  <Label className='text-md text-white'>
+                  <Label className='text-white'>
                     {formatQuestionText(question)}
                     {isOptional && (
                       <span className='ml-1 text-gray-400'>(Opsional)</span>
@@ -653,7 +653,7 @@ export default function EvaluasiCMIFormStep() {
                   </Label>
                   <Textarea
                     placeholder='Tulis jawaban Anda di sini...'
-                    className='placeholder:text-md min-h-[100px] border-gray-600 bg-transparent font-satoshi text-white placeholder:font-satoshi placeholder:text-gray-500'
+                    className='min-h-[100px] border-gray-600 bg-transparent font-satoshi text-white placeholder:font-satoshi placeholder:text-gray-500'
                     {...register(`umpanBalik.question_${index}`)}
                   />
                   {validationErrors[`question_${index}`] && (
@@ -700,13 +700,11 @@ export default function EvaluasiCMIFormStep() {
               height={400}
             />
             <Button
+              asChild
               variant='default'
-              onClick={() => {
-                window.location.href = '/';
-              }}
               className='w-full rounded-lg bg-blue-600 px-8 py-3 font-satoshi text-white hover:bg-blue-700'
             >
-              Back to Home Page
+              <Link href='/'>Back to Home Page</Link>
             </Button>
           </div>
         </div>

@@ -44,7 +44,7 @@ const FONT_FAMILY_CLASSES = {
   jetbrainsMono: 'font-jetbrains-mono',
   inter: 'font-inter',
   helveticaNeue: 'font-helveticaNeue',
-  playfair: 'font-playfairDisplay',
+  playfair: 'font-playfair-display',
 } as const;
 
 export type FontFamily = keyof typeof FONT_FAMILY_CLASSES;

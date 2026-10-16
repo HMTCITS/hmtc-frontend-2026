@@ -100,7 +100,7 @@ export default function DivisionQuestionStep({
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: (idx + 1) * 0.08 }}
                 >
-                  <Label className='text-md mb-2 block text-justify font-satoshi font-medium text-white/90'>
+                  <Label className='mb-2 block text-justify font-satoshi font-medium text-white/90'>
                     {qText}
                   </Label>
                   <Textarea

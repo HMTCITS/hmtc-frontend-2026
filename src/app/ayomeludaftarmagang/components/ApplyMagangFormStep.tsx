@@ -17,6 +17,7 @@ import {
 import {
   BaseFormValues,
   clearZipFile,
+  DivisionAnswers,
   loadZipFile,
   saveBase,
   saveDivisionAnswers,
@@ -122,8 +123,8 @@ export default function ApplyMagangFormStep(_props: ApplyMagangFormStepProps) {
     });
     if (prev.includes(divisionId) && !next.includes(divisionId)) {
       try {
-        const all = (watch('divisionAnswers') || {}) as Record<string, any>;
-        const nextAnswers = { ...(all || {}) } as Record<string, any>;
+        const all = (watch('divisionAnswers') || {}) as DivisionAnswers;
+        const nextAnswers: DivisionAnswers = { ...all };
         if (nextAnswers[divisionId]) {
           delete nextAnswers[divisionId];
         }
@@ -344,7 +345,7 @@ export default function ApplyMagangFormStep(_props: ApplyMagangFormStepProps) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: num * 0.1 }}
             >
-              <label className='text-md mb-2 block text-justify font-satoshi font-medium text-white/90 transition-colors'>
+              <label className='mb-2 block text-justify font-satoshi font-medium text-white/90 transition-colors'>
                 {GENERAL_QUESTIONS[num - 1] || `Pertanyaan ${num}`}
               </label>
               <textarea

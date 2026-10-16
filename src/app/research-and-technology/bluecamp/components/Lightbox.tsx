@@ -31,7 +31,7 @@ export default function Lightbox({ item, onClose }: LightboxProps) {
               src={item.image}
               alt='Gambar Dokumentasi Bluecamp'
               fill
-              className="object-cover"
+              className='object-cover'
             />
           ) : (
             <div className='text-6xl text-[#0A4A98]/50'>◈</div>
@@ -47,7 +47,7 @@ export default function Lightbox({ item, onClose }: LightboxProps) {
 
       <button
         onClick={onClose}
-        className='text-md absolute top-6 right-8 flex cursor-pointer items-center gap-2 font-bold tracking-widest text-white'
+        className='absolute top-6 right-8 flex cursor-pointer items-center gap-2 font-bold tracking-widest text-white'
       >
         <X size={20} />
         Tutup

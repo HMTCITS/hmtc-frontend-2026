@@ -124,6 +124,7 @@ export default function RestrictedModal({
                   <Typography
                     variant='s0'
                     className='text-center text-[#00AAE7] max-md:text-2xl'
+                    font='satoshi'
                     weight='light'
                   >
                     ACCESS RESTRICTED

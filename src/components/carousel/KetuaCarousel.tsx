@@ -62,9 +62,9 @@ const EmblaCarousel: React.FC<PropType> = ({ options }) => {
           <h2 className='font-adelphe text-base text-[#FFFFFF] uppercase'>
             History of HMTC
           </h2>
-          <h1 className='w-full font-adelphe text-4xl leading-[40px] font-bold text-[#FFFFFF] lg:text-5xl lg:leading-[53px]'>
+          <h2 className='w-full font-adelphe text-4xl leading-[40px] font-bold text-[#FFFFFF] lg:text-5xl lg:leading-[53px]'>
             Get to Know The Chairman of HMTC
-          </h1>
+          </h2>
 
           <p className='text-justify font-satoshi text-base leading-[20px] text-[#FFFFFF] lg:text-lg lg:leading-[25px]'>
             Sejarah HMTC dibangun oleh para pemimpin visioner yang telah
@@ -73,8 +73,8 @@ const EmblaCarousel: React.FC<PropType> = ({ options }) => {
             berkembang menjadi organisasi yang solid dan inovatif. Tiap periode
             kepemimpinan terus membawa perubahan, tantangan, serta pencapaian
             yang menjadi fondasi bagi generasi HMTC berikutnya, hingga kini,
-            Agym Kamil Ramadhan, Ketua HMTC 2026 Niat Baik
-            hadir untuk membawa transformasi HMTC kearah yang lebih baik.
+            Agym Kamil Ramadhan, Ketua HMTC 2026 Niat Baik hadir untuk membawa
+            transformasi HMTC kearah yang lebih baik.
           </p>
         </div>
       </div>

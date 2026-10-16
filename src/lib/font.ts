@@ -48,87 +48,87 @@ export const adelphe = localFont({
 
 /**
  * Font configuration for the Helvetica Neue Family.
- * Verify that the folder name "helevtica-neue" is intentional.
+ * Verify that the folder name "helvetica-neue" is intentional.
  */
 export const helveticaNeue = localFont({
   src: [
     {
-      path: './fonts/helevtica-neue/HelveticaNeueBlack.woff2',
+      path: './fonts/helvetica-neue/HelveticaNeueBlack.woff2',
       weight: '900',
       style: 'normal',
     },
     {
-      path: './fonts/helevtica-neue/HelveticaNeueBlackItalic.woff2',
+      path: './fonts/helvetica-neue/HelveticaNeueBlackItalic.woff2',
       weight: '900',
       style: 'italic',
     },
     {
-      path: './fonts/helevtica-neue/HelveticaNeueBold.woff2',
+      path: './fonts/helvetica-neue/HelveticaNeueBold.woff2',
       weight: '700',
       style: 'normal',
     },
     {
-      path: './fonts/helevtica-neue/HelveticaNeueBoldItalic.woff2',
+      path: './fonts/helvetica-neue/HelveticaNeueBoldItalic.woff2',
       weight: '700',
       style: 'italic',
     },
     {
-      path: './fonts/helevtica-neue/HelveticaNeueHeavy.woff2',
+      path: './fonts/helvetica-neue/HelveticaNeueHeavy.woff2',
       weight: '800',
       style: 'normal',
     },
     {
-      path: './fonts/helevtica-neue/HelveticaNeueHeavyItalic.woff2',
+      path: './fonts/helvetica-neue/HelveticaNeueHeavyItalic.woff2',
       weight: '800',
       style: 'italic',
     },
     {
-      path: './fonts/helevtica-neue/HelveticaNeueItalic.woff2',
+      path: './fonts/helvetica-neue/HelveticaNeueItalic.woff2',
       weight: '400',
       style: 'italic',
     },
     {
-      path: './fonts/helevtica-neue/HelveticaNeueLight.woff2',
+      path: './fonts/helvetica-neue/HelveticaNeueLight.woff2',
       weight: '300',
       style: 'normal',
     },
     {
-      path: './fonts/helevtica-neue/HelveticaNeueLightItalic.woff2',
+      path: './fonts/helvetica-neue/HelveticaNeueLightItalic.woff2',
       weight: '300',
       style: 'italic',
     },
     {
-      path: './fonts/helevtica-neue/HelveticaNeueMedium.woff2',
+      path: './fonts/helvetica-neue/HelveticaNeueMedium.woff2',
       weight: '500',
       style: 'normal',
     },
     {
-      path: './fonts/helevtica-neue/HelveticaNeueMediumItalic.woff2',
+      path: './fonts/helvetica-neue/HelveticaNeueMediumItalic.woff2',
       weight: '500',
       style: 'italic',
     },
     {
-      path: './fonts/helevtica-neue/HelveticaNeueRoman.woff2',
+      path: './fonts/helvetica-neue/HelveticaNeueRoman.woff2',
       weight: '400',
       style: 'normal',
     },
     {
-      path: './fonts/helevtica-neue/HelveticaNeueThin.woff2',
+      path: './fonts/helvetica-neue/HelveticaNeueThin.woff2',
       weight: '100',
       style: 'normal',
     },
     {
-      path: './fonts/helevtica-neue/HelveticaNeueThinItalic.woff2',
+      path: './fonts/helvetica-neue/HelveticaNeueThinItalic.woff2',
       weight: '100',
       style: 'italic',
     },
     {
-      path: './fonts/helevtica-neue/HelveticaNeueUltraLight.woff2',
+      path: './fonts/helvetica-neue/HelveticaNeueUltraLight.woff2',
       weight: '200',
       style: 'normal',
     },
     {
-      path: './fonts/helevtica-neue/HelveticaNeueUltraLightItalic.woff2',
+      path: './fonts/helvetica-neue/HelveticaNeueUltraLightItalic.woff2',
       weight: '200',
       style: 'italic',
     },
@@ -746,7 +746,7 @@ export const harryPotter = localFont({
 });
 
 export const archivo = Archivo({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
   variable: '--font-archivo',
 });
