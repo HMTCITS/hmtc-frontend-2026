@@ -16,12 +16,11 @@ Public marketing + event site for HMTC ITS, plus an internal dashboard and auth 
 
 ## 2. Non-negotiable constraints
 
-1. **Do not add a CMS or page-builder.** No Directus, Strapi, Sanity, Contentful, Prismic, Builder.io, etc. See `DESIGN.md` §11.
-2. **Do not change the content architecture.** Page content is hardcoded TypeScript; the backend is the custom REST API at `api.hmtc-its.com`; form submissions go through NocoDB route handlers.
-3. **Do not add a CSS framework, UI kit, or styling runtime.** Tailwind v4 + `cn()` is the whole system.
-4. **Do not invent a colour, font, spacing, radius, or breakpoint.** Every value must come from `DESIGN.md` §2 / §3 or from an existing component.
-5. **Do not redesign existing pages.** If a page looks wrong, raise it — do not silently restyle it.
-6. **Do not create new `max-w-*` values, hand-written `@media` queries, or arbitrary radius values.** Use `layout`, `max-w-[1240px]` (L3) or `max-w-7xl` (L3 Seminar), and the breakpoints listed in `DESIGN.md` §2.3 and §10 B6.
+1. **Do not change the content architecture.** Page content is hardcoded TypeScript; the backend is the custom REST API at `api.hmtc-its.com`; form submissions go through NocoDB route handlers.
+2. **Do not add a CSS framework, UI kit, or styling runtime.** Tailwind v4 + `cn()` is the whole system.
+3. **Do not invent a colour, font, spacing, radius, or breakpoint.** Every value must come from `DESIGN.md` §2 / §3 or from an existing component.
+4. **Do not redesign existing pages.** If a page looks wrong, raise it — do not silently restyle it.
+5. **Do not create new `max-w-*` values, hand-written `@media` queries, or arbitrary radius values.** Use `layout`, `max-w-[1240px]` (L3) or `max-w-7xl` (L3 Seminar), and the breakpoints listed in `DESIGN.md` §2.3 and §10 B6.
 
 ---
 

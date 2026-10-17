@@ -13,11 +13,10 @@
 
 ## 0. Read this first
 
-1. **There is no Directus, Strapi, Sanity, or page-builder.** Page content is hardcoded TypeScript. See §11.
-2. **There are two styling systems.** The `Typography` component (§4) and raw Tailwind utilities on markup (§6). `Typography` is **mandated** for new work.
-3. **The base font is Satoshi**, declared on `<body>` (§10 B1). Text elements should _still_ carry an explicit font — the design uses eight families, and `<Typography>` without `font` silently gives you Poppins (173 call sites omit it, §10 F4).
-4. **9 dead class names were removed** (§10 A4). If you meet `font-secondary`, `text-base-nav`, `text-md` etc. in a branch older than the cleanup, they do nothing.
-5. **There is no dark mode.** Do not add dark styles. See §10 A3.
+1. **There are two styling systems.** The `Typography` component (§4) and raw Tailwind utilities on markup (§6). `Typography` is **mandated** for new work.
+2. **The base font is Satoshi**, declared on `<body>` (§10 B1). Text elements should _still_ carry an explicit font — the design uses eight families, and `<Typography>` without `font` silently gives you Poppins (173 call sites omit it, §10 F4).
+3. **9 dead class names were removed** (§10 A4). If you meet `font-secondary`, `text-base-nav`, `text-md` etc. in a branch older than the cleanup, they do nothing.
+4. **There is no dark mode.** Do not add dark styles. See §10 A3.
 
 ---
 
@@ -529,13 +528,12 @@ _Deliberately left:_ `embla.css`'s `max-width: 500px`. Moving it onto the 640px 
 
 ## 11. Content architecture
 
-| Mechanism                                  | Where                                                                                                | Serves                                                                     |
-| ------------------------------------------ | ---------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| **Hardcoded TS content objects**           | `src/app/*/page.tsx`, `src/contents/{layout,announcement,gallery,anggota,magangForm,evaluasiCMI}.ts` | **All page copy and section structure**                                    |
-| **Custom REST backend** `api.hmtc-its.com` | `src/lib/api/*.client.ts`, `api.ts` (axios, HttpOnly cookie auth, refresh interceptor)               | gallery, repository, users, uploads, requests, profile                     |
-| **NocoDB** (self-hosted)                   | `src/app/api/{magical-message,seminar-dosen,seminar-dosen-2,seminar-dosen-3,tc-run}/route.ts`        | **Form submissions only** — inserts rows via `/api/v2/tables/{id}/records` |
+| Mechanism                                  | Where                                                                                         | Serves                                                                     |
+| ------------------------------------------ | --------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| **Hardcoded TS content objects**           | `src/app/*/page.tsx`, `src/contents/{layout,announcement,gallery,magangForm,evaluasiCMI}.ts`  | **All page copy and section structure**                                    |
+| **Custom REST backend** `api.hmtc-its.com` | `src/lib/api/*.client.ts`, `api.ts` (axios, HttpOnly cookie auth, refresh interceptor)        | gallery, repository, users, uploads, requests, profile                     |
+| **NocoDB** (self-hosted)                   | `src/app/api/{magical-message,seminar-dosen,seminar-dosen-2,seminar-dosen-3,tc-run}/route.ts` | **Form submissions only** — inserts rows via `/api/v2/tables/{id}/records` |
 
-**There is no Directus and no page-builder. Do not introduce one.**
 Per-period gating lives in `src/proxy.ts` (Next.js 16 middleware) which redirects `/dashboard`, `/sandbox`, `/login`, `/register`, `/change-password` to `/coming-soon` in production and consults `/api/schedule?path=…` for `/ayomeludaftarmagang` and `/hidden-page-cf`.
 
 ---
@@ -573,7 +571,7 @@ Per-period gating lives in `src/proxy.ts` (Next.js 16 middleware) which redirect
     pnpm typecheck && pnpm lint:strict && pnpm format:check && pnpm test
     ```
 
-11. **Confirm content type:** if the page needs editor-managed copy, extend the NocoDB route-handler pattern (§11). **Do not add a CMS.**
+11. **Confirm content type:** if the page needs editor-managed copy, extend the NocoDB route-handler pattern (§11).
 
 ---
 
