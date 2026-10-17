@@ -33,7 +33,7 @@ export default function GalleryPage() {
       </div>
       <div className='absolute top-0 left-0 -z-10 h-[100%] w-full select-none'>
         <Image
-          src='/images/internal-affairs/syukuran-wisuda/gallery-bg.png'
+          src='/images/internal-affairs/syukuran-wisuda/gallery-bg.webp'
           alt=''
           fill
           className='object-cover object-center select-none'

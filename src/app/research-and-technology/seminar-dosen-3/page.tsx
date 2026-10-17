@@ -15,7 +15,7 @@ const seminarDosen3Content: SeminarEventContent = {
     label: 'Register Now',
   },
   heroImage: {
-    src: '/research-and-technology/seminar-dosen-3/hero-xr-gamification.png',
+    src: '/research-and-technology/seminar-dosen-3/hero-xr-gamification.webp',
     alt: 'Extended Reality and Gamification in Training, Education, and Communities',
   },
   speaker: {
@@ -23,7 +23,7 @@ const seminarDosen3Content: SeminarEventContent = {
     title: 'Lecturer at the Grafika, Interaksi, Gim, dan Analitika Laboratory, ITS',
     description:
       'Hadziq Fabroyir, S.Kom., Ph.D. is an Informatics lecturer at ITS specializing in Extended Reality (XR), Human-Computer Interaction, and immersive digital experiences. His work explores how emerging technologies, gamification, and design thinking can be applied to education, training, and community engagement.',
-    imageSrc: '/research-and-technology/seminar-dosen-3/speaker-hadziq.png',
+    imageSrc: '/research-and-technology/seminar-dosen-3/speaker-hadziq.webp',
     badges: [
       'Informatics Lecturer @ ITS',
       'Lecturer of Grafika, Interaksi, Gim, dan Analitika (GIGa) Laboratory @ ITS',

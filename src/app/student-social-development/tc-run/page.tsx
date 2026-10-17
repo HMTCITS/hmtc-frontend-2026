@@ -644,7 +644,7 @@ export default function TCRunPage() {
                   className='group relative mx-auto flex aspect-[11/13] w-full cursor-pointer flex-col items-center justify-center overflow-hidden rounded-2xl border-4 border-gray-200 bg-gray-100 p-2 transition-all hover:border-blue-200 md:max-w-[50%]'
                 >
                   <Image
-                    src='/images/student-social-development/tc-run/Rute Lari.png'
+                    src='/images/student-social-development/tc-run/Rute Lari.webp'
                     alt='Rute lari'
                     width={220}
                     height={390}
@@ -876,7 +876,7 @@ export default function TCRunPage() {
                   </h3>
                   <div className='group relative mx-auto flex aspect-[1632/2892] w-full flex-col items-center justify-center overflow-hidden rounded-2xl border-4 border-gray-200 bg-gray-100 p-2 transition-all md:max-w-[50%]'>
                     <Image
-                      src='/images/student-social-development/tc-run/Ver. 8.png'
+                      src='/images/student-social-development/tc-run/Ver. 8.webp'
                       alt='QRIS TC Run 2026'
                       width={1632}
                       height={2892}
