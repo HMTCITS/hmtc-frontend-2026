@@ -57,6 +57,7 @@ Public marketing + event site for HMTC ITS, plus an internal dashboard and auth 
 5. **Footer is mandatory on every public page.**
 6. **Seminar blue `#2F6FED` is scoped to `/research-and-technology/seminar-dosen*` only.** Do not use it anywhere else — including the announcement bar.
 7. **Sanctioned bespoke themes are frozen.** `DESIGN.md` §9 lists them. Do not "fix" their palettes or fonts.
+8. **Keep `public/` assets under 1 MiB.** `<NextImage>` re-encodes at runtime, so a heavy source file buys no extra fidelity — it only inflates git, the Docker image and every clone. Cap raster width at 2560px and re-encode before committing; `pnpm check:images` (pre-commit + CI) enforces the ceiling.
 
 ---
 
@@ -127,6 +128,7 @@ pnpm lint:strict # eslint --max-warnings=0
 pnpm format:check
 pnpm format:write
 pnpm test       # jest
+pnpm check:images # fail if any public/ asset exceeds 1 MiB
 ```
 
 **Before considering any change done:**
@@ -140,6 +142,7 @@ Notes:
 - `pnpm format:write` runs Prettier with `prettier-plugin-tailwindcss`, which **reorders Tailwind classes**. Run it, do not hand-order.
 - Prettier config: single quotes, JSX single quotes, 2-space, semicolons. `cn`/`clsx` are configured as Tailwind functions.
 - Husky runs `pre-commit`, `commit-msg`, `pre-push`. Do not bypass with `--no-verify`.
+- `pre-commit` runs `pnpm lint:strict` and then `node scripts/check-image-sizes.mjs --staged`, so an oversized asset is rejected before it reaches history.
 
 ---
 

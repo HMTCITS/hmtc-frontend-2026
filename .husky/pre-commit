@@ -1,1 +1,2 @@
 pnpm lint:strict
+node scripts/check-image-sizes.mjs --staged
