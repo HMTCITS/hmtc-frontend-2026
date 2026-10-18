@@ -557,7 +557,7 @@ Per-period gating lives in `src/proxy.ts` (Next.js 16 middleware) which redirect
 ## 13. New page — the prescribed recipe
 
 1. **Pick the layer** (§1).
-2. **Choose a route** under `src/app/<domain>/<slug>/page.tsx`; export a `Metadata` object with `title`, `description`, `alternates.canonical`, `robots`, OpenGraph and Twitter cards — copy `src/app/info/page.tsx` as the Metadata template.
+2. **Choose a route** under `src/app/<domain>/<slug>/page.tsx`; export a `Metadata` object with `title`, `description`, `alternates.canonical`, `robots`, OpenGraph and Twitter cards — copy `src/app/info/page.tsx` as the Metadata template. **Proker (_program kerja_) pages are year-scoped — see §14.**
 3. **Render `<JsonLd />`.**
 4. **Compose chrome:** `<NavbarLanding isActive />` … `<Footer />`. Footer is mandatory.
 5. **Define a typed `…Content` object** in the page file (do not inline JSX per field) and pass it to a template in `src/components/<domain>/`.
@@ -572,6 +572,45 @@ Per-period gating lives in `src/proxy.ts` (Next.js 16 middleware) which redirect
     ```
 
 11. **Confirm content type:** if the page needs editor-managed copy, extend the NocoDB route-handler pattern (§11).
+
+---
+
+## 14. Proker pages — year-scoped routes
+
+Proker (program kerja) pages are published per edition year and are served from
+`/<domain>/<proker-slug>/<year>` — e.g. `/internal-affairs/syukuran-wisudawan/2026`.
+Every proker route is three files:
+
+```text
+src/app/<domain>/<proker-slug>/
+  PageContent.tsx   # the page implementation (server or client component)
+  [year]/page.tsx   # edition route: generateStaticParams + dynamicParams = false
+  route.ts          # legacy year-less URL -> real HTTP 301 to PROKER_DEFAULT_YEAR
+```
+
+The edition year is **never** hardcoded. `src/lib/config.ts` is the single
+source of truth:
+
+- `PROKER_BASE_PATHS` — named proker base paths, reused by the route `[year]`
+  and redirect files.
+- `PROKER_DEFAULT_YEAR` — the edition the legacy year-less URLs redirect to.
+  Change this one value to roll the site over to another edition.
+- `PROKER_EDITION_YEARS` — `basePath -> published years`. A proker that is not
+  listed publishes `PROKER_DEFAULT_YEAR` only.- `prokerHref(basePath)` — builds the year-suffixed URL for internal links.
+
+Rules:
+
+- An unpublished or malformed year must stay a **404**. Enforce it in the router
+  (`generateStaticParams` + `dynamicParams = false`) — not with a render-time
+  `notFound()`.
+- The legacy redirect must live in a **route handler**, not a page. The root
+  `<Suspense>` in `src/app/providers.tsx` wraps every page and flushes a 200
+  shell before the page body renders, so a page-level `permanentRedirect()`
+  degrades into a client-side redirect and `notFound()` into a soft-404. A route
+  handler sets the status itself: `NextResponse.redirect(url, 301)`.
+- Internal links, nav, breadcrumbs and cards use `prokerHref(PROKER_BASE_PATHS.<key>)`
+  — see `src/contents/layout.ts`.
+- Never add a second `[year]` page or a hand-written redirect list per route.
 
 ---
 

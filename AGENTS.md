@@ -43,6 +43,8 @@ Public marketing + event site for HMTC ITS, plus an internal dashboard and auth 
 | Image size presets                           | `src/constants/components/image-sizes.ts` |
 | Design contract                              | `DESIGN.md`                               |
 
+**Proker note:** proker (_program kerja_) pages are year-scoped — `src/app/<domain>/<proker-slug>/[year]/page.tsx` plus a legacy year-less redirect at `…/<proker-slug>/route.ts`. See `DESIGN.md` §14.
+
 **Tailwind v4 note:** there is **no `tailwind.config.js`**. Theme tokens live in the `@theme` block of `src/styles/globals.css`. (`components.json` still references a `tailwind.config.js` — that reference is stale; do not create the file.)
 
 ---
