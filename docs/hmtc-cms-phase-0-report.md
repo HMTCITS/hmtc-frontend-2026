@@ -311,35 +311,46 @@ There is no `pnpm-workspace.yaml` or `.npmrc`, so the pins for `glob`, `lodash`,
 
 ### 5.1 Blocker ledger
 
-| ID     | Blocker                                  | Status                | Notes                                                                                                                              |
-| ------ | ---------------------------------------- | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| B1     | Revision retention duration              | 🔴 **OPEN — product** | Proposed 2 years. Gates the editor phase only.                                                                                     |
-| B2     | Directus auth/authorization integration  | 🟢 **RESOLVED**       | Directus 11.1.2; session-cookie flow available natively. Confirm OAuth providers are intended.                                     |
-| B3     | Annual uniqueness constraint             | 🟡 **NARROWED**       | Constraints mapped. Blocked on the cardinality question (Q8) — one page per proker-year, or many?                                  |
-| B4     | Default-year source                      | 🟢 **RESOLVED**       | `src/lib/config.ts` only; Directus cannot conflict.                                                                                |
-| B5     | Cross-department grant representation    | 🟡 **PARTIAL**        | Schema cannot enforce uniqueness of grants. Public role surface fully mapped. Row-level rule for drafts **unverified** (see §3.4). |
-| B6     | Asset visibility                         | 🟢 **RESOLVED**       | All assets are public. Decide whether that is acceptable.                                                                          |
-| **B7** | **Dependency security baseline** _(new)_ | 🔴 **OPEN**           | 3 critical / 63 high; `next` in advisory range; `pnpm.overrides` inert. Recommend before Phase 1.                                  |
+| ID        | Blocker                                     | Status          | Resolution                                                                                                   |
+| --------- | ------------------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------ |
+| B1        | Revision retention duration                 | ⛔ **DEFERRED** | Proposed 2 years. Gates the editor phase only.                                                               |
+| B2        | Directus auth/authorization integration     | 🟢 **RESOLVED** | Directus 11.1.2; session-cookie flow native. Open: confirm the public `/auth/oauth` providers are intended.  |
+| B3        | Annual uniqueness constraint                | 🟢 **RESOLVED** | **Q8: one page per proker-year** → migration `M2` Option A.                                                  |
+| B4        | Default-year source                         | 🟢 **RESOLVED** | `src/lib/config.ts` only; Directus cannot conflict.                                                          |
+| B5        | Cross-department grant representation       | 🟢 **RESOLVED** | **Q9** rule confirmed configured. **Q11** approach settled — Directus migration extension. Open: N1, N2, N7. |
+| B6        | Asset visibility                            | 🟢 **RESOLVED** | **Q10: all public except forms** — current state is intended.                                                |
+| B7        | Dependency security baseline _(new)_        | ⛔ **DEFERRED** | Accepted risk by decision. Revisit before production launch.                                                 |
+| **N1/N2** | Directus deployment access to `extensions/` | 🔴 **OPEN**     | Required to execute M2 and M6.                                                                               |
+| **N3**    | `cms_pages.page_type` vocabulary            | 🔴 **OPEN**     | Deferred (Q14). Field is `required` with an empty note.                                                      |
 
-### 5.2 Questions that must be answered before Phase 1
+### 5.2 Questions — all answered or explicitly deferred
 
-- **Q8 (blocks B3, and the migration design).** `cms_pages` supports a `parent_page` self-relation and a required unique `slug`, but the spec's route is only `/department/activity/{year}`. **Is there exactly one page per proker-year, or many?** If many, what is the URL?
-- **Q9 (blocks nothing, but urgent).** Does the public role's read permission on `cms_pages` carry a `status = published` rule? **Cannot be determined while the table is empty.** Verify in Studio **before authoring content**, or drafts will be world-readable.
-- **Q10 (blocks the media phase).** Assets are public by default. Is that acceptable for **all** proker media, or is a private-asset path required?
-- **Q11 (blocks Phases 3–4).** Cross-department grants cannot be uniquely constrained by `cms_department_memberships` as-is. Migrate the schema, or enforce entirely in Next.js?
-- **Q12 (blocks nothing yet).** `cms_prokers.department` is nullable, so `/{department}/{activity}/{year}` is not always constructible. Make it required, or introduce a sentinel department?
-- **Q13.** `/gallery` is locked (F15). Gate via Directus auth, replace the check, or remove the gate?
+Every Phase 0 question has been settled: **Q8, Q9, Q10, Q12, Q13 answered**; **Q14 and B7 deferred by decision**. Decisions and their consequences are recorded in **`docs/hmtc-cms-decisions.md`** — §4 for what was decided, §5 for what remains open.
+
+The Phase 0 questions and their answers, for the record:
+
+| ID  | Answer                                                                                                          |
+| --- | --------------------------------------------------------------------------------------------------------------- |
+| Q8  | **One page per proker-year.** → `M2` Option A.                                                                  |
+| Q9  | **The public-role rule is already configured.** No permission change needed; one behavioural check outstanding. |
+| Q10 | **Everything public except forms.** Assets at `/assets/<uuid>` staying public is intended.                      |
+| Q12 | **Make `cms_prokers.department` required.** → `M5`.                                                             |
+| Q13 | **Drop the `/gallery` gate.** The route is legacy and should not be used.                                       |
+| Q14 | **Deferred.** `page_type` vocabulary still undefined.                                                           |
+
+Still open, and tracked in the decisions log: **N1/N2** (Directus deployment access), **N3** (`page_type` vocabulary), **N4** (revision retention), **N7** (membership role vocabulary).
 
 ### 5.3 Recommended Phase 1 scope
 
-Phase 1 = security foundation (specification §13 step 4). Preconditions: **B7 resolved or explicitly accepted**, and **Q8/Q9 answered**.
+Phase 1 = security foundation (specification §13 step 4). **No preconditions remain for the security work itself** — Q8/Q9 are answered and B7 is deferred by decision.
 
-1. Upgrade `next` past the advisory; move `pnpm.overrides` into `pnpm-workspace.yaml` so the pins actually apply.
-2. Implement server-side session verification against Directus 11 using the session-cookie flow (B2).
-3. Add the resource-authorization helper and the `/dashboard/cms` route group with a real guard, replacing the pathname-based block in `src/proxy.ts` (audit F10).
-4. Build the permission-denied state component — the one genuinely new UI state (audit F5).
-5. Replace the 13 dummy identities in `src/app/dashboard/**`.
-6. **Verify Q9 and, if no rule exists, add the public-role `status = published` rule before any content is created.**
+1. Implement server-side session verification against Directus 11 using the session-cookie flow (B2).
+2. Add the resource-authorization helper and the `/dashboard/cms` route group with a real guard, replacing the pathname-based block in `src/proxy.ts` (audit F10, decision A4).
+3. Build the permission-denied state component — the one genuinely new UI state (audit F5).
+4. Replace the 13 dummy identities in `src/app/dashboard/**`.
+5. Run the Q9 behavioural check once a draft exists — `docs/hmtc-cms-decisions.md` §6.
+
+**Deferred out of Phase 1 by decision:** the `next` upgrade and the inert `pnpm.overrides` fix (B7).
 
 Explicitly **not** in Phase 1: block registry, editor, media library, preview, publishing workflow, templates, revisions.
 

@@ -2,9 +2,11 @@
 
 **Status:** Plan only. **No migration has been executed.**
 **Deliverable:** Specification §17 item 2 ("Directus schema migration plan with rollback strategy")
-**Companion:** `docs/hmtc-cms-phase-0-report.md`, `docs/audits/hmtc-cms-data-fetching-audit.md` (rev. 2), `docs/hmtc-cms-implementation-specification.md`
+**Companion:** `docs/hmtc-cms-decisions.md` (**the decision log — read this first**), `docs/hmtc-cms-phase-0-report.md`, `docs/hmtc-cms-implementation-specification.md`, `docs/audits/hmtc-cms-data-fetching-audit.md` (rev. 2)
 **Target:** Directus 11.1.2 at `https://directus.hmtc-its.com`
 **Date:** 2026-10-19
+
+> **Updated 2026-10-19:** decisions Q8, Q9, Q10 and Q12 are now answered and this plan reflects them. **M4 is a no-op; M5 and M11 are settled; M2 is unblocked; M6 awaits N1/N2; M9 is deferred.** Open items are tracked in `docs/hmtc-cms-decisions.md` §5 — not duplicated here.
 
 > **Nothing in this document has been applied.** No collection, field, index, relation, role, policy, or permission was created, modified, or deleted during Phase 0. Track B was strictly read-only.
 
@@ -34,19 +36,19 @@ Two migrations below are trivial against an empty table and expensive against a 
 
 ## 2. Migration inventory
 
-| ID      | Item                                                              | Origin               | Blocking decision    | Risk                |
-| ------- | ----------------------------------------------------------------- | -------------------- | -------------------- | ------------------- |
-| **M1**  | `field_type_snapshow` → `field_type_snapshot`                     | S1                   | none                 | Low                 |
-| **M2**  | `cms_pages.slug` unique constraint                                | S2                   | **Q8 (cardinality)** | Medium              |
-| **M3**  | `cms_pages.slug` / `department` / `proker` / `status` nullability | S6 (generalised)     | none                 | Low                 |
-| **M4**  | `cms_pages.proker` required semantics                             | S3                   | Q8, Q12              | Medium              |
-| **M5**  | `cms_prokers.department` nullability                              | Q12                  | none                 | Low                 |
-| **M6**  | `cms_department_memberships` grant uniqueness + role vocabulary   | B5                   | Q11                  | Medium              |
-| **M7**  | Department slug canonicalisation                                  | F14                  | none                 | Low                 |
-| **M8**  | Field interfaces for Directus Studio                              | S4                   | none                 | Low                 |
-| **M9**  | Enum enforcement for status vocabularies                          | S5                   | none                 | Low                 |
-| **M10** | `cms_site_settings` singleton enforcement                         | S7                   | none                 | Low                 |
-| **M11** | Public-role row-level rule for published content                  | **Q9 — new, urgent** | none                 | **High if skipped** |
+| ID      | Item                                                              | Origin           | Blocking decision        | Risk              |
+| ------- | ----------------------------------------------------------------- | ---------------- | ------------------------ | ----------------- |
+| **M1**  | `field_type_snapshow` → `field_type_snapshot`                     | S1               | none                     | Low               |
+| **M2**  | `cms_pages.slug` unique constraint                                | S2               | ✅ Q8 → **Option A**     | Medium            |
+| **M3**  | `cms_pages.slug` / `department` / `proker` / `status` nullability | S6 (generalised) | none                     | Low               |
+| **M4**  | `cms_pages.proker` required semantics                             | S3               | ✅ Q8/Q12 → **no-op**    | —                 |
+| **M5**  | `cms_prokers.department` nullability                              | Q12              | ✅ Q12 → **required**    | Low               |
+| **M6**  | `cms_department_memberships` grant uniqueness + role vocabulary   | B5               | 🟡 N1, N2, N7            | Medium            |
+| **M7**  | Department slug canonicalisation                                  | F14              | none                     | Low               |
+| **M8**  | Field interfaces for Directus Studio                              | S4               | none                     | Low               |
+| **M9**  | Enum enforcement for status vocabularies                          | S5               | ⛔ N3 (deferred)         | Low               |
+| **M10** | `cms_site_settings` singleton enforcement                         | S7               | none                     | Low               |
+| **M11** | Public-role row-level rule for published content                  | Q9               | ✅ **already satisfied** | Low (verify once) |
 
 ---
 
@@ -70,43 +72,26 @@ Two migrations below are trivial against an empty table and expensive against a 
 
 ---
 
-### M2 — `cms_pages.slug` uniqueness 🔴 **BLOCKED on Q8**
+### M2 — `cms_pages.slug` uniqueness ✅ **RESOLVED — Option A**
 
 **Problem.** `cms_pages.slug` is **globally unique** (`is_unique: true`, indexed), while content is year-scoped (`edition_year` is required and indexed). A slug such as `welcome-party` therefore cannot exist in both the 2026 and 2027 editions — which contradicts the edition model in `DESIGN.md` §14 and `src/lib/config.ts`.
 
-**The blocking question (Q8).** The specification's route is `/department/activity/{year}` — three segments — but `cms_pages` also carries a `parent_page` self-relation and a required unique `slug` that is **not part of that route**. Nothing prevents N pages per `(proker, edition_year)`. So:
-
-> **Is there exactly one page per proker-year, or many — and if many, what is the URL?**
-
-**Two mutually exclusive resolutions:**
-
-#### Option A — one page per proker-year
+**Decision (Q8): one page per proker-year.** The route stays three segments. `parent_page` remains in the schema but is not part of the URL model for the first release.
 
 ```text
 Route:   /{department.slug}/{proker.slug}/{edition_year}
-Change:  drop UNIQUE on cms_pages.slug
-         add  UNIQUE (department, proker, edition_year)
-         slug becomes non-unique display/SEO metadata, or is removed
+Change:  drop  UNIQUE (slug)
+         add   UNIQUE (department, proker, edition_year)
+         slug becomes non-unique display/SEO metadata (or is dropped)
 ```
 
-#### Option B — many pages per proker-year
+**Consequence for the route builder.** `cms_departments.slug` and `cms_prokers.slug` are **already globally unique**, so the tuple is constructible from those two slugs plus `edition_year` — no page-level slug is needed in the URL. Note this makes the department segment decorative for _uniqueness_ purposes; it is kept for readabability and canonical structure.
 
-```text
-Route:   /{department.slug}/{proker.slug}/{edition_year}/{slug}
-Change:  keep cms_pages.slug
-         replace global UNIQUE(slug) with UNIQUE (department, proker, edition_year, slug)
-         parent_page carries the nesting
-```
+**Forward.** Drop the existing unique index, add the composite one. Directus has **no native composite-unique support** — use a custom migration extension. See `docs/hmtc-cms-decisions.md` §4 (Q11) for the exact code and the two prerequisites (deployment access to `extensions/`, and applying while the tables are empty).
 
-**Do not choose by assumption.** Option B is implied by `parent_page` existing; Option A is implied by the specification's route shape. The two are not reconcilable without a decision.
+**Rollback.** Drop the composite index, restore the single-column unique on `slug`. **Only safe while the table is empty or collision-free** — record the pre-migration constraint definition first.
 
-**Why blocking matters.** This determines the constraint, the route builder, the cache-tag scheme, and the redirect source format. Migrating before deciding means migrating twice.
-
-**Forward.** Drop the existing unique index, add the composite one. Directus exposes per-field `is_unique` via the schema API; composite unique indexes need a database-level migration plus a Directus metadata reload.
-
-**Rollback.** Drop the composite index, restore the single-column unique on `slug`. **Only safe while the table is empty or collision-free** — record the pre-migration constraint definition before touching it.
-
-**Verify.** Attempt to insert two rows differing only in `edition_year` with the same slug (expect success); attempt to insert two identical `(department, proker, edition_year, slug)` tuples (expect failure).
+**Verify.** Two rows differing only in `edition_year` with the same slug → both accepted. Two identical `(department, proker, edition_year)` tuples → second rejected.
 
 ---
 
@@ -138,30 +123,21 @@ Directus `required` is **application-level metadata**; it does not imply a `NOT 
 
 ---
 
-### M4 — `cms_pages.proker` required semantics 🔴 **BLOCKED on Q8 / Q12**
+### M4 — `cms_pages.proker` required semantics ✅ **RESOLVED — no migration**
 
 **Problem.** `cms_pages.proker` is `required: true`, so **every page must belong to a proker**. Standalone pages — landing, `/info`, About, Contact — have no valid value.
 
-**The specification's own guidance (§5) is the right instinct:** _"Avoid fake/sentinel relations without a clear need."_ Its stated resolution is to **constrain the first release to proker-only pages**, which defers the problem rather than solving it.
+**Decision (Q8 + Q12 + specification §5): narrow the scope.** The CMS manages **proker pages only**; unrelated public content stays hardcoded. This matches the specification's own guidance — _"Avoid fake/sentinel relations without a clear need."_
 
-**Two acceptable resolutions:**
-
-| Option                                    | Change                                                                                  | Consequence                                                                                           |
-| ----------------------------------------- | --------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| **A. Narrow the scope** (spec §5 default) | Leave `proker` required; CMS manages proker pages only; standalone pages stay hardcoded | Nothing to migrate now. The constraint bites the moment someone wants an editor-managed landing page. |
-| **B. Widen the model**                    | Make `proker` nullable, and require `department` + `edition_year` instead               | Standalone pages become expressible; route construction needs a dept-only branch                      |
-
-**Recommendation:** adopt **A** for the first release (it matches "Proker pages only" in specification §1) and record B as a deliberate future migration. Adopting A means **M4 is a no-op** — but it must be recorded as an accepted limitation, not an oversight.
-
-**Verify.** `cms_pages.proker` accepts null after M3 (or is documented as intentionally required).
+**Consequence: M4 is a no-op.** Leave `proker` required. Recorded here as an **accepted limitation, not an oversight.** The constraint will bite the moment someone wants an editor-managed landing page; widening the model later means making `proker` nullable, requiring `department` + `edition_year` instead, and adding a department-only branch to the route builder.
 
 ---
 
-### M5 — `cms_prokers.department` nullability
+### M5 — `cms_prokers.department` nullability ✅ **RESOLVED — make it required**
 
-**Problem.** `cms_prokers.department` is `is_nullable: true` and indexed, but **not required**. A proker may therefore exist with no department — in which case `/{department}/{activity}/{year}` **cannot be constructed at all**. Combined with `cms_prokers.slug` being globally unique, the department segment is decorative for routing.
+**Problem.** `cms_prokers.department` is `is_nullable: true` and indexed, but **not required**. A proker may therefore exist with no department — in which case `/{department}/{activity}/{year}` **cannot be constructed at all**.
 
-**Change.** `SET NOT NULL` on `cms_prokers.department`.
+**Decision (Q12): make it required.** `SET NOT NULL` on `cms_prokers.department`.
 
 **Forward.** One `SET NOT NULL`. Zero rows, so no backfill needed.
 
@@ -173,7 +149,7 @@ Directus `required` is **application-level metadata**; it does not imply a `NOT 
 
 ---
 
-### M6 — Department membership grants 🔴 **BLOCKED on Q11**
+### M6 — Department membership grants 🟡 **approach settled; implementation pending N1/N2**
 
 **Problem.** `cms_department_memberships` cannot express the specification's §4 permission matrix:
 
@@ -195,7 +171,9 @@ add    CHECK / application-level validation for membership_role
        (proposed vocabulary: 'editor' | 'reviewer' | 'publisher' | 'template_maintainer')
 ```
 
-**Q11 — the blocking decision.** Cross-department grants cannot be uniquely constrained as-is. **Migrate the schema, or enforce entirely in Next.js?** Migration is strongly preferred: the specification requires that _"Direct API calls cannot bypass role/resource checks"_ (§12), which is unachievable if the only enforcement lives in application code.
+**Q11 — resolved in principle.** Cross-department grants cannot be uniquely constrained with Directus's native schema tools. The approach is a **Directus custom migration extension** (Knex, versioned in the repo, reversible) — see `docs/hmtc-cms-decisions.md` §4 (Q11) for the exact code, why the mechanism was chosen, and the two prerequisites: **deployment access to `extensions/`**, and **applying while the tables are empty**. Migration is preferred over app-only enforcement because the specification requires that _"Direct API calls cannot bypass role/resource checks"_ (§12), which is unachievable if the only enforcement lives in application code.
+
+**App-side handling is still required.** A composite-constraint violation surfaces as a generic `400`; map it to a field-specific message in the Route Handler.
 
 **Forward.** Add the composite unique index; introduce a constrained vocabulary for `membership_role`.
 
@@ -292,7 +270,7 @@ cms_review_events.action   submitted | approved | changes_requested | unpublishe
 
 ---
 
-### M11 — Public-role row-level rule for published content 🔴 **URGENT — verify before authoring content**
+### M11 — Public-role row-level rule for published content ✅ **RESOLVED — already configured**
 
 **Origin:** Track B (§3.4 of the Phase 0 report), not the audit.
 
@@ -304,63 +282,50 @@ GET https://directus.hmtc-its.com/items/cms_pages   →  200  {"data":[]}
 
 Read is **all 23 fields** (including `status`, `blocks`, `published_by`). Create/update/delete are all **403**. Filtering on **every** probed field is **403**.
 
-**What is NOT known.** The collection is empty, so `{"data":[]}` is consistent with **both**:
+**Decision (Q9): the rule is already configured.** Confirmed by the operator in Directus Studio. **No permission change is required.**
 
-- a row-level rule `status = published` (drafts never returned) — **safe**, and
-- no row-level rule (every row returned) — **unsafe**: the first draft becomes world-readable.
+**Why this was worth chasing.** Had no rule existed, the first draft authored in Directus would have been world-readable at `/items/cms_pages`, bypassing Next.js entirely — defeating the specification's §12 criterion _"Draft and in-review pages are never returned by public queries."_ Next.js-side status filtering remains required as **defence in depth**, but the authoritative control is the Directus policy, not the application.
 
-**I cannot distinguish these while the table is empty.** An earlier single-field `status` filter probe appeared to suggest a rule; re-testing all fields showed the filter denial is blanket, so **that interpretation was withdrawn**.
+⚠️ **One behavioural verification is still outstanding**, because it cannot be observed on an empty table. See below.
 
-**Change if no rule exists.** Add a public-role permission rule on `cms_pages` and `cms_forms`:
+**Verify — must be done after the first draft exists.** An empty result is indistinguishable from a correctly filtered one, so the policy has to be confirmed by behaviour, not by reading it:
 
-```text
-cms_pages   read   rule: status = published
-cms_forms   read   rule: status = published   (form definitions; submissions stay 403)
-```
+1. Inspect the rule in Studio — done (Q9).
+2. **Once the first draft exists:** `curl …/items/cms_pages` must **not** return it.
+3. Publish, then confirm the page **does** appear.
 
-**Why this is the authoritative fix.** The specification requires _"Draft and in-review pages are never returned by public queries"_ and _"Direct API calls cannot bypass role/resource checks"_ (§12). Filtering in Next.js satisfies the first only for requests that go through Next.js. Anyone can query Directus directly:
+If step 2 returns the draft, **stop and fix before authoring more content.** This is the only §12 acceptance criterion that cannot be verified on an empty database.
 
-```bash
-curl 'https://directus.hmtc-its.com/items/cms_pages'
-```
-
-Next.js-side filtering remains **necessary defence in depth**, but it is not sufficient on its own.
-
-**Forward.** Add the rule in Studio (Settings → Policies → Public) or via `/permissions`.
-
-**Rollback.** Remove the rule. ⚠️ Rolling back **exposes drafts** — treat this as a security-relevant revert.
-
-**Verify — two-step, and the second step is the one that matters.**
-
-1. Immediately: inspect the rule in Studio. Do not infer it from an empty response.
-2. **After the first draft is authored:** `curl …/items/cms_pages` must **not** return it. Repeat once a page is published, and confirm it then **does** appear.
+**Rollback.** Removing the rule **exposes drafts** — treat it as a security-relevant revert.
 
 ---
 
 ## 4. Sequencing
 
 ```text
-Phase M-A  (no blockers, zero-risk, do together)
+Phase M-A  (ready now — no blockers, zero-risk)
   M1  field_type_snapshot rename
   M7  department slug canonicalisation
   M10 site_settings singleton
   M8  Studio interfaces
-  M5  cms_prokers.department NOT NULL
-  M3  nullability alignment (partially — after M2/M4 settle slug/proker)
+  M5  cms_prokers.department NOT NULL            ← Q12 answered
+  M4  cms_pages.proker required                  ← RESOLVED: no-op, nothing to run
         │
         ▼
-Phase M-B  (blocked — needs Q8, Q11, Q12, Q14 answered)
-  M2  slug uniqueness          ← Q8
-  M4  proker required          ← Q8, Q12   (may resolve to a documented no-op)
-  M6  membership uniqueness    ← Q11
-  M9  enum enforcement         ← Q14
+Phase M-B  (needs the migration-extension approach confirmed — N1, N2)
+  M2  slug uniqueness  → UNIQUE (department, proker, edition_year)   ← Q8 answered: Option A
+  M6  membership uniqueness → UNIQUE (user, department)              ← also N7 (role vocabulary)
         │
         ▼
-Phase M-C  (security — verify immediately, no schema change)
-  M11 public-role published rule   ← MUST be confirmed before any content is authored
+Phase M-C  (nullability alignment — run AFTER M2 settles slug/proker)
+  M3  SET NOT NULL on slug / department / proker / status
+        │
+        ▼
+Phase M-D  (deferred — N3)
+  M9  enum enforcement             ← blocked on the page_type vocabulary
 ```
 
-**M11 is deliberately outside the structural sequence.** It is a permission check, not a schema migration, and its verification is a **precondition for creating the first page** — not part of a phased rollout.
+**M11 is deliberately outside the structural sequence.** It is a permission check, not a schema migration, and it is already satisfied (Q9) — only one _behavioural_ verification remains, and that is a **precondition for creating the first page**, not part of a rollout.
 
 ---
 
@@ -369,7 +334,7 @@ Phase M-C  (security — verify immediately, no schema change)
 #### Principles
 
 1. **Snapshot first.** Take a full logical backup of the Directus database **and** an export of Directus's own configuration (`directus_collections`, `directus_fields`, `directus_relations`, `directus_permissions`) before any migration. Directus keeps its schema metadata in those tables — a database restore that misses them leaves Directus desynchronised from the physical schema.
-2. **Migrate through Directus, not around it.** Use the Directus schema API or Studio so `directus_fields`/`directus_relations` stay consistent. Raw `ALTER TABLE` against the database will silently desync Directus's metadata and produce a UI that disagrees with reality.
+2. **Migrate through Directus, not around it — with one exception.** Use the Directus schema API, Studio, or a tracked migration extension, so `directus_fields`/`directus_relations` stay consistent. An ad-hoc `psql`/`ALTER TABLE` run against the database will silently desync Directus's metadata and produce a UI that disagrees with reality. **The exception is composite unique indexes (M2, M6):** Directus has no metadata representation for those, so there is nothing to desync — but they must still go through a versioned migration extension rather than a manual statement, so the change is tracked, reviewable and reversible. See `docs/hmtc-cms-decisions.md` §4.
 3. **Additive before destructive.** Add the new constraint or column, verify, then remove the old one — never drop first.
 4. **One migration, one commit, one rollback script.** Each of M1–M10 is independently revertible. Do not bundle.
 5. **Record the "before" state in the commit message** (constraint definitions, field metadata, row values). A rollback you cannot describe is not a rollback.
@@ -406,20 +371,29 @@ Phase M-C  (security — verify immediately, no schema change)
 
 ---
 
-## 7. Decisions required before this plan can be executed
+## 7. Decisions
 
-| ID      | Decision                                                                                                                         | Blocks                                   |
-| ------- | -------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
-| **Q8**  | One page per proker-year, or many? Determines the route shape.                                                                   | M2, M4 — and the migration design itself |
-| **Q9**  | Does the public role's read on `cms_pages` carry a `status = published` rule? **Verify in Studio.**                              | M11 — and any content creation           |
-| **Q10** | Is all CMS media acceptable as publicly readable at `/assets/<uuid>`? No private-asset path exists today.                        | Media phase                              |
-| **Q11** | Migrate `cms_department_memberships` for unique grants, or enforce in Next.js only?                                              | M6, Phase 1 authorisation                |
-| **Q12** | Make `cms_prokers.department` required and use a sentinel for standalone pages — or constrain release to proker pages (spec §5)? | M4, M5                                   |
-| **Q13** | `/gallery` is permanently locked (Phase 0 report F15). Gate via Directus auth, replace the check, or remove the gate?            | Gallery, not the CMS                     |
-| **Q14** | What is the vocabulary for `cms_pages.page_type`? Undocumented, and it affects routing.                                          | M9, M2                                   |
-| **B1**  | Revision retention duration (proposed: 2 years).                                                                                 | Editor phase only — not this plan        |
+Live decisions, open questions and deferrals are tracked in **`docs/hmtc-cms-decisions.md`** — deliberately in one place, so this plan, the Phase 0 report and the specification cannot drift out of sync.
 
-**How to resolve Q9 (the urgent one).** Directus Studio → Settings → Policies → Public → `cms_pages`. Look for a row-level rule. If there is none, add `status = published` **before** authoring the first page. Do not infer the answer from an empty API response — that is the trap this document exists to flag.
+Status at the time of writing:
+
+| Migration           | Blocked by            | State                                                         |
+| ------------------- | --------------------- | ------------------------------------------------------------- |
+| M1, M3, M7, M8, M10 | —                     | ✅ Ready to execute                                           |
+| M2                  | Q11 approach (N1, N2) | ✅ Unblocked — **Option A** chosen (one page per proker-year) |
+| M4                  | —                     | ✅ **No-op** — scope narrowed to proker pages                 |
+| M5                  | —                     | ✅ Ready — make `department` required                         |
+| M6                  | N1, N2, N7            | 🟡 Awaiting confirmation of the extension approach            |
+| M9                  | N3                    | ⛔ Deferred — `page_type` vocabulary undefined                |
+| M11                 | —                     | ✅ Already satisfied — one behavioural check outstanding      |
+
+**The single check to run before authoring content:**
+
+```bash
+curl -s https://directus.hmtc-its.com/items/cms_pages | jq '.data | length'   # must be 0 once a draft exists
+```
+
+See M11 for the full procedure.
 
 ---
 
