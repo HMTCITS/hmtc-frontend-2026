@@ -1,14 +1,14 @@
 # HMTC CMS — Directus Schema Migration Plan
 
-**Status:** Plan only. **No migration has been executed.**
+**Status:** **M2, M6 and M12 applied to production 2026-10-19.** M1, M3, M5, M7, M8 and M10 remain planned; M4 is a documented no-op; M9 is deferred.
 **Deliverable:** Specification §17 item 2 ("Directus schema migration plan with rollback strategy")
 **Companion:** `docs/hmtc-cms-decisions.md` (**the decision log — read this first**), `docs/hmtc-cms-phase-0-report.md`, `docs/hmtc-cms-implementation-specification.md`, `docs/audits/hmtc-cms-data-fetching-audit.md` (rev. 2)
 **Target:** Directus 11.1.2 at `https://directus.hmtc-its.com`
 **Date:** 2026-10-19
 
-> **Updated 2026-10-19:** decisions Q8, Q9, Q10 and Q12 are now answered and this plan reflects them. **M4 is a no-op; M5 and M11 are settled; M2 is unblocked; M6 awaits N1/N2; M9 is deferred.** Open items are tracked in `docs/hmtc-cms-decisions.md` §5 — not duplicated here.
+> **Updated 2026-10-19 — M2, M6 and M12 are APPLIED to production.** See `scripts/directus-schema/001-page-identity-and-grants.up.sql`. Q8, Q9, Q10 and Q12 are answered; **M4 is a no-op; M5 and M11 are settled; M9 is deferred.** Open items live in `docs/hmtc-cms-decisions.md` §5. ⚠️ **Operational rule: restart Directus after any DDL executed outside it.** Directus does **not** store `is_unique`/`is_nullable` in `directus_fields` (verified — those columns do not exist), it **introspects** Postgres — but the introspection is **cached in memory**, so out-of-band DDL is invisible until the cache rebuilds. Always `docker restart directus` and re-verify before trusting Studio or the REST API.
 
-> **Nothing in this document has been applied.** No collection, field, index, relation, role, policy, or permission was created, modified, or deleted during Phase 0. Track B was strictly read-only.
+> **Scope note.** Phase 0 (Track B) was strictly read-only — no collection, field, index, relation, role, policy or permission was touched. The M2/M6/M12 changes were applied afterwards, on explicit approval, via the tracked SQL in `scripts/directus-schema/`.
 
 ---
 
@@ -39,16 +39,17 @@ Two migrations below are trivial against an empty table and expensive against a 
 | ID      | Item                                                              | Origin           | Blocking decision        | Risk              |
 | ------- | ----------------------------------------------------------------- | ---------------- | ------------------------ | ----------------- |
 | **M1**  | `field_type_snapshow` → `field_type_snapshot`                     | S1               | none                     | Low               |
-| **M2**  | `cms_pages.slug` unique constraint                                | S2               | ✅ Q8 → **Option A**     | Medium            |
+| **M2**  | `cms_pages.slug` unique constraint                                | S2               | ✅ **APPLIED**           | —                 |
 | **M3**  | `cms_pages.slug` / `department` / `proker` / `status` nullability | S6 (generalised) | none                     | Low               |
 | **M4**  | `cms_pages.proker` required semantics                             | S3               | ✅ Q8/Q12 → **no-op**    | —                 |
 | **M5**  | `cms_prokers.department` nullability                              | Q12              | ✅ Q12 → **required**    | Low               |
-| **M6**  | `cms_department_memberships` grant uniqueness + role vocabulary   | B5               | 🟡 N1, N2, N7            | Medium            |
+| **M6**  | `cms_department_memberships` grant uniqueness                     | B5               | ✅ **APPLIED** (N7 open) | —                 |
 | **M7**  | Department slug canonicalisation                                  | F14              | none                     | Low               |
 | **M8**  | Field interfaces for Directus Studio                              | S4               | none                     | Low               |
 | **M9**  | Enum enforcement for status vocabularies                          | S5               | ⛔ N3 (deferred)         | Low               |
 | **M10** | `cms_site_settings` singleton enforcement                         | S7               | none                     | Low               |
 | **M11** | Public-role row-level rule for published content                  | Q9               | ✅ **already satisfied** | Low (verify once) |
+| **M12** | Page FK delete semantics → `ON DELETE RESTRICT`                   | FK review        | ✅ **APPLIED**           | —                 |
 
 ---
 
@@ -72,7 +73,7 @@ Two migrations below are trivial against an empty table and expensive against a 
 
 ---
 
-### M2 — `cms_pages.slug` uniqueness ✅ **RESOLVED — Option A**
+### M2 — `cms_pages.slug` uniqueness ✅ **APPLIED**
 
 **Problem.** `cms_pages.slug` is **globally unique** (`is_unique: true`, indexed), while content is year-scoped (`edition_year` is required and indexed). A slug such as `welcome-party` therefore cannot exist in both the 2026 and 2027 editions — which contradicts the edition model in `DESIGN.md` §14 and `src/lib/config.ts`.
 
@@ -87,11 +88,19 @@ Change:  drop  UNIQUE (slug)
 
 **Consequence for the route builder.** `cms_departments.slug` and `cms_prokers.slug` are **already globally unique**, so the tuple is constructible from those two slugs plus `edition_year` — no page-level slug is needed in the URL. Note this makes the department segment decorative for _uniqueness_ purposes; it is kept for readabability and canonical structure.
 
-**Forward.** Drop the existing unique index, add the composite one. Directus has **no native composite-unique support** — use a custom migration extension. See `docs/hmtc-cms-decisions.md` §4 (Q11) for the exact code and the two prerequisites (deployment access to `extensions/`, and applying while the tables are empty).
+**✅ APPLIED 2026-10-19** via `scripts/directus-schema/001-page-identity-and-grants.up.sql`.
 
-**Rollback.** Drop the composite index, restore the single-column unique on `slug`. **Only safe while the table is empty or collision-free** — record the pre-migration constraint definition first.
+```sql
+ALTER TABLE cms_pages DROP CONSTRAINT cms_pages_slug_unique;
+CREATE UNIQUE INDEX cms_pages_department_proker_year_unique
+  ON cms_pages (department, proker, edition_year);
+```
 
-**Verify.** Two rows differing only in `edition_year` with the same slug → both accepted. Two identical `(department, proker, edition_year)` tuples → second rejected.
+`cms_pages_slug_index` (plain btree on `slug`) was intentionally kept — slug is still the lookup key for redirects and breadcrumbs, it is just no longer unique.
+
+**Verified after applying:** `cms_pages_slug_unique` is gone, `cms_pages_department_proker_year_unique` exists, and `directus_read-fields` reports `slug.is_unique = false` — **but only after `docker restart directus`**, confirming the schema-cache behaviour described in the banner.
+
+**Rollback.** `…down.sql` — restores `UNIQUE (slug)`. **Only safe while `cms_pages` has no duplicate slugs**, which is exactly what this migration permits.
 
 ---
 
@@ -149,7 +158,7 @@ Directus `required` is **application-level metadata**; it does not imply a `NOT 
 
 ---
 
-### M6 — Department membership grants 🟡 **approach settled; implementation pending N1/N2**
+### M6 — Department membership grants ✅ **APPLIED — constraint in place; vocabulary still open (N7)**
 
 **Problem.** `cms_department_memberships` cannot express the specification's §4 permission matrix:
 
@@ -171,15 +180,20 @@ add    CHECK / application-level validation for membership_role
        (proposed vocabulary: 'editor' | 'reviewer' | 'publisher' | 'template_maintainer')
 ```
 
-**Q11 — resolved in principle.** Cross-department grants cannot be uniquely constrained with Directus's native schema tools. The approach is a **Directus custom migration extension** (Knex, versioned in the repo, reversible) — see `docs/hmtc-cms-decisions.md` §4 (Q11) for the exact code, why the mechanism was chosen, and the two prerequisites: **deployment access to `extensions/`**, and **applying while the tables are empty**. Migration is preferred over app-only enforcement because the specification requires that _"Direct API calls cannot bypass role/resource checks"_ (§12), which is unachievable if the only enforcement lives in application code.
+**Q11 — resolved and applied.** Directus has no native composite-unique support, so this went in as direct SQL (`001-…up.sql`) rather than a migration extension — the extension added plumbing without adding durability, since `extensions/` is an empty persisted volume and the DB is a persisted volume too.
 
-**App-side handling is still required.** A composite-constraint violation surfaces as a generic `400`; map it to a field-specific message in the Route Handler.
+**App-side handling is still required.** A composite-constraint violation surfaces as a generic `400`; map it to a field-specific message in the Route Handler. Confirmed live: the violation reports as
 
-**Forward.** Add the composite unique index; introduce a constrained vocabulary for `membership_role`.
+```text
+ERROR: duplicate key value violates unique constraint
+       "cms_department_memberships_user_department_unique"
+```
+
+**✅ APPLIED 2026-10-19.** Verified by a rolled-back negative test: inserting the same `(user, department)` twice fails with the constraint name above, and the transaction leaves zero rows.
+
+**Still open (N7).** `membership_role` remains a free string. The permission matrix cannot be validated against it until a vocabulary is agreed.
 
 **Rollback.** Drop the index; revert `membership_role` to a free string. **Check for duplicates before rolling back a unique index.**
-
-**Verify.** Insert `(user A, dept 1)` twice → second fails. Assign an invalid `membership_role` → rejected.
 
 ---
 
@@ -300,29 +314,49 @@ If step 2 returns the draft, **stop and fix before authoring more content.** Thi
 
 ---
 
+### M12 — Page FK delete semantics → `ON DELETE RESTRICT` ✅ **APPLIED**
+
+**Problem found during the migration.** `cms_pages.department` and `cms_pages.proker` were both `ON DELETE SET NULL`, and both columns are meant to become `NOT NULL` (M3). That combination is incoherent: once the columns are `NOT NULL`, `SET NULL` makes a delete fail with a confusing not-null violation instead of doing something sensible.
+
+Worse, `cms_prokers.department` is `ON DELETE CASCADE`, so deleting a **department** cascades to its prokers, which then try to `SET NULL` on their pages — so department deletion would have failed transitively, with an error naming the wrong table.
+
+**Applied.** Both page FKs switched to `ON DELETE RESTRICT`:
+
+```text
+cms_pages.proker_foreign      → ON DELETE RESTRICT
+cms_pages.department_foreign  → ON DELETE RESTRICT
+```
+
+**Consequence the team must know:** a proker or department that has pages **cannot be deleted**. The delete fails cleanly and the transaction rolls back. That is the intended protection — it prevents silently orphaning published pages — but retiring a proker becomes an archival operation, not a delete.
+
+**Rollback.** `…down.sql` restores `SET NULL`.
+
+---
+
 ## 4. Sequencing
 
 ```text
+✅ DONE — applied to production 2026-10-19 (scripts/directus-schema/001-*.sql)
+  M2   slug uniqueness  → UNIQUE (department, proker, edition_year)
+  M6   membership uniqueness → UNIQUE (user, department)
+  M12  page FKs → ON DELETE RESTRICT
+        │
+        ▼
 Phase M-A  (ready now — no blockers, zero-risk)
-  M1  field_type_snapshot rename
-  M7  department slug canonicalisation
-  M10 site_settings singleton
-  M8  Studio interfaces
-  M5  cms_prokers.department NOT NULL            ← Q12 answered
-  M4  cms_pages.proker required                  ← RESOLVED: no-op, nothing to run
+  M1   field_type_snapshot rename
+  M7   department slug canonicalisation
+  M10  site_settings singleton
+  M8   Studio interfaces
+  M5   cms_prokers.department NOT NULL
+  M4   cms_pages.proker required   ← no-op, nothing to run
         │
         ▼
-Phase M-B  (needs the migration-extension approach confirmed — N1, N2)
-  M2  slug uniqueness  → UNIQUE (department, proker, edition_year)   ← Q8 answered: Option A
-  M6  membership uniqueness → UNIQUE (user, department)              ← also N7 (role vocabulary)
+Phase M-C  (nullability alignment — M2 is settled, so this is unblocked)
+  M3   SET NOT NULL on slug / department / proker / status
         │
         ▼
-Phase M-C  (nullability alignment — run AFTER M2 settles slug/proker)
-  M3  SET NOT NULL on slug / department / proker / status
-        │
-        ▼
-Phase M-D  (deferred — N3)
-  M9  enum enforcement             ← blocked on the page_type vocabulary
+Phase M-D  (deferred)
+  M9   enum enforcement            ← blocked on the page_type vocabulary (N3)
 ```
 
 **M11 is deliberately outside the structural sequence.** It is a permission check, not a schema migration, and it is already satisfied (Q9) — only one _behavioural_ verification remains, and that is a **precondition for creating the first page**, not part of a rollout.

@@ -60,67 +60,53 @@ These were the open blockers from the Phase 0 report. All are now answered.
 | **Q14** | What is the vocabulary for `cms_pages.page_type`?                                                 | ⛔ **Deferred.**                                                               | Migration **M9** stays blocked. Note the field is `required` and currently undocumented.                                                                            |
 | **B7**  | Dependency security: 109 vulnerabilities, `pnpm.overrides` inert.                                 | ⛔ **Deferred by decision — accepted risk.**                                   | `next@16.2.9` remains inside advisory GHSA-cjq9-62q9-8jv4. Revisit before production launch. See §5.                                                                |
 
-### Q11 — how the composite unique constraints will be migrated 🟡
+### Q11 — how the composite unique constraints were migrated ✅ **APPLIED**
 
 **Asked:** _"how do you plan to migrate it? does Directus support it?"_
 
-**Answer: Directus does not support composite unique constraints.** Confirmed against Directus's own issue tracker and community discussions:
+**Answer: Directus does not support composite unique constraints.** Confirmed against Directus's issue tracker and community discussions:
 
 - The Admin UI and schema API expose only per-field `is_unique`. There is **no multi-column unique control**.
-- ⚠️ **Marking two fields individually as "Unique" does not work** — it creates two independent single-column constraints, which is not the intent.
-- Community reports warn of UI/backend instability when composite constraints are applied manually to an **existing populated** collection, and of violations surfacing as a generic `400 "Field has to be unique"` rather than a field-specific error.
+- ⚠️ **Marking two fields individually as "Unique" does not work** — it creates two independent single-column constraints.
+- Violations surface as a generic `400` rather than a field-specific error, so app-side mapping is required.
 
-**Recommended approach — Directus custom migration extension:**
+**Approach — direct SQL, tracked in the repo.** I originally proposed a Directus migration extension. That was over-engineered, and inspecting the actual deployment showed why:
 
-```text
-extensions/migrations/<timestamp>-cms-composite-unique.js
+| Claim I made                                                             | What the deployment showed                                                                                                              |
+| ------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
+| "Migrate through Directus, not around it — raw DDL desyncs its metadata" | **Wrong.** `directus_fields` has no `is_unique`/`is_nullable` columns at all — Directus _introspects_ Postgres for those.               |
+| "Container filesystem isn't durable"                                     | **Wrong.** `extensions/` is a persisted named volume (`hmtc-shared_directus_extensions`), currently empty with no migrations directory. |
+| "Migration plumbing is needed for reproducibility"                       | The DB is a persisted named volume too. A tracked `.sql` file gives the same reviewability for far less machinery.                      |
+
+**The one real caveat — Directus caches the introspected schema in memory.** Out-of-band DDL is invisible until the cache rebuilds: after applying the SQL, `directus_read-fields` still reported `slug.is_unique = true` until `docker restart directus` was run. That is now a standing rule (N8).
+
+**Applied** — `scripts/directus-schema/001-page-identity-and-grants.up.sql`:
+
+```sql
+ALTER TABLE cms_pages DROP CONSTRAINT cms_pages_slug_unique;
+CREATE UNIQUE INDEX cms_pages_department_proker_year_unique
+  ON cms_pages (department, proker, edition_year);
+CREATE UNIQUE INDEX cms_department_memberships_user_department_unique
+  ON cms_department_memberships ("user", department);
 ```
 
-```js
-module.exports = {
-  async up(knex) {
-    await knex.schema.alterTable('cms_pages', (t) => {
-      t.dropUnique(['slug']); // M2: remove global unique
-      t.unique(['department', 'proker', 'edition_year']); // M2: one page per proker-year
-    });
-    await knex.schema.alterTable('cms_department_memberships', (t) => {
-      t.unique(['user', 'department']); // M6: one grant per user+dept
-    });
-  },
-  async down(knex) {
-    await knex.schema.alterTable('cms_pages', (t) => {
-      t.dropUnique(['department', 'proker', 'edition_year']);
-      t.unique(['slug']);
-    });
-    await knex.schema.alterTable('cms_department_memberships', (t) => {
-      t.dropUnique(['user', 'department']);
-    });
-  },
-};
-```
+**App-side handling is still required.** The violation reaches the client as a generic `400`. Map it to a field-specific message in the Route Handler — in addition to, not instead of, Zod validation.
 
-**Why this mechanism:** it is versioned, tracked in the repository, runs on Directus startup, and is reversible — unlike an ad-hoc `psql` statement that exists only in someone's shell history.
-
-**App-side handling is still required.** The constraint violation reaches the client as a generic `400`. Map it to a readable, field-specific message in the Route Handler rather than surfacing Directus's raw error. This is in addition to — not instead of — Zod validation.
-
-**Two prerequisites:**
-
-1. **Deployment access.** This requires writing to the Directus deployment's `extensions/` directory and restarting it. Confirm who owns that before scheduling M2/M6.
-2. **Apply while the tables are empty.** All `cms_*` tables except `cms_departments` have zero rows today. That is the safe window — the community caveats above concern populated collections.
-
-**Status:** approach recommended; **implementation pending your confirmation.** M2 and M6 are the two migrations that depend on it.
+**Status:** ✅ applied 2026-10-19 and verified. `membership_role` remains an unconstrained string (N7).
 
 ## 5. Open — needs an answer
 
-| ID     | Question                                                                                                                                                    | Why it matters                                                                                                                      | Blocks               |
-| ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
-| **N1** | Approve the Directus migration-extension approach in §4 (Q11)?                                                                                              | It is the only viable route for M2 and M6. Needs deployment access to `extensions/`.                                                | M2, M6               |
-| **N2** | Who owns the Directus deployment? Can we write to `extensions/` and restart it?                                                                             | Same.                                                                                                                               | M2, M6               |
-| **N3** | `cms_pages.page_type` — what are the allowed values? The field is `required` with an empty note.                                                            | Affects routing and validation.                                                                                                     | M9                   |
-| **N4** | Revision retention duration (proposed: **2 years**). Are currently-published revisions exempt from routine cleanup?                                         | Needed before the editor phase. Recommended safe default: never purge the live published revision or the only recoverable snapshot. | Editor phase         |
-| **N5** | Accept the dependency-security debt (B7) until launch, or schedule it?                                                                                      | `pnpm.overrides` is silently inert — every security pin is unapplied.                                                               | Production readiness |
-| **N6** | Is the `/gallery` route being removed entirely, or just un-gated?                                                                                           | Q13 says drop the gate and that the route is legacy. Un-gating is a 2-file change; removal is a routing decision.                   | Q13 follow-up        |
-| **N7** | Should `cms_department_memberships.membership_role` get a constrained vocabulary? Proposed: `editor` \| `reviewer` \| `publisher` \| `template_maintainer`. | Currently a free string; the permission matrix cannot be validated against it.                                                      | M6                   |
+| ID     | Question                                                                                                                                                    | Why it matters                                                                                                                                          | Blocks               |
+| ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
+| ~~N1~~ | ~~Approve the Directus migration-extension approach in §4 (Q11)?~~                                                                                          | ✅ **RESOLVED — rejected.** Direct SQL used instead; the extension added machinery without adding durability. See §4 Q11.                               | —                    |
+| ~~N2~~ | ~~Who owns the Directus deployment? Can we write to `extensions/` and restart it?~~                                                                         | ✅ **RESOLVED.** `ssh hmtc`; Directus 11.1 runs in Docker with a persisted `directus_postgres` volume. Restart is safe — nothing consumes Directus yet. | —                    |
+| **N3** | `cms_pages.page_type` — what are the allowed values? The field is `required` with an empty note.                                                            | Affects routing and validation.                                                                                                                         | M9                   |
+| **N4** | Revision retention duration (proposed: **2 years**). Are currently-published revisions exempt from routine cleanup?                                         | Needed before the editor phase. Recommended safe default: never purge the live published revision or the only recoverable snapshot.                     | Editor phase         |
+| **N5** | Accept the dependency-security debt (B7) until launch, or schedule it?                                                                                      | `pnpm.overrides` is silently inert — every security pin is unapplied.                                                                                   | Production readiness |
+| **N6** | Is the `/gallery` route being removed entirely, or just un-gated?                                                                                           | Q13 says drop the gate and that the route is legacy. Un-gating is a 2-file change; removal is a routing decision.                                       | Q13 follow-up        |
+| **N7** | Should `cms_department_memberships.membership_role` get a constrained vocabulary? Proposed: `editor` \| `reviewer` \| `publisher` \| `template_maintainer`. | Currently a free string; the permission matrix cannot be validated against it.                                                                          | M6                   |
+
+**Standing operational rule (N8) — restart Directus after out-of-band DDL.** Directus caches its introspected schema in memory, so `is_unique` / `is_nullable` stay stale until the cache rebuilds — even though those values are not stored in `directus_fields`. Observed directly: after applying `001`, `directus_read-fields` still reported `slug.is_unique = true`; only `docker restart directus` corrected it. This also applies after restoring a backup.
 
 ## 6. One verification still outstanding
 

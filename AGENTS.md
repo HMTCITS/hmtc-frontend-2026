@@ -232,6 +232,17 @@ The Directus credential must be read in exactly one place — the server module 
 - Previews are bearer links scoped to one page + revision, revocable, non-indexable, 72 h by default. A preview grant never permits editing.
 - **Unpublished content must return a real HTTP 404** — use `generateStaticParams()` + `export const dynamicParams = false`, **not** `notFound()`. The root `<React.Suspense>` in `src/app/providers.tsx` makes `notFound()` a soft-404 (HTTP 200).
 
+### Changing the Directus schema
+
+Schema changes live in `scripts/directus-schema/` as paired `.up.sql` / `.down.sql` files, applied through `docker exec … psql` on the deployment (`ssh hmtc`). Directus has **no native composite-unique support**, so anything beyond per-field constraints is plain Postgres DDL.
+
+**Two rules, both learned the hard way:**
+
+1. **Restart Directus after any DDL.** `docker restart directus`. Directus does not store `is_unique` / `is_nullable` in `directus_fields` — it introspects Postgres — but it **caches that introspection in memory**. Out-of-band DDL is invisible until the cache rebuilds, so Studio and the REST API keep reporting the old shape. Nothing consumes Directus yet, so a restart is free.
+2. **Snapshot first.** `docker exec directus_postgres pg_dump -U directuspg -d directusdb > pre-<n>.sql`. That file is the rollback; the `.down.sql` is the tidy path.
+
+Do not mark two fields individually as `unique` in Studio to emulate a composite constraint — that creates two independent single-column constraints.
+
 ### Before you write CMS code
 
 1. Read `docs/hmtc-cms-decisions.md` — it separates confirmed requirements from open questions.
