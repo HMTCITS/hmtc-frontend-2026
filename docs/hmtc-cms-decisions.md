@@ -94,6 +94,19 @@ CREATE UNIQUE INDEX cms_department_memberships_user_department_unique
 
 **Status:** ✅ applied 2026-10-19 and verified. `membership_role` remains an unconstrained string (N7).
 
+### Applied to production — 2026-10-19
+
+Both files live in `scripts/directus-schema/`. Each has a paired `.down.sql`, and each was preceded by a `pg_dump` snapshot on the host.
+
+| File                               | Contents                                                                                                          | Verified by                                                                |
+| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| `001-page-identity-and-grants`     | M2 composite page identity, M6 membership uniqueness, M12 page FKs → `RESTRICT`                                   | `pg_indexes`, `\d`, and a rolled-back duplicate-insert test                |
+| `002-nullability-slugs-interfaces` | M1 column typo, M3 + M5 `SET NOT NULL`, M7 department slugs, M8 six `select-dropdown` vocabularies, M10 singleton | `information_schema`, `directus_read-fields`, slug and choice-count checks |
+
+**After both, Directus was restarted** and the public API surface re-checked: `/items/cms_pages` still 200, `/items/cms_departments` still 403, `POST /items/cms_pages` still 403, and the OAS still exposes the same 16 role-scoped paths. Only the schema shape changed — no permission changed.
+
+**Still unenforced at the database level:** `M9` (CHECK constraints on status values) is deferred, so the Zod layer must carry that validation until `page_type` is defined (N3). `membership_role` likewise (N7).
+
 ## 5. Open — needs an answer
 
 | ID     | Question                                                                                                                                                    | Why it matters                                                                                                                                          | Blocks               |

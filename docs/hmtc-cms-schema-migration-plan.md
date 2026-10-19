@@ -1,12 +1,12 @@
 # HMTC CMS — Directus Schema Migration Plan
 
-**Status:** **M2, M6 and M12 applied to production 2026-10-19.** M1, M3, M5, M7, M8 and M10 remain planned; M4 is a documented no-op; M9 is deferred.
+**Status:** **M1, M2, M3, M5, M6, M7, M8, M10 and M12 applied to production 2026-10-19.** Only M9 remains (deferred pending N3); M4 is a documented no-op; M11 is already satisfied.
 **Deliverable:** Specification §17 item 2 ("Directus schema migration plan with rollback strategy")
 **Companion:** `docs/hmtc-cms-decisions.md` (**the decision log — read this first**), `docs/hmtc-cms-phase-0-report.md`, `docs/hmtc-cms-implementation-specification.md`, `docs/audits/hmtc-cms-data-fetching-audit.md` (rev. 2)
 **Target:** Directus 11.1.2 at `https://directus.hmtc-its.com`
 **Date:** 2026-10-19
 
-> **Updated 2026-10-19 — M2, M6 and M12 are APPLIED to production.** See `scripts/directus-schema/001-page-identity-and-grants.up.sql`. Q8, Q9, Q10 and Q12 are answered; **M4 is a no-op; M5 and M11 are settled; M9 is deferred.** Open items live in `docs/hmtc-cms-decisions.md` §5. ⚠️ **Operational rule: restart Directus after any DDL executed outside it.** Directus does **not** store `is_unique`/`is_nullable` in `directus_fields` (verified — those columns do not exist), it **introspects** Postgres — but the introspection is **cached in memory**, so out-of-band DDL is invisible until the cache rebuilds. Always `docker restart directus` and re-verify before trusting Studio or the REST API.
+> **Updated 2026-10-19 — `001` and `002` are APPLIED to production.** See `scripts/directus-schema/`. M1, M2, M3, M5, M6, M7, M8, M10 and M12 are done; **M4 is a no-op; M11 already satisfied; M9 is deferred (N3).** ⚠️ **Operational rule: restart Directus after any DDL executed outside it.** Directus does **not** store `is_unique`/`is_nullable` in `directus_fields` (verified — those columns do not exist), it **introspects** Postgres — but the introspection is **cached in memory**, so out-of-band DDL is invisible until the cache rebuilds. Always `docker restart directus` and re-verify before trusting Studio or the REST API.
 
 > **Scope note.** Phase 0 (Track B) was strictly read-only — no collection, field, index, relation, role, policy or permission was touched. The M2/M6/M12 changes were applied afterwards, on explicit approval, via the tracked SQL in `scripts/directus-schema/`.
 
@@ -38,16 +38,16 @@ Two migrations below are trivial against an empty table and expensive against a 
 
 | ID      | Item                                                              | Origin           | Blocking decision        | Risk              |
 | ------- | ----------------------------------------------------------------- | ---------------- | ------------------------ | ----------------- |
-| **M1**  | `field_type_snapshow` → `field_type_snapshot`                     | S1               | none                     | Low               |
+| **M1**  | `field_type_snapshow` → `field_type_snapshot`                     | S1               | ✅ **APPLIED**           | —                 |
 | **M2**  | `cms_pages.slug` unique constraint                                | S2               | ✅ **APPLIED**           | —                 |
-| **M3**  | `cms_pages.slug` / `department` / `proker` / `status` nullability | S6 (generalised) | none                     | Low               |
+| **M3**  | `cms_pages.slug` / `department` / `proker` / `status` nullability | S6 (generalised) | ✅ **APPLIED**           | —                 |
 | **M4**  | `cms_pages.proker` required semantics                             | S3               | ✅ Q8/Q12 → **no-op**    | —                 |
-| **M5**  | `cms_prokers.department` nullability                              | Q12              | ✅ Q12 → **required**    | Low               |
+| **M5**  | `cms_prokers.department` nullability                              | Q12              | ✅ **APPLIED**           | —                 |
 | **M6**  | `cms_department_memberships` grant uniqueness                     | B5               | ✅ **APPLIED** (N7 open) | —                 |
-| **M7**  | Department slug canonicalisation                                  | F14              | none                     | Low               |
-| **M8**  | Field interfaces for Directus Studio                              | S4               | none                     | Low               |
+| **M7**  | Department slug canonicalisation                                  | F14              | ✅ **APPLIED**           | —                 |
+| **M8**  | Field interfaces for Directus Studio                              | S4               | ✅ **APPLIED** (partial) | —                 |
 | **M9**  | Enum enforcement for status vocabularies                          | S5               | ⛔ N3 (deferred)         | Low               |
-| **M10** | `cms_site_settings` singleton enforcement                         | S7               | none                     | Low               |
+| **M10** | `cms_site_settings` singleton enforcement                         | S7               | ✅ **APPLIED**           | —                 |
 | **M11** | Public-role row-level rule for published content                  | Q9               | ✅ **already satisfied** | Low (verify once) |
 | **M12** | Page FK delete semantics → `ON DELETE RESTRICT`                   | FK review        | ✅ **APPLIED**           | —                 |
 
@@ -55,7 +55,7 @@ Two migrations below are trivial against an empty table and expensive against a 
 
 ## 3. Migration detail
 
-### M1 — `field_type_snapshow` typo
+### M1 — `field_type_snapshow` typo ✅ **APPLIED**
 
 **Problem.** `cms_form_answers.field_type_snapshow` should read `field_type_snapshot`. Confirmed to be the live API field name, so any generated TypeScript type inherits the misspelling.
 
@@ -104,7 +104,7 @@ CREATE UNIQUE INDEX cms_pages_department_proker_year_unique
 
 ---
 
-### M3 — Nullability drift on `cms_pages`
+### M3 — Nullability drift on `cms_pages` ✅ **APPLIED**
 
 **Problem (generalises S6).** Four of the seven fields that Directus marks `required` are `is_nullable: true` in the database:
 
@@ -142,7 +142,7 @@ Directus `required` is **application-level metadata**; it does not imply a `NOT 
 
 ---
 
-### M5 — `cms_prokers.department` nullability ✅ **RESOLVED — make it required**
+### M5 — `cms_prokers.department` nullability ✅ **APPLIED**
 
 **Problem.** `cms_prokers.department` is `is_nullable: true` and indexed, but **not required**. A proker may therefore exist with no department — in which case `/{department}/{activity}/{year}` **cannot be constructed at all**.
 
@@ -197,7 +197,7 @@ ERROR: duplicate key value violates unique constraint
 
 ---
 
-### M7 — Department slug canonicalisation
+### M7 — Department slug canonicalisation ✅ **APPLIED**
 
 **Problem (F14).** `cms_departments.slug` is documented as the route segment (_"Contoh: /internal-affairs"_) but does not match the repository's routes:
 
@@ -225,7 +225,7 @@ ERROR: duplicate key value violates unique constraint
 
 ---
 
-### M8 — Directus Studio field interfaces
+### M8 — Directus Studio field interfaces ✅ **APPLIED** (status vocabularies only)
 
 **Problem (S4).** Every `cms_*` field has `"interface": null`, so Directus Studio renders raw inputs — including `cms_pages.blocks` as a **plain JSON textarea**.
 
@@ -268,7 +268,7 @@ cms_review_events.action   submitted | approved | changes_requested | unpublishe
 
 ---
 
-### M10 — `cms_site_settings` singleton
+### M10 — `cms_site_settings` singleton ✅ **APPLIED**
 
 **Problem (S7).** `id` is a plain `integer` primary key with no singleton guarantee; the API can return multiple rows. Application code would then need to guess which is canonical.
 
@@ -336,27 +336,23 @@ cms_pages.department_foreign  → ON DELETE RESTRICT
 ## 4. Sequencing
 
 ```text
-✅ DONE — applied to production 2026-10-19 (scripts/directus-schema/001-*.sql)
+✅ DONE — 001 (scripts/directus-schema/001-page-identity-and-grants.*.sql)
   M2   slug uniqueness  → UNIQUE (department, proker, edition_year)
   M6   membership uniqueness → UNIQUE (user, department)
   M12  page FKs → ON DELETE RESTRICT
-        │
-        ▼
-Phase M-A  (ready now — no blockers, zero-risk)
-  M1   field_type_snapshot rename
-  M7   department slug canonicalisation
-  M10  site_settings singleton
-  M8   Studio interfaces
-  M5   cms_prokers.department NOT NULL
-  M4   cms_pages.proker required   ← no-op, nothing to run
-        │
-        ▼
-Phase M-C  (nullability alignment — M2 is settled, so this is unblocked)
+
+✅ DONE — 002 (scripts/directus-schema/002-nullability-slugs-interfaces.*.sql)
+  M1   field_type_snapshow → field_type_snapshot (column + metadata)
   M3   SET NOT NULL on slug / department / proker / status
-        │
-        ▼
-Phase M-D  (deferred)
-  M9   enum enforcement            ← blocked on the page_type vocabulary (N3)
+  M5   cms_prokers.department SET NOT NULL
+  M7   department slug canonicalisation
+  M8   select-dropdown + choices on the six status/action fields
+  M10  cms_site_settings singleton (CHECK id = 1 + seeded row)
+
+⛔ REMAINING
+  M9   enum enforcement (CHECK constraints)  ← blocked on the page_type vocabulary (N3)
+  M4   no-op — scope narrowed to proker pages
+  M11  already satisfied — one behavioural check outstanding
 ```
 
 **M11 is deliberately outside the structural sequence.** It is a permission check, not a schema migration, and it is already satisfied (Q9) — only one _behavioural_ verification remains, and that is a **precondition for creating the first page**, not part of a rollout.
