@@ -27,7 +27,7 @@
 | **L1** | **2026 Canonical (editorial dark)** | `/`, and the standard for all **new** pages                                             | `src/app/landing/**`, `src/layouts/{Navbar,NavbarLanding,Footer}.tsx`                                             | **Canonical — build new pages here**            |
 | **L2** | **Foundation tokens**               | available everywhere                                                                    | `src/styles/globals.css` `@theme`                                                                                 | **Source of brand colour + `Typography` scale** |
 | **L3** | **Event microsite (light)**         | `/research-and-technology/seminar-dosen{,-2,-3}`, `/student-welfare/academic-resources` | `src/components/seminar/SeminarEventTemplate.tsx`, `src/components/student-welfare/AcademicResourcesTemplate.tsx` | Supported template family — extend, do not fork |
-| **L4** | **Admin (shadcn/ui)**               | `/dashboard/**`, `src/app/(auth)/**`                                                    | `src/components/ui/**`                                                                                            | Internal only — never surface on public pages   |
+| **L4** | **Admin (shadcn/ui)**               | `/dashboard/**` (incl. the CMS at `/dashboard/cms`), `src/app/(auth)/**`                | `src/components/ui/**`                                                                                            | Internal only — never surface on public pages   |
 | **L5** | **Sanctioned bespoke themes**       | Bluecamp, TC Run, Syukuran Wisudawan, Info, Magical Message, Coming Soon, CMI, Magang   | per-route                                                                                                         | **Sanctioned and frozen — see §9**              |
 
 ### Which layer am I in?
@@ -528,11 +528,14 @@ _Deliberately left:_ `embla.css`'s `max-width: 500px`. Moving it onto the 640px 
 
 ## 11. Content architecture
 
-| Mechanism                                  | Where                                                                                         | Serves                                                                     |
-| ------------------------------------------ | --------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| **Hardcoded TS content objects**           | `src/app/*/page.tsx`, `src/contents/{layout,announcement,gallery,magangForm,evaluasiCMI}.ts`  | **All page copy and section structure**                                    |
-| **Custom REST backend** `api.hmtc-its.com` | `src/lib/api/*.client.ts`, `api.ts` (axios, HttpOnly cookie auth, refresh interceptor)        | gallery, repository, users, uploads, requests, profile                     |
-| **NocoDB** (self-hosted)                   | `src/app/api/{magical-message,seminar-dosen,seminar-dosen-2,seminar-dosen-3,tc-run}/route.ts` | **Form submissions only** — inserts rows via `/api/v2/tables/{id}/records` |
+Four mechanisms exist. **Know which one you are on** — two are live, one is being introduced, one is legacy.
+
+| Mechanism                                  | Where                                                                                         | Serves                                                 | Status                                                                                         |
+| ------------------------------------------ | --------------------------------------------------------------------------------------------- | ------------------------------------------------------ | ---------------------------------------------------------------------------------------------- |
+| **Hardcoded TS content objects**           | `src/app/*/page.tsx`, `src/contents/{layout,announcement,gallery,magangForm,evaluasiCMI}.ts`  | **All public page copy and section structure**         | **Live — the default.** Most public content is still this                                      |
+| **NocoDB** (self-hosted)                   | `src/app/api/{magical-message,seminar-dosen,seminar-dosen-2,seminar-dosen-3,tc-run}/route.ts` | **Form submissions only**                              | **Live.** Inserts via `/api/v2/tables/{id}/records`                                            |
+| **Directus**                               | `src/lib/directus/`, `src/app/api/cms/`, `src/app/dashboard/cms/`                             | CMS content, media, CMS identity                       | **Being introduced** — proker pages only. See `AGENTS.md` §13                                  |
+| ~~Custom REST backend~~ `api.hmtc-its.com` | `src/lib/api/`                                                                                | gallery, repository, users, uploads, requests, profile | ⚠️ **Legacy.** Those resources return 404 and most of the client was deleted — `AGENTS.md` §14 |
 
 Per-period gating lives in `src/proxy.ts` (Next.js 16 middleware) which redirects `/dashboard`, `/sandbox`, `/login`, `/register`, `/change-password` to `/coming-soon` in production and consults `/api/schedule?path=…` for `/ayomeludaftarmagang` and `/hidden-page-cf`.
 
@@ -551,6 +554,8 @@ Per-period gating lives in `src/proxy.ts` (Next.js 16 middleware) which redirect
 | O7  | Remove `next-themes` from `package.json` + lockfile                                                         | Deferred to keep this diff reviewable (see §10 deviations).                                                                              |
 | O8  | Per-component reduced-motion guards for JS/WebGL motion                                                     | The global CSS guard does not cover them (§10 B2).                                                                                       |
 | O9  | `KetuaCard` uses `font-['Libre_Caslon_Condensed']`, which is **not loaded** — it silently inherits          | Either load the face or switch to `font-libre` (Libre Caslon Text). Changing it alters rendering, so it needs a decision.                |
+
+> **CMS-scoped open items are tracked separately.** Asset privacy, revision retention, the `cms_pages.page_type` vocabulary and the dependency-security baseline are architecture decisions, not design-contract ones — see `docs/hmtc-cms-decisions.md`.
 
 ---
 

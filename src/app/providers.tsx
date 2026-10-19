@@ -1,54 +1,34 @@
 'use client';
 
-import {
-  QueryClient,
-  QueryClientProvider,
-  QueryFunctionContext,
-  QueryObserverOptions,
-} from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import * as React from 'react';
 
 import Loading from '@/components/Loading';
 import { Toaster } from '@/components/ui/sonner';
-import api from '@/lib/api/api';
 
 /**
- * Default query function untuk React Query.
- * Mengharapkan queryKey berupa readonly array dengan elemen pertama sebagai endpoint.
- */
-const defaultQueryFn = async ({
-  queryKey,
-}: QueryFunctionContext<readonly unknown[]>) => {
-  const endpoint = queryKey[0] as string;
-  const { data } = await api.get(endpoint);
-  return data;
-};
-
-/**
- * Extend tipe QueryObserverOptions agar mendukung properti suspense.
- * Perhatikan bahwa default type untuk TError diubah menjadi Error untuk mencegah konflik tipe.
- */
-interface ExtendedQueryObserverOptions<TData = unknown, TError = Error>
-  extends QueryObserverOptions<TData, TError> {
-  suspense?: boolean;
-}
-
-/**
- * Membuat instance QueryClient sebagai singleton.
- * Pengaturan default untuk query meliputi:
- * - Mengaktifkan suspense.
- * - Retry sesuai environment.
- * - Stale time selama 3 menit.
+ * The single QueryClient for the application.
+ *
+ * Deliberately has no `defaultQueryFn`. Deriving the endpoint from
+ * `queryKey[0]` meant that any hook which forgot to pass a `queryFn` silently
+ * issued a request for whatever the first key segment happened to be. Every
+ * hook must pass an explicit `queryFn` instead.
+ *
+ * `suspense` is deliberately not set here: in TanStack Query v5 it is an
+ * observer-level option, so declaring it in client defaults had no reliable
+ * effect. Use `useSuspenseQuery` where suspension is genuinely wanted.
+ *
+ * A second client used to live in `src/lib/query-client.ts` with different
+ * `staleTime`/`gcTime`/`retry` values. It was never imported and has been
+ * removed — two clients with contradictory defaults is worse than one.
  */
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      queryFn: defaultQueryFn,
-      suspense: true,
       retry: process.env.NODE_ENV === 'development' ? 0 : 3,
       staleTime: 1000 * 60 * 3,
-    } as ExtendedQueryObserverOptions,
+    },
   },
 });
 
@@ -58,7 +38,7 @@ type ProvidersProps = {
 
 /**
  * Providers membungkus aplikasi dengan QueryClientProvider dan Toaster.
- * Suspense fallback ditetapkan ke komponen <Loading />.
+ * The Suspense boundary remains for page-level `next/dynamic` fallbacks.
  * React Query Devtools hanya ditampilkan saat development.
  */
 export default function Providers({ children }: ProvidersProps) {
