@@ -13,8 +13,16 @@ export interface PaginatedApiResponse<DataType> {
   data: PaginateData<DataType>;
 }
 
+/**
+ * Envelope returned by the legacy `api.hmtc-its.com` application API.
+ *
+ * Note: this type previously declared a stray callable member
+ * (`id(id): readonly ['galleries', 'detail', number]`) — a copy-paste artefact
+ * from the React Query key factory. It was never called, but it mis-typed
+ * every `response.data` access in the six client modules that use this type.
+ * Removed in the Phase 0 cleanup.
+ */
 export type ApiResponse<T> = {
-  id(id: any): readonly ['galleries', 'detail', number];
   message: string;
   status: boolean;
   code: number;
