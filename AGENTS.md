@@ -41,6 +41,7 @@ Public marketing + event site for HMTC ITS, plus an internal dashboard and auth 
 | **CMS server data access** (to be created)       | `src/lib/directus/` — see §13             |
 | **CMS route handlers** (to be created)           | `src/app/api/cms/` — see §13              |
 | **CMS interface** (to be created)                | `src/app/dashboard/cms/` — see §13        |
+| **CMS schema migrations** (applied, tracked)     | `scripts/directus-schema/*.sql` — see §13 |
 | Legacy API clients — **mostly deleted**, see §14 | `src/lib/api/`                            |
 | Class merge helper                               | `src/lib/utils.ts` (`cn`)                 |
 | Image size presets                               | `src/constants/components/image-sizes.ts` |

@@ -5,7 +5,7 @@
 **Date of audit:** 2026-10-19
 **Revision:** 2 — Directus schema inspected (rev. 1 was blocked); legacy-API status verified against the live server.
 
-> **Status: awaiting review.** No CMS interface has been implemented. Phase Two/Three below are recommendations only.
+> **Status: historical baseline — NOT the current state.** This audit is the evidence trail for findings F1–F18 and should be read as such. For what was decided, see `docs/hmtc-cms-decisions.md`; for what was implemented, see `docs/hmtc-cms-phase-0-report.md`; for the schema changes, see `docs/hmtc-cms-schema-migration-plan.md`. The Phase Two / Three recommendations in §5–§6 were superseded by `docs/hmtc-cms-implementation-specification.md`.
 
 **Revision 2 changes**
 

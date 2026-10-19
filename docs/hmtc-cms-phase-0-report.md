@@ -1,6 +1,6 @@
 # HMTC CMS — Phase 0 Report (Groundwork)
 
-**Status:** Complete, awaiting review
+**Status:** Complete and reviewed. Decisions recorded in `docs/hmtc-cms-decisions.md`; migrations `001`/`002` applied (see `docs/hmtc-cms-schema-migration-plan.md`).
 **Scope executed:** Specification §13 steps 1–2 (baseline verification + decision freeze), comprising Track A (cleanup) and Track B (Directus/repository verification)
 **Baseline spec:** `docs/hmtc-cms-implementation-specification.md`
 **Audit:** `docs/audits/hmtc-cms-data-fetching-audit.md` (rev. 2)
