@@ -300,7 +300,6 @@ export default function Navbar() {
               alt='Logo HMTC ITS 2026'
               width={32}
               height={32}
-              priority
               quality={80}
               className='h-16 w-auto'
             />

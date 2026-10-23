@@ -225,7 +225,7 @@ Navbar/Announcement  →  Hero (dark, full-bleed, display type)  →  alternatin
 surface sections (bg-white / bg-[#121212] / bg-gray-100)  →  Footer
 ```
 
-Reference: `src/app/landing/LandingPage.tsx` — `LoadingScreen` → `HeaderAnnouncement` → `Cover` → `Navbar` → `About` → `ShowCase` (Vision/Mission, Quotes, Ketua carousel) → `RevealKabinet`.
+Reference: `src/app/landing/LandingPage.tsx` — `LoadingScreen` → `HeaderAnnouncement` → `Cover` → `Navbar` → `About` → `ShowCase` (Vision/Mission, Quotes, Ketua carousel) → `RevealKabinet`. The opening animation is preserved; `RevealKabinet` loads as it approaches the viewport.
 
 `src/layouts/Navbar.tsx` = scroll-reveal over a dark hero (transparent → `bg-black` at `scrollY ≥ 80`).
 `src/layouts/NavbarLanding.tsx` = sticky, always `bg-[#040404]`. **Use this one for L3 template pages** (`<NavbarLanding isActive />`).
