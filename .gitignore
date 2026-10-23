@@ -43,3 +43,6 @@ next-env.d.ts
 
 # Claude
 .claude
+
+# Pi agent task logs
+/.pi/

@@ -6,6 +6,9 @@ on:
       - main
   pull_request: {}
 
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.job }}-${{ github.ref }}
   cancel-in-progress: true
@@ -79,3 +82,19 @@ jobs:
 
       - name: 💅 Run Prettier write
         run: pnpm format:write
+
+  assets:
+    name: 🖼️ Asset Size
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⬇️ Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: ⎔ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      # No install step: this check only uses Node builtins.
+      - name: 🖼️ Check public/ asset sizes
+        run: node scripts/check-image-sizes.mjs

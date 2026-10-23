@@ -78,12 +78,13 @@ const Quotes: React.FC = () => {
           </div>
         </div>
         <NextImage
-          src='/Quotes/incremental2026.png'
+          src='/Quotes/incremental2026.webp'
           alt='Quotes Background'
           className='h-full w-full rounded-none'
           imgClassName='object-cover'
           width={646}
           height={311}
+          sizes='(min-width: 1024px) 50vw, 100vw'
         />
       </div>
     </div>

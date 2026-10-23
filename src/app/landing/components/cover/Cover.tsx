@@ -66,12 +66,13 @@ export default function Cover({ heroReady }: { heroReady?: boolean }) {
       {/* Background */}
       <div className='absolute inset-0'>
         <NextImage
-          src='bendera.png'
+          src='bendera.webp'
           alt='Background Beranda HMTC 2026'
           className='h-full w-full'
           imgClassName='h-full w-full object-cover object-center'
           width={1512}
           height={982}
+          sizes='100vw'
           priority={true}
         />
         <div className='absolute inset-0 bg-black/72' />

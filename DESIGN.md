@@ -13,11 +13,10 @@
 
 ## 0. Read this first
 
-1. **There is no Directus, Strapi, Sanity, or page-builder.** Page content is hardcoded TypeScript. See §11.
-2. **There are two styling systems.** The `Typography` component (§4) and raw Tailwind utilities on markup (§6). `Typography` is **mandated** for new work.
-3. **The base font is Satoshi**, declared on `<body>` (§10 B1). Text elements should _still_ carry an explicit font — the design uses eight families, and `<Typography>` without `font` silently gives you Poppins (173 call sites omit it, §10 F4).
-4. **9 dead class names were removed** (§10 A4). If you meet `font-secondary`, `text-base-nav`, `text-md` etc. in a branch older than the cleanup, they do nothing.
-5. **There is no dark mode.** Do not add dark styles. See §10 A3.
+1. **There are two styling systems.** The `Typography` component (§4) and raw Tailwind utilities on markup (§6). `Typography` is **mandated** for new work.
+2. **The base font is Satoshi**, declared on `<body>` (§10 B1). Text elements should _still_ carry an explicit font — the design uses eight families, and `<Typography>` without `font` silently gives you Poppins (173 call sites omit it, §10 F4).
+3. **9 dead class names were removed** (§10 A4). If you meet `font-secondary`, `text-base-nav`, `text-md` etc. in a branch older than the cleanup, they do nothing.
+4. **There is no dark mode.** Do not add dark styles. See §10 A3.
 
 ---
 
@@ -28,7 +27,7 @@
 | **L1** | **2026 Canonical (editorial dark)** | `/`, and the standard for all **new** pages                                             | `src/app/landing/**`, `src/layouts/{Navbar,NavbarLanding,Footer}.tsx`                                             | **Canonical — build new pages here**            |
 | **L2** | **Foundation tokens**               | available everywhere                                                                    | `src/styles/globals.css` `@theme`                                                                                 | **Source of brand colour + `Typography` scale** |
 | **L3** | **Event microsite (light)**         | `/research-and-technology/seminar-dosen{,-2,-3}`, `/student-welfare/academic-resources` | `src/components/seminar/SeminarEventTemplate.tsx`, `src/components/student-welfare/AcademicResourcesTemplate.tsx` | Supported template family — extend, do not fork |
-| **L4** | **Admin (shadcn/ui)**               | `/dashboard/**`, `src/app/(auth)/**`                                                    | `src/components/ui/**`                                                                                            | Internal only — never surface on public pages   |
+| **L4** | **Admin (shadcn/ui)**               | `/dashboard/**` (incl. the CMS at `/dashboard/cms`), `src/app/(auth)/**`                | `src/components/ui/**`                                                                                            | Internal only — never surface on public pages   |
 | **L5** | **Sanctioned bespoke themes**       | Bluecamp, TC Run, Syukuran Wisudawan, Info, Magical Message, Coming Soon, CMI, Magang   | per-route                                                                                                         | **Sanctioned and frozen — see §9**              |
 
 ### Which layer am I in?
@@ -226,7 +225,7 @@ Navbar/Announcement  →  Hero (dark, full-bleed, display type)  →  alternatin
 surface sections (bg-white / bg-[#121212] / bg-gray-100)  →  Footer
 ```
 
-Reference: `src/app/landing/LandingPage.tsx` — `LoadingScreen` → `HeaderAnnouncement` → `Cover` → `Navbar` → `About` → `ShowCase` (Vision/Mission, Quotes, Ketua carousel) → `RevealKabinet`.
+Reference: `src/app/landing/LandingPage.tsx` — `LoadingScreen` → `HeaderAnnouncement` → `Cover` → `Navbar` → `About` → `ShowCase` (Vision/Mission, Quotes, Ketua carousel) → `RevealKabinet`. The opening animation is preserved; `RevealKabinet` loads as it approaches the viewport.
 
 `src/layouts/Navbar.tsx` = scroll-reveal over a dark hero (transparent → `bg-black` at `scrollY ≥ 80`).
 `src/layouts/NavbarLanding.tsx` = sticky, always `bg-[#040404]`. **Use this one for L3 template pages** (`<NavbarLanding isActive />`).
@@ -529,13 +528,15 @@ _Deliberately left:_ `embla.css`'s `max-width: 500px`. Moving it onto the 640px 
 
 ## 11. Content architecture
 
-| Mechanism                                  | Where                                                                                                | Serves                                                                     |
-| ------------------------------------------ | ---------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| **Hardcoded TS content objects**           | `src/app/*/page.tsx`, `src/contents/{layout,announcement,gallery,anggota,magangForm,evaluasiCMI}.ts` | **All page copy and section structure**                                    |
-| **Custom REST backend** `api.hmtc-its.com` | `src/lib/api/*.client.ts`, `api.ts` (axios, HttpOnly cookie auth, refresh interceptor)               | gallery, repository, users, uploads, requests, profile                     |
-| **NocoDB** (self-hosted)                   | `src/app/api/{magical-message,seminar-dosen,seminar-dosen-2,seminar-dosen-3,tc-run}/route.ts`        | **Form submissions only** — inserts rows via `/api/v2/tables/{id}/records` |
+Four mechanisms exist. **Know which one you are on** — two are live, one is being introduced, one is legacy.
 
-**There is no Directus and no page-builder. Do not introduce one.**
+| Mechanism                                  | Where                                                                                         | Serves                                                 | Status                                                                                         |
+| ------------------------------------------ | --------------------------------------------------------------------------------------------- | ------------------------------------------------------ | ---------------------------------------------------------------------------------------------- |
+| **Hardcoded TS content objects**           | `src/app/*/page.tsx`, `src/contents/{layout,announcement,gallery,magangForm,evaluasiCMI}.ts`  | **All public page copy and section structure**         | **Live — the default.** Most public content is still this                                      |
+| **NocoDB** (self-hosted)                   | `src/app/api/{magical-message,seminar-dosen,seminar-dosen-2,seminar-dosen-3,tc-run}/route.ts` | **Form submissions only**                              | **Live.** Inserts via `/api/v2/tables/{id}/records`                                            |
+| **Directus**                               | `src/lib/directus/`, `src/app/api/cms/`, `src/app/dashboard/cms/`                             | CMS content, media, CMS identity                       | **Being introduced** — proker pages only. See `AGENTS.md` §13                                  |
+| ~~Custom REST backend~~ `api.hmtc-its.com` | `src/lib/api/`                                                                                | gallery, repository, users, uploads, requests, profile | ⚠️ **Legacy.** Those resources return 404 and most of the client was deleted — `AGENTS.md` §14 |
+
 Per-period gating lives in `src/proxy.ts` (Next.js 16 middleware) which redirects `/dashboard`, `/sandbox`, `/login`, `/register`, `/change-password` to `/coming-soon` in production and consults `/api/schedule?path=…` for `/ayomeludaftarmagang` and `/hidden-page-cf`.
 
 ---
@@ -554,12 +555,14 @@ Per-period gating lives in `src/proxy.ts` (Next.js 16 middleware) which redirect
 | O8  | Per-component reduced-motion guards for JS/WebGL motion                                                     | The global CSS guard does not cover them (§10 B2).                                                                                       |
 | O9  | `KetuaCard` uses `font-['Libre_Caslon_Condensed']`, which is **not loaded** — it silently inherits          | Either load the face or switch to `font-libre` (Libre Caslon Text). Changing it alters rendering, so it needs a decision.                |
 
+> **CMS-scoped open items are tracked separately.** Asset privacy, revision retention, the `cms_pages.page_type` vocabulary and the dependency-security baseline are architecture decisions, not design-contract ones — see `docs/hmtc-cms-decisions.md`.
+
 ---
 
 ## 13. New page — the prescribed recipe
 
 1. **Pick the layer** (§1).
-2. **Choose a route** under `src/app/<domain>/<slug>/page.tsx`; export a `Metadata` object with `title`, `description`, `alternates.canonical`, `robots`, OpenGraph and Twitter cards — copy `src/app/info/page.tsx` as the Metadata template.
+2. **Choose a route** under `src/app/<domain>/<slug>/page.tsx`; export a `Metadata` object with `title`, `description`, `alternates.canonical`, `robots`, OpenGraph and Twitter cards — copy `src/app/info/page.tsx` as the Metadata template. **Proker (_program kerja_) pages are year-scoped — see §14.**
 3. **Render `<JsonLd />`.**
 4. **Compose chrome:** `<NavbarLanding isActive />` … `<Footer />`. Footer is mandatory.
 5. **Define a typed `…Content` object** in the page file (do not inline JSX per field) and pass it to a template in `src/components/<domain>/`.
@@ -573,7 +576,46 @@ Per-period gating lives in `src/proxy.ts` (Next.js 16 middleware) which redirect
     pnpm typecheck && pnpm lint:strict && pnpm format:check && pnpm test
     ```
 
-11. **Confirm content type:** if the page needs editor-managed copy, extend the NocoDB route-handler pattern (§11). **Do not add a CMS.**
+11. **Confirm content type:** if the page needs editor-managed copy, extend the NocoDB route-handler pattern (§11).
+
+---
+
+## 14. Proker pages — year-scoped routes
+
+Proker (program kerja) pages are published per edition year and are served from
+`/<domain>/<proker-slug>/<year>` — e.g. `/internal-affairs/syukuran-wisudawan/2026`.
+Every proker route is three files:
+
+```text
+src/app/<domain>/<proker-slug>/
+  PageContent.tsx   # the page implementation (server or client component)
+  [year]/page.tsx   # edition route: generateStaticParams + dynamicParams = false
+  route.ts          # legacy year-less URL -> real HTTP 301 to PROKER_DEFAULT_YEAR
+```
+
+The edition year is **never** hardcoded. `src/lib/config.ts` is the single
+source of truth:
+
+- `PROKER_BASE_PATHS` — named proker base paths, reused by the route `[year]`
+  and redirect files.
+- `PROKER_DEFAULT_YEAR` — the edition the legacy year-less URLs redirect to.
+  Change this one value to roll the site over to another edition.
+- `PROKER_EDITION_YEARS` — `basePath -> published years`. A proker that is not
+  listed publishes `PROKER_DEFAULT_YEAR` only.- `prokerHref(basePath)` — builds the year-suffixed URL for internal links.
+
+Rules:
+
+- An unpublished or malformed year must stay a **404**. Enforce it in the router
+  (`generateStaticParams` + `dynamicParams = false`) — not with a render-time
+  `notFound()`.
+- The legacy redirect must live in a **route handler**, not a page. The root
+  `<Suspense>` in `src/app/providers.tsx` wraps every page and flushes a 200
+  shell before the page body renders, so a page-level `permanentRedirect()`
+  degrades into a client-side redirect and `notFound()` into a soft-404. A route
+  handler sets the status itself: `NextResponse.redirect(url, 301)`.
+- Internal links, nav, breadcrumbs and cards use `prokerHref(PROKER_BASE_PATHS.<key>)`
+  — see `src/contents/layout.ts`.
+- Never add a second `[year]` page or a hand-written redirect list per route.
 
 ---
 

@@ -14,7 +14,7 @@ export default function ProkerPage() {
     <div>
       <div className='relative z-10 flex flex-col items-center justify-center gap-[28px] self-stretch bg-[#EFDFC4] px-6 pt-[100px] pb-0 md:px-16 lg:px-[254px]'>
         <Image
-          src='/images/internal-affairs/syukuran-wisuda/proker-bg.png'
+          src='/images/internal-affairs/syukuran-wisuda/proker-bg.webp'
           alt=''
           fill
           priority
@@ -75,7 +75,7 @@ export default function ProkerPage() {
           </button>
           <div className='relative z-10 mx-auto flex aspect-video w-full max-w-[984px] items-center justify-center'>
             <Image
-              src='/images/internal-affairs/syukuran-wisuda/VideoFrame.png'
+              src='/images/internal-affairs/syukuran-wisuda/VideoFrame.webp'
               alt=''
               fill
               priority

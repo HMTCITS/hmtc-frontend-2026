@@ -14,6 +14,7 @@
     "format:write": "prettier --write .",
     "format:check": "prettier --check .",
     "format": "pnpm run format:write && pnpm run lint:fix && pnpm run typecheck && pnpm run lint:strict",
+    "check:images": "node scripts/check-image-sizes.mjs",
     "prepare": "husky",
     "test": "jest --passWithNoTests",
     "test:watch": "jest --watch",

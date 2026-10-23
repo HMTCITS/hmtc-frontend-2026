@@ -191,7 +191,7 @@ export default function HarapanPage() {
     );
 
   return (
-    <div className="flex flex-col items-center justify-center gap-[28px] self-stretch bg-[#EFDFC4] bg-[url('/images/internal-affairs/syukuran-wisuda/harapan-bg.png')] bg-repeat p-8 py-32 sm:p-16 md:p-[10%]">
+    <div className="flex flex-col items-center justify-center gap-[28px] self-stretch bg-[#EFDFC4] bg-[url('/images/internal-affairs/syukuran-wisuda/harapan-bg.webp')] bg-repeat p-8 py-32 sm:p-16 md:p-[10%]">
       <div className="relative z-10 inline-flex w-full flex-col gap-7 bg-[url('/images/internal-affairs/syukuran-wisuda/blank-brown-paper-design.png')] bg-cover bg-repeat p-8 pb-48 sm:p-16 md:p-24 md:pb-32">
         <div className='absolute -top-20 -left-20 hidden md:block'>
           <Image

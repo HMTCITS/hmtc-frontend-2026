@@ -21,6 +21,8 @@ type LazySectionProps = {
    * Default: 0.15 (15% visible triggers)
    */
   threshold?: number;
+  /** Start loading before the section enters the viewport. */
+  rootMargin?: string;
   /**
    * Callback when section first becomes visible
    */
@@ -47,6 +49,7 @@ const LazySection: React.FC<LazySectionProps> = ({
   fallback,
   once = true,
   threshold = 0.15,
+  rootMargin = '0px',
   onVisible,
   forceVisible = false,
   skeletonHeight,
@@ -85,11 +88,12 @@ const LazySection: React.FC<LazySectionProps> = ({
       },
       {
         threshold,
+        rootMargin,
       },
     );
     io.observe(ref.current);
     return () => io.disconnect();
-  }, [threshold, once, forceVisible, onVisible]);
+  }, [threshold, rootMargin, once, forceVisible, onVisible]);
 
   const Skeleton = fallback ?? (
     <div

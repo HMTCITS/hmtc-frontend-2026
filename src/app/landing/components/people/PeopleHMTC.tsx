@@ -16,7 +16,7 @@ export default function PeopleHMTC() {
     '/peoplehmtc/SW.png',
     '/peoplehmtc/STI.png',
     '/peoplehmtc/SSD.png',
-    '/peoplehmtc/SRD.png',
+    '/peoplehmtc/SRD.webp',
     '/peoplehmtc/psdm.png',
     '/peoplehmtc/Personalia.png',
     '/peoplehmtc/Keuangan.png',

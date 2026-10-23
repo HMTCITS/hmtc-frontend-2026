@@ -2048,33 +2048,6 @@ export default function RevealKabinet({
           })}
         </div>
       </div>
-      <div
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '1px',
-          height: '1px',
-          opacity: 0.001,
-          overflow: 'hidden',
-          pointerEvents: 'none',
-          zIndex: -1,
-        }}
-        aria-hidden
-      >
-        {([-2, -1, 1, 2] as const).map((offset) => {
-          const idx = (si + offset + slides.length) % slides.length;
-          return (
-            <Image
-              key={slides[idx].id}
-              src={slides[idx].photo}
-              alt=''
-              width={500}
-              height={300}
-            />
-          );
-        })}
-      </div>
       <div className='flex flex-1 flex-col justify-center gap-7 lg:flex-row'>
         <div
           ref={photoRef}
@@ -2091,7 +2064,6 @@ export default function RevealKabinet({
               fill
               sizes='(min-width: 1024px) 30vw, 100vw'
               className='object-contain'
-              priority
               draggable={false}
             />
             <div className='pointer-events-none absolute inset-0 grid h-full w-full grid-cols-12 grid-rows-12'>
