@@ -44,6 +44,7 @@ export const adelphe = localFont({
     },
   ],
   variable: '--font-adelphe',
+  preload: false,
 });
 
 /**
@@ -134,6 +135,7 @@ export const helveticaNeue = localFont({
     },
   ],
   variable: '--font-helveticaNeue',
+  preload: false,
 });
 
 /**
@@ -159,6 +161,7 @@ export const libreCaslon = localFont({
     },
   ],
   variable: '--font-libreCaslon',
+  preload: false,
 });
 
 /**
@@ -229,6 +232,7 @@ export const satoshi = localFont({
     // },
   ],
   variable: '--font-satoshi',
+  preload: false,
 });
 
 /**
@@ -523,6 +527,7 @@ export const inter = localFont({
     },
   ],
   variable: '--font-inter',
+  preload: false,
 });
 
 /**
@@ -593,6 +598,7 @@ export const playfairDisplay = localFont({
     },
   ],
   variable: '--font-PlayfairDisplay',
+  preload: false,
 });
 
 /**
@@ -693,6 +699,7 @@ export const poppins = localFont({
     },
   ],
   variable: '--font-poppins',
+  preload: false,
 });
 
 /**
@@ -705,6 +712,7 @@ export const libreBaskerville = Libre_Baskerville({
   style: ['normal', 'italic'],
   display: 'swap',
   variable: '--font-libre-baskerville',
+  preload: false,
 });
 
 /**
@@ -717,6 +725,7 @@ export const plusJakartaSans = Plus_Jakarta_Sans({
   style: ['normal', 'italic'],
   display: 'swap',
   variable: '--font-plus-jakarta-sans',
+  preload: false,
 });
 
 /**
@@ -729,6 +738,7 @@ export const jetbrainsMono = JetBrains_Mono({
   style: ['normal', 'italic'],
   display: 'swap',
   variable: '--font-jetbrains-mono',
+  preload: false,
 });
 
 /**
@@ -743,10 +753,12 @@ export const harryPotter = localFont({
   ],
   display: 'swap',
   variable: '--font-harry-potter',
+  preload: false,
 });
 
 export const archivo = Archivo({
   subsets: ['latin'],
   weight: ['400', '500', '600', '700', '800'],
   variable: '--font-archivo',
+  preload: false,
 });
