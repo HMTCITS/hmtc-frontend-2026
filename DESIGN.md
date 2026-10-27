@@ -215,6 +215,7 @@ Applies to L1/L3; L4 uses the shadcn scale (§8).
 | Entrance choreography           | `500–780ms`                                                                                             |
 | Line-mask reveal                | `translateY(108%)` → `0` inside `overflow-hidden`                                                       |
 | Loading screen                  | 2.45 s, dismisses once, then releases hero animation                                                    |
+| Scale transitions               | Tailwind v4 `scale-*` sets the `scale` property — use `transition-[scale,…]`, not `transform`           |
 
 **Mandate:** every motion must respect `prefers-reduced-motion`. A global CSS guard now covers transitions and keyframes (§10 B2), but **JS and WebGL motion is not covered** — guard it inside the component.
 
@@ -225,7 +226,7 @@ Navbar/Announcement  →  Hero (dark, full-bleed, display type)  →  alternatin
 surface sections (bg-white / bg-[#121212] / bg-gray-100)  →  Footer
 ```
 
-Reference: `src/app/landing/LandingPage.tsx` — `LoadingScreen` → `HeaderAnnouncement` → `Cover` → `Navbar` → `About` → `ShowCase` (Vision/Mission, Quotes, Ketua carousel) → `RevealKabinet`. The opening animation is preserved; `RevealKabinet` loads as it approaches the viewport.
+Reference: `src/app/landing/LandingPage.tsx` — `LoadingScreen` → `HeaderAnnouncement` → `Cover` → `Navbar` → `About` → `ShowCase` (Vision/Mission, Quotes, Ketua carousel) → `RevealKabinet` → `GalleryCarousel` ("Gallery of HMTC", `#gallery`). The opening animation is preserved; `RevealKabinet` and `GalleryCarousel` load as they approach the viewport (`lazy: true` in `HOME_SECTIONS`, mounted through `LazySection`). Two requested exceptions in `GalleryCarousel`: its heading copies the `RevealKabinet` heading above it (`font-serif text-[48px]`, raw classes) so the pair reads as one, and its cards use `rounded-lg` instead of the `rounded-2xl` card default.
 
 `src/layouts/Navbar.tsx` = scroll-reveal over a dark hero (transparent → `bg-black` at `scrollY ≥ 80`).
 `src/layouts/NavbarLanding.tsx` = sticky, always `bg-[#040404]`. **Use this one for L3 template pages** (`<NavbarLanding isActive />`).
