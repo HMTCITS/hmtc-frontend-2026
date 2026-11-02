@@ -56,6 +56,15 @@ export const galleryItems: GalleryItem[] = [
   {
     id: 6,
     date: 'Mei 2026',
+    title: 'LKMM TD',
+    image: '/gallery/lkmmTd2026.jpg',
+    link: 'https://drive.google.com/drive/folders/13O3hPDu-akep7ZOkh29QAAWuwXxJVgxB',
+    width: 600,
+    height: 400,
+  },
+  {
+    id: 7,
+    date: 'Mei 2026',
     title: 'Supporteran Basket ELITExPESRAF',
     image:
       'https://directus.hmtc-its.com/assets/4604c029-9bae-4d76-8f14-f7c2acae8319',
@@ -64,7 +73,7 @@ export const galleryItems: GalleryItem[] = [
     height: 400,
   },
   {
-    id: 7,
+    id: 8,
     date: 'Agustus 2026',
     title: 'HMTC x BEM FTEIC Peduli',
     image:
@@ -74,7 +83,7 @@ export const galleryItems: GalleryItem[] = [
     height: 400,
   },
   {
-    id: 8,
+    id: 9,
     date: 'Agustus 2026',
     title: 'Basic Media Schooling (BMS)',
     image:
@@ -84,7 +93,16 @@ export const galleryItems: GalleryItem[] = [
     height: 400,
   },
   {
-    id: 9,
+    id: 10,
+    date: 'Agustus 2026',
+    title: 'Incremental 3',
+    image: '/gallery/incremental3.jpg',
+    link: 'https://drive.google.com/drive/folders/1A12AueR5b7eFf9gWDeYMefS4v4s0f6yr',
+    width: 600,
+    height: 400,
+  },
+  {
+    id: 11,
     date: 'Oktober 2026',
     title: 'TC Run',
     image:
@@ -94,7 +112,7 @@ export const galleryItems: GalleryItem[] = [
     height: 400,
   },
   {
-    id: 10,
+    id: 12,
     date: 'Agustus 2026',
     title: 'OKKBK 2026',
     image:
@@ -104,7 +122,7 @@ export const galleryItems: GalleryItem[] = [
     height: 400,
   },
   {
-    id: 11,
+    id: 13,
     date: 'September 2026',
     title: 'Benchmarking HMTC ITS x HMIF ITB',
     image:
