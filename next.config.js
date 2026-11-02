@@ -93,6 +93,13 @@ const nextConfig = {
         protocol: 'https',
         hostname: '**.cloudflareinsights.com',
       },
+      // Directus file storage (public assets, decision Q10). Only the asset
+      // endpoint is allowed — never the REST API (see CSP connect-src, D4).
+      {
+        protocol: 'https',
+        hostname: 'directus.hmtc-its.com',
+        pathname: '/assets/**',
+      },
     ],
   },
 };

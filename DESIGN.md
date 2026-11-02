@@ -383,7 +383,7 @@ Weights: `thin` `extralight` `light` `regular` `medium` `semibold` `bold` `extra
 
 - **`NextImage` is mandatory** for all content imagery.
 - Bare `src` values are auto-prefixed with `/images/`. Pass `serverStaticImg` to bypass, or a leading `/` for root-absolute.
-- **All content imagery must live in `public/`.** `next.config.js` `images.remotePatterns` allows **only** `**.cloudflareinsights.com`. A remote hero image will not render.
+- **Static content imagery lives in `public/`.** `next.config.js` `images.remotePatterns` allows only `**.cloudflareinsights.com` and Directus assets (`https://directus.hmtc-its.com/assets/**`, public by decision Q10). Any other remote image will not render.
 - Formats: AVIF → WebP (`images.formats`). `dangerouslyAllowSVG: true`.
 - Presets: `ImageSizes.{Square|Widescreen|Standard}.{sm|md|lg|xl}` in `src/constants/components/image-sizes.ts`.
 - `useSkeleton` for lists and anything loaded asynchronously; `priority` for the hero and the navbar logo only.

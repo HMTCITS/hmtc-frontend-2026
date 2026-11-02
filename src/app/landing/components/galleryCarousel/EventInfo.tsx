@@ -171,29 +171,32 @@ export default function EventInfo({
 
       <div className='flex items-center justify-between gap-4'>
         {/* Same pill as the Instagram link in RevealKabinet; inverts on hover. */}
-        <BaseLink
-          href={event.link}
-          className='inline-flex items-center gap-2 rounded-full border border-white/40 px-5 py-2.5 text-white transition-colors duration-75 hover:border-white hover:bg-white hover:text-[#0B0B0C] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#0078B4]'
-        >
-          <Typography as='span' font='satoshi' weight='medium' variant='b4'>
-            Explore More
-          </Typography>
-          <ArrowUpRight
-            aria-hidden='true'
-            strokeWidth={1.5}
-            className='size-4'
-          />
-          <span className='sr-only'> — {event.title} (opens in new tab)</span>
-        </BaseLink>
+        {event.link && (
+          <BaseLink
+            href={event.link}
+            className='inline-flex items-center gap-2 rounded-full border border-white/40 px-5 py-2.5 text-white transition-colors duration-75 hover:border-white hover:bg-white hover:text-[#0B0B0C] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#0078B4]'
+          >
+            <Typography as='span' font='satoshi' weight='medium' variant='b4'>
+              Explore More
+            </Typography>
+            <ArrowUpRight
+              aria-hidden='true'
+              strokeWidth={1.5}
+              className='size-4'
+            />
+            <span className='sr-only'> — {event.title} (opens in new tab)</span>
+          </BaseLink>
+        )}
 
-        {/* Position counter. Screen readers get it from the live region. */}
+        {/* Position counter. Screen readers get it from the live region.
+            ml-auto keeps it right-aligned when the link is absent. */}
         <Typography
           as='div'
           aria-hidden='true'
           font='satoshi'
           weight='medium'
           variant='c0'
-          className='flex tracking-[0.18em] text-white/55 tabular-nums'
+          className='ml-auto flex tracking-[0.18em] text-white/55 tabular-nums'
         >
           <div className='relative grid overflow-hidden text-white'>
             <AnimatePresence initial={false} custom={direction}>

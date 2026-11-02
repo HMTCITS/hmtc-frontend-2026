@@ -58,7 +58,7 @@ Public marketing + event site for HMTC ITS, plus an internal dashboard and auth 
 1. **Identify your layer first** (`DESIGN.md` §1). Most new work is **L1 Canonical**.
 2. **Use `<Typography>` for all text.** Do not write raw `font-*`/`text-*` size classes on headings and body copy. See §5 below.
 3. **Use `<NextImage>` for all images.** Bare `src` values are auto-prefixed with `/images/`.
-4. **All content imagery must live in `public/`.** `next.config.js` `images.remotePatterns` allows only `**.cloudflareinsights.com`; a remote URL will not render.
+4. **Static content imagery lives in `public/`.** `next.config.js` `images.remotePatterns` allows only `**.cloudflareinsights.com` and Directus assets (`https://directus.hmtc-its.com/assets/**`); any other remote URL will not render.
 5. **Footer is mandatory on every public page.**
 6. **Seminar blue `#2F6FED` is scoped to `/research-and-technology/seminar-dosen*` only.** Do not use it anywhere else — including the announcement bar.
 7. **Sanctioned bespoke themes are frozen.** `DESIGN.md` §9 lists them. Do not "fix" their palettes or fonts.

@@ -43,7 +43,10 @@ export default function EventCard({ event, state, onSelect }: EventCardProps) {
           fill
           useSkeleton
           draggable={false}
-          sizes='(min-width: 1280px) 256px, (min-width: 768px) 33vw, 60vw'
+          // Rendered width, not card width: a 3:2 photo covering a 5:7 card is
+          // drawn ~2.1x the card width (card ≈ 300px at xl, 256px at md, 1/2
+          // of the row at sm, 3/5 below). Under-hinting this blurs the photo.
+          sizes='(min-width: 1280px) 640px, (min-width: 768px) 540px, (min-width: 640px) 105vw, 126vw'
           className={cn(
             'absolute inset-0 transition-opacity',
             EASE,
