@@ -38,7 +38,7 @@ export const galleryItems: GalleryItem[] = [
   {
     id: 4,
     date: 'Mei 2026',
-    title: 'Benchmark HMTC x HMTL',
+    title: 'Benchmark HMTC x HMPL',
     image:
       'https://directus.hmtc-its.com/assets/fcbdcd9b-30e5-4c98-8250-b9999f6b83e9',
     link: GALLERY_DRIVE_LINK,
