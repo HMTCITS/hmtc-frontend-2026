@@ -13,6 +13,8 @@ For more details, see https://www.gnu.org/licenses/gpl-3.0.en.html.
 
 ## Getting Started
 
+> Full guide, including a local Directus for CMS work: [`docs/local-development.md`](docs/local-development.md).
+
 ### 1. Clone the Repository
 
 You can clone this repository using one of the following methods:

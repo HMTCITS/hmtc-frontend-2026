@@ -185,15 +185,16 @@ Consequence: **the sandbox pages are not a live visual reference.** Verify compo
 
 ## 12. Documentation index
 
-| Document                                        | Purpose                                                                            |
-| ----------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `DESIGN.md`                                     | Design contract — layers, tokens, components, a11y, cleanup queue, new-page recipe |
-| `README.md`                                     | Setup, commit convention, deployment                                               |
-| `docs/hmtc-cms-implementation-specification.md` | CMS requirements, permission matrix, API contract, acceptance criteria             |
-| `docs/hmtc-cms-decisions.md`                    | **Decision log** — what is confirmed vs. still open, with the reasoning            |
-| `docs/hmtc-cms-schema-migration-plan.md`        | Directus migrations M1–M11 with rollback (plan only, nothing applied)              |
-| `docs/hmtc-cms-phase-0-report.md`               | What Phase 0 changed, and the verification evidence                                |
-| `docs/audits/hmtc-cms-data-fetching-audit.md`   | Read-only audit of the existing data-fetching layer (findings F1–F18)              |
+| Document                                        | Purpose                                                                                    |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `DESIGN.md`                                     | Design contract — layers, tokens, components, a11y, cleanup queue, new-page recipe         |
+| `README.md`                                     | Setup, commit convention, deployment                                                       |
+| `docs/local-development.md`                     | Local setup, including a local Directus with the production schema (`pnpm directus:setup`) |
+| `docs/hmtc-cms-implementation-specification.md` | CMS requirements, permission matrix, API contract, acceptance criteria                     |
+| `docs/hmtc-cms-decisions.md`                    | **Decision log** — what is confirmed vs. still open, with the reasoning                    |
+| `docs/hmtc-cms-schema-migration-plan.md`        | Directus migrations M1–M11 with rollback (plan only, nothing applied)                      |
+| `docs/hmtc-cms-phase-0-report.md`               | What Phase 0 changed, and the verification evidence                                        |
+| `docs/audits/hmtc-cms-data-fetching-audit.md`   | Read-only audit of the existing data-fetching layer (findings F1–F18)                      |
 
 When you make a decision that changes either document, **update it in the same change.**
 
