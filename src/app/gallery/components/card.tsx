@@ -49,17 +49,19 @@ export default function Card({ item }: CardProps) {
           </Typography>
         </div>
 
-        <div className='mt-4 flex justify-end'>
-          <Link
-            href={item.link}
-            className='flex items-center gap-2 border-b text-[#00AAE7] hover:text-[#0085b8]'
-          >
-            <Typography variant='b3' font='satoshi'>
-              View More
-            </Typography>
-            <MoveRight size={20} />
-          </Link>
-        </div>
+        {item.link && (
+          <div className='mt-4 flex justify-end'>
+            <Link
+              href={item.link}
+              className='flex items-center gap-2 border-b text-[#00AAE7] hover:text-[#0085b8]'
+            >
+              <Typography variant='b3' font='satoshi'>
+                View More
+              </Typography>
+              <MoveRight size={20} />
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   );

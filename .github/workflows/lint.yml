@@ -19,15 +19,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: ⬇️ Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: ⎔ Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 24
-
+      # No `version:` — the pnpm version comes from `packageManager` in package.json.
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
+
+      - name: ⎔ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'pnpm'
 
       - name: ⚡ Install Dependencies (pnpm)
         run: pnpm install --frozen-lockfile
@@ -40,15 +42,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: ⬇️ Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: ⎔ Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 24
-
+      # No `version:` — the pnpm version comes from `packageManager` in package.json.
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
+
+      - name: ⎔ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'pnpm'
 
       - name: ⚡ Install Dependencies (pnpm)
         run: pnpm install --frozen-lockfile
@@ -61,15 +65,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: ⬇️ Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: ⎔ Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 24
-
+      # No `version:` — the pnpm version comes from `packageManager` in package.json.
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
+
+      - name: ⎔ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'pnpm'
 
       - name: ⚡ Install Dependencies (pnpm)
         run: pnpm install --frozen-lockfile
