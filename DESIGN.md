@@ -184,7 +184,7 @@ Tailwind v4 defaults are in force and are the only scale to use:
 
 Observed usage: `md:` is by far the most common (≈417 uses), then `lg:` (≈220) and `sm:` (≈199). `2xl:` is used **once**. `min-lg:` is used 12 times and is identical to `lg:`.
 
-**Rules**
+#### Breakpoint rules
 
 - Prefer `md:` → `lg:` → `xl:` for section layout. **Do not add breakpoints beyond this scale.**
 - Do not hand-write `@media` queries. Two legacy exceptions are tolerated and are **not** precedents: `styles/embla.css` (`500px`, plus 1024/768/640px) and `globals.css`'s swiper block (now `768px` after the B6 fix).

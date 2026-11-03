@@ -7,7 +7,7 @@
 
 ---
 
-# Checklist
+## Checklist
 
 - [ ] Code is well-commented, especially in complex or non-obvious areas.
 - [ ] Changes have been rebased against the main branch.
@@ -16,7 +16,7 @@
 
 ---
 
-# Deployment Links To Test
+## Deployment Links To Test
 
 - **Staging Environment:**  
   [https://staging.yourproject.com](https://staging.yourproject.com)
@@ -25,7 +25,7 @@
 
 ---
 
-# Screenshots / Videos
+## Screenshots / Videos
 
 **Before & After:**
 

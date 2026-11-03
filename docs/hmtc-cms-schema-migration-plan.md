@@ -7,7 +7,7 @@
 **Date:** 2026-10-19
 
 > **Updated 2026-10-19 — `001` and `002` are APPLIED to production.** See `scripts/directus-schema/`. M1, M2, M3, M5, M6, M7, M8, M10 and M12 are done; **M4 is a no-op; M11 already satisfied; M9 is deferred (N3).** ⚠️ **Operational rule: restart Directus after any DDL executed outside it.** Directus does **not** store `is_unique`/`is_nullable` in `directus_fields` (verified — those columns do not exist), it **introspects** Postgres — but the introspection is **cached in memory**, so out-of-band DDL is invisible until the cache rebuilds. Always `docker restart directus` and re-verify before trusting Studio or the REST API.
-
+>
 > **Scope note.** Phase 0 (Track B) was strictly read-only — no collection, field, index, relation, role, policy or permission was touched. The M2/M6/M12 changes were applied afterwards, on explicit approval, via the tracked SQL in `scripts/directus-schema/`.
 
 ---
@@ -361,7 +361,7 @@ cms_pages.department_foreign  → ON DELETE RESTRICT
 
 ## 5. Global rollback strategy
 
-#### Principles
+### Principles
 
 1. **Snapshot first.** Take a full logical backup of the Directus database **and** an export of Directus's own configuration (`directus_collections`, `directus_fields`, `directus_relations`, `directus_permissions`) before any migration. Directus keeps its schema metadata in those tables — a database restore that misses them leaves Directus desynchronised from the physical schema.
 2. **Migrate through Directus, not around it — with one exception.** Use the Directus schema API, Studio, or a tracked migration extension, so `directus_fields`/`directus_relations` stay consistent. An ad-hoc `psql`/`ALTER TABLE` run against the database will silently desync Directus's metadata and produce a UI that disagrees with reality. **The exception is composite unique indexes (M2, M6):** Directus has no metadata representation for those, so there is nothing to desync — but they must still go through a versioned migration extension rather than a manual statement, so the change is tracked, reviewable and reversible. See `docs/hmtc-cms-decisions.md` §4.
@@ -370,7 +370,7 @@ cms_pages.department_foreign  → ON DELETE RESTRICT
 5. **Record the "before" state in the commit message** (constraint definitions, field metadata, row values). A rollback you cannot describe is not a rollback.
 6. **Rollback rehearsal on a restored copy** before applying anything to production.
 
-#### Per-migration rollback
+### Per-migration rollback
 
 | Migration | Mechanism                                          | Data loss risk                             |
 | --------- | -------------------------------------------------- | ------------------------------------------ |
