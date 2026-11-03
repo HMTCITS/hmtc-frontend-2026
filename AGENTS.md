@@ -194,7 +194,7 @@ Consequence: **the sandbox pages are not a live visual reference.** Verify compo
 | `docs/hmtc-cms-api-contract.md`                 | Readable index of the `/api/cms/*` contract (source of truth: `src/lib/cms/**`)            |
 | `docs/hmtc-cms-integration-plan.md`             | How Next.js and Directus connect end to end: credentials, flows, cache, deploy             |
 | `docs/hmtc-cms-decisions.md`                    | **Decision log** — what is confirmed vs. still open, with the reasoning                    |
-| `docs/hmtc-cms-schema-migration-plan.md`        | Directus migrations M1–M11 with rollback (plan only, nothing applied)                      |
+| `docs/hmtc-cms-schema-migration-plan.md`        | Directus migrations M1–M12 with rollback (`001`–`003` applied to production)               |
 | `docs/hmtc-cms-phase-0-report.md`               | What Phase 0 changed, and the verification evidence                                        |
 | `docs/audits/hmtc-cms-data-fetching-audit.md`   | Read-only audit of the existing data-fetching layer (findings F1–F18)                      |
 
@@ -204,7 +204,7 @@ When you make a decision that changes either document, **update it in the same c
 
 ## 13. The CMS (Directus) — in progress
 
-**Status:** Phase 0 complete; block schema (`src/lib/directus/blocks.ts`) and the API contract (`src/lib/cms/**`, `docs/hmtc-cms-api-contract.md`) are merged. No session, Route Handler or editor code exists yet. Everything below is the agreed contract — read it before adding CMS code.
+**Status:** Phase 0 complete; block schema (`src/lib/directus/blocks.ts`) and the API contract (`src/lib/cms/**`, `docs/hmtc-cms-api-contract.md`) are merged; migration `003` (revisions, preview grants, vocabularies) is applied to production as of 2026-11-03. No session, Route Handler or editor code exists yet. Everything below is the agreed contract — read it before adding CMS code.
 
 - **Develop against local Directus only:** `pnpm directus:setup` (`docs/local-development.md`). Never point a dev server at production Directus with write credentials.
 - **Contract first:** a new endpoint, DTO field, status or role is added to `src/lib/cms/**` (and, for vocabularies, a migration) before any handler or UI uses it.

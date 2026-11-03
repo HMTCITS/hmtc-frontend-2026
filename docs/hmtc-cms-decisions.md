@@ -92,7 +92,7 @@ CREATE UNIQUE INDEX cms_department_memberships_user_department_unique
 
 **App-side handling is still required.** The violation reaches the client as a generic `400`. Map it to a field-specific message in the Route Handler — in addition to, not instead of, Zod validation.
 
-**Status:** ✅ applied 2026-10-19 and verified. `membership_role` remains an unconstrained string (N7).
+**Status:** ✅ applied 2026-10-19 and verified. `membership_role` was an unconstrained string until `003` (2026-11-03, R6).
 
 ### Applied to production — 2026-10-19
 
@@ -105,7 +105,17 @@ Both files live in `scripts/directus-schema/`. Each has a paired `.down.sql`, an
 
 **After both, Directus was restarted** and the public API surface re-checked: `/items/cms_pages` still 200, `/items/cms_departments` still 403, `POST /items/cms_pages` still 403, and the OAS still exposes the same 16 role-scoped paths. Only the schema shape changed — no permission changed.
 
-**Still unenforced at the database level:** `M9` (CHECK constraints on status values) is deferred, so the Zod layer must carry that validation until `page_type` is defined (N3). `membership_role` likewise (N7).
+~~**Still unenforced at the database level:** `M9` (CHECK constraints on status values) is deferred, so the Zod layer must carry that validation until `page_type` is defined (N3). `membership_role` likewise (N7).~~ **Superseded — `003` below enforces both.**
+
+### Applied to production — 2026-11-03
+
+| File                           | Contents                                                                                                                                                                                | Verified by                                                                                                                                                       |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `003-revisions-preview-grants` | `cms_page_revisions` (immutable), `cms_preview_grants`, `cms_pages.published_revision` / `current_revision`, M9 CHECK constraints (R4, R6, R8), public read on `cms_pages` removed (R2) | `to_regclass` for both tables, `information_schema` for both pointers, `pg_constraint` for all six new CHECKs, public-policy permission diff against the snapshot |
+
+Preconditions checked first: `cms_pages`, `cms_department_memberships` and `cms_review_events` were empty. Snapshot `~/pre-003.sql` (285 KB, complete) was taken on the host, the file ran in one transaction with `ON_ERROR_STOP=1`, and Directus was restarted (N8).
+
+**Public API surface afterwards:** `/items/cms_pages` 200 → **403**. The public policy now reads only `cms_forms` and `directus_files`; `cms_departments` and `cms_prokers` were already 403 before `003`.
 
 ## 4b. Decisions taken 2026-11-03
 
@@ -142,13 +152,13 @@ From the integration plan (`docs/hmtc-cms-integration-plan.md`, PR #196, merged)
 
 Q9 was only ever confirmed by reading the policy. R2 replaces it with a stronger rule — **no anonymous read on `cms_pages` at all** — which can be verified on an empty database.
 
-**After migration 003 is applied to production:**
+**After migration 003 is applied to production:** ✅ **verified 2026-11-03 — 403.**
 
 ```bash
 curl -s -o /dev/null -w '%{http_code}\n' https://directus.hmtc-its.com/items/cms_pages   # expect 403
 ```
 
-Then, once the first page is published, confirm the public route renders it (200) and that draft blocks are still not reachable anonymously.
+**Still outstanding:** once the first page is published, confirm the public route renders it (200) and that draft blocks are still not reachable anonymously.
 
 ## 7. Deferred items — recorded so they are not forgotten
 

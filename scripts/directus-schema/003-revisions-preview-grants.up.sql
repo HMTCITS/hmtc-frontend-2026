@@ -1,5 +1,5 @@
 -- 003 — revisions, preview grants, vocabularies, public read (UP)
--- Not yet applied to production.
+-- Applied to production 2026-11-03.
 --
 -- Target:  Directus 11.1.2, directus_postgres (PostgreSQL 16)
 -- Database: directusdb   User: directuspg
