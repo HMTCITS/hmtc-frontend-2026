@@ -191,6 +191,8 @@ Consequence: **the sandbox pages are not a live visual reference.** Verify compo
 | `README.md`                                     | Setup, commit convention, deployment                                                       |
 | `docs/local-development.md`                     | Local setup, including a local Directus with the production schema (`pnpm directus:setup`) |
 | `docs/hmtc-cms-implementation-specification.md` | CMS requirements, permission matrix, API contract, acceptance criteria                     |
+| `docs/hmtc-cms-api-contract.md`                 | Readable index of the `/api/cms/*` contract (source of truth: `src/lib/cms/**`)            |
+| `docs/hmtc-cms-integration-plan.md`             | How Next.js and Directus connect end to end: credentials, flows, cache, deploy             |
 | `docs/hmtc-cms-decisions.md`                    | **Decision log** — what is confirmed vs. still open, with the reasoning                    |
 | `docs/hmtc-cms-schema-migration-plan.md`        | Directus migrations M1–M11 with rollback (plan only, nothing applied)                      |
 | `docs/hmtc-cms-phase-0-report.md`               | What Phase 0 changed, and the verification evidence                                        |
@@ -202,7 +204,10 @@ When you make a decision that changes either document, **update it in the same c
 
 ## 13. The CMS (Directus) — in progress
 
-**Status:** Phase 0 complete (dead-code cleanup + verification). **No CMS code has been written yet.** Everything below is the agreed contract — read it before adding CMS code.
+**Status:** Phase 0 complete; block schema (`src/lib/directus/blocks.ts`) and the API contract (`src/lib/cms/**`, `docs/hmtc-cms-api-contract.md`) are merged. No session, Route Handler or editor code exists yet. Everything below is the agreed contract — read it before adding CMS code.
+
+- **Develop against local Directus only:** `pnpm directus:setup` (`docs/local-development.md`). Never point a dev server at production Directus with write credentials.
+- **Contract first:** a new endpoint, DTO field, status or role is added to `src/lib/cms/**` (and, for vocabularies, a migration) before any handler or UI uses it.
 
 - **Mount point:** `/dashboard/cms/**`. It is **L4** (`DESIGN.md` §8) — `ui/*` primitives and shadcn tokens. Never surface L4 styling on a public page.
 - **Directus:** 11.1.2 at `directus.hmtc-its.com`. It is the source of truth for CMS content, media and CMS identity. It does **not** replace `api.hmtc-its.com`; see §14.
