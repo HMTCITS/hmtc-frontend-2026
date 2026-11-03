@@ -2,9 +2,10 @@
 
 ## Context
 
-Phase 0 is done: dead code is gone, and Directus migrations 001/002 are applied. No CMS code exists yet (`src/lib/directus/`, `src/app/api/cms/` and `src/app/dashboard/cms/` are all missing). The spec (`docs/hmtc-cms-implementation-specification.md`) and the decision log fix the *rules*: server-only reads, explicit Route Handlers, tag revalidation, typed blocks, bearer previews and real 404s. Nothing yet says *how* the pieces connect end-to-end, or how environment, caching and deployment work. This plan defines that integration. When it is accepted, `docs/hmtc-cms-decisions.md` and `AGENTS.md` §12–§13 should be updated to reference it, as `AGENTS.md` §12 requires.
+Phase 0 is done: dead code is gone, and Directus migrations 001/002 are applied. No CMS code exists yet (`src/lib/directus/`, `src/app/api/cms/` and `src/app/dashboard/cms/` are all missing). The spec (`docs/hmtc-cms-implementation-specification.md`) and the decision log fix the _rules_: server-only reads, explicit Route Handlers, tag revalidation, typed blocks, bearer previews and real 404s. Nothing yet says _how_ the pieces connect end-to-end, or how environment, caching and deployment work. This plan defines that integration. When it is accepted, `docs/hmtc-cms-decisions.md` and `AGENTS.md` §12–§13 should be updated to reference it, as `AGENTS.md` §12 requires.
 
 User decisions taken in this planning round:
+
 - **404 strategy:** fix the root `<Suspense>` soft-404 trap so `notFound()` returns a real 404. CMS pages then render on demand and are tag-cached, so publishing needs no redeploy.
 - **Deployment topology (confirmed 2026-10-30):** Directus is the BaaS and the only backend. The shared compose runs `directus`, `docmost`, `nocodb` and `uptime-kuma`, so **one Directus instance serves both staging and production**. The Next.js frontend runs as **exactly one container per environment** (`hmtc-prod`, `hmtc-staging`).
 - **Next.js adds no backend of its own.** The `/api/cms/*` route handlers are thin guards in front of Directus: they check the session and the rules Directus can't express (such as no self-approval), then forward to Directus. They exist because CSP forbids browser→Directus calls (D4). They store nothing.
@@ -17,13 +18,14 @@ All file paths below are relative to `hmtc-frontend-2026/`.
 
 **Three credentials, three paths. The browser never calls the Directus API**, because CSP `connect-src` stays unchanged (D4).
 
-| Path | Caller | Credential | Used for |
-|---|---|---|---|
-| Public read | Server Components | `DIRECTUS_READ_TOKEN`: a static token on a read-only "nextjs-reader" policy | Published revisions, prokers, departments, redirects, site settings, preview-grant lookup |
-| Editor read/write | `/api/cms/*` Route Handlers and `/dashboard/cms` Server Components | **The acting user's** Directus access token from an HttpOnly cookie | Everything an editor does. Directus policies are the second layer, and Next.js authorization is the first |
-| Webhook | Directus Flow → `/api/cms/revalidate` | `CMS_REVALIDATE_SECRET` (HMAC header) | Cache invalidation for changes Next.js didn't make itself (Studio edits, the other environment) |
+| Path              | Caller                                                             | Credential                                                                  | Used for                                                                                                  |
+| ----------------- | ------------------------------------------------------------------ | --------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| Public read       | Server Components                                                  | `DIRECTUS_READ_TOKEN`: a static token on a read-only "nextjs-reader" policy | Published revisions, prokers, departments, redirects, site settings, preview-grant lookup                 |
+| Editor read/write | `/api/cms/*` Route Handlers and `/dashboard/cms` Server Components | **The acting user's** Directus access token from an HttpOnly cookie         | Everything an editor does. Directus policies are the second layer, and Next.js authorization is the first |
+| Webhook           | Directus Flow → `/api/cms/revalidate`                              | `CMS_REVALIDATE_SECRET` (HMAC header)                                       | Cache invalidation for changes Next.js didn't make itself (Studio edits, the other environment)           |
 
 **Module layout** (every file starts with `import 'server-only'`):
+
 - `src/lib/directus/env.ts`: Zod-parses the env vars once and fails fast. This is the only place the tokens are read.
 - `src/lib/directus/client.ts`: a thin `fetch` wrapper with no `@directus/sdk` (D6). `directusRead(path, { tags })` uses `cache: 'force-cache'` plus `next: { tags }`. In Next 15+, `fetch` is uncached by default, so `force-cache` is mandatory. `directusAsUser(token, path, init)` uses `cache: 'no-store'`. The wrapper normalises Directus errors into the spec's 401/403/404/409/422 model and never forwards a raw Directus body.
 - `src/lib/directus/schema.ts`: Zod schemas for the collections and status vocabularies (M9 is enforced in the app).
@@ -34,6 +36,7 @@ All file paths below are relative to `hmtc-frontend-2026/`.
 **Auth flow.** The login form under `/dashboard/cms/login` posts to `POST /api/cms/auth/login`. That handler calls Directus `/auth/login` with `mode: 'json'` and sets the `cms_at` (short-lived access) and `cms_rt` (refresh) cookies with `HttpOnly; Secure; SameSite=Lax; Path=/`. `session.ts` resolves `/users/me` with the access token and refreshes through `/auth/refresh` when it expires. Logout calls `/auth/logout` and clears both cookies. `src/proxy.ts` replaces the pathname block for `/dashboard/cms/**` with a cheap cookie-presence redirect to login. **Real verification happens in the CMS layout and in every handler**, because middleware is not the security boundary (A4, F10).
 
 **Directus schema additions: migration `003`** (paired up/down SQL, pg_dump first, restart Directus afterwards per N8):
+
 - `cms_page_revisions`: an immutable snapshot of `page`, `revision_number`, `blocks`, `blocks_schema_version`, `title`/SEO fields, `author`, `created_at` and `change_note`.
 - `cms_pages.published_revision` (FK → revisions, nullable) and `cms_pages.current_revision`.
 - `cms_preview_grants`: `page`, `revision`, `token_hash`, `created_by`, `expires_at` and `revoked_at`.
@@ -44,6 +47,7 @@ All file paths below are relative to `hmtc-frontend-2026/`.
 `/dashboard/cms/**` is L4 (`ui/*`, `base-data-table.tsx`). The editor uses TanStack Query against explicit routes from spec §11. Add `cmsKeys` to `src/lib/query-keys.ts`, and give every query an explicit `queryFn` (the Phase 0 rule).
 
 Every mutation handler runs the same pipeline:
+
 1. **Origin check**: `Origin` must equal the site origin (CSRF), on top of `SameSite=Lax`.
 2. **Session**: `session.ts` returns the verified user and access token, or 401.
 3. **Zod** validation of params and body, or 422 with block-level error paths for the editor.
@@ -57,6 +61,7 @@ Every mutation handler runs the same pipeline:
 **Submit** writes `status=in_review` plus a `cms_review_events{action:submitted, actor}`.
 
 **Publish** (`POST /api/cms/pages/{id}/publish`) runs in an order that keeps a failure safe, since Directus has no cross-request transaction:
+
 1. Reject if the actor equals the latest `submitted` event's actor (no self-approval, enforced server-side).
 2. Re-validate the blocks, or return 422. Publishing fails on any invalid block.
 3. Insert a `cms_page_revisions` snapshot. It is harmless if a later step fails.
@@ -81,12 +86,23 @@ Restore copies a snapshot into `cms_pages.blocks` as a new draft and never publi
 **Route shape.** Keep the existing per-proker folders (`src/app/<dept>/<proker>/[year]/page.tsx`). A proker moves to the CMS **one at a time** (the controlled rollout from spec §13). Its `[year]/page.tsx` switches from hardcoded `PageContent` to this:
 
 ```tsx
-export const dynamicParams = true;            // render on demand
-export async function generateStaticParams() { return []; } // CI build needs no Directus
+export const dynamicParams = true; // render on demand
+export async function generateStaticParams() {
+  return [];
+} // CI build needs no Directus
 export default async function Page({ params }) {
-  const page = await getPublishedPage(DEPT, PROKER, Number((await params).year));
-  if (!page) notFound();                      // real 404 once Suspense is fixed
-  return <><CmsBlocks blocks={page.blocks} /><Footer /></>;
+  const page = await getPublishedPage(
+    DEPT,
+    PROKER,
+    Number((await params).year),
+  );
+  if (!page) notFound(); // real 404 once Suspense is fixed
+  return (
+    <>
+      <CmsBlocks blocks={page.blocks} />
+      <Footer />
+    </>
+  );
 }
 ```
 
@@ -94,13 +110,13 @@ The first request renders the page and caches it under its tags. Later requests 
 
 **Cache tags** (the only freshness mechanism; no time-based `revalidate`, per D7):
 
-| Tag | Attached to | Invalidated by |
-|---|---|---|
-| `cms:page:{dept}/{proker}/{year}` | that page's published read | publish, unpublish, archive, restore-then-publish |
-| `cms:page-id:{id}` | the same read, keyed by ID for webhook use | the same events |
-| `cms:routes` | `listPublishedRoutes()`, sitemap, nav listings | any publish or unpublish |
-| `cms:redirects` | `cms_page_redirects` read | redirect edits (webhook) |
-| `cms:settings` | `cms_site_settings` | settings edits (webhook) |
+| Tag                               | Attached to                                    | Invalidated by                                    |
+| --------------------------------- | ---------------------------------------------- | ------------------------------------------------- |
+| `cms:page:{dept}/{proker}/{year}` | that page's published read                     | publish, unpublish, archive, restore-then-publish |
+| `cms:page-id:{id}`                | the same read, keyed by ID for webhook use     | the same events                                   |
+| `cms:routes`                      | `listPublishedRoutes()`, sitemap, nav listings | any publish or unpublish                          |
+| `cms:redirects`                   | `cms_page_redirects` read                      | redirect edits (webhook)                          |
+| `cms:settings`                    | `cms_site_settings`                            | settings edits (webhook)                          |
 
 **Invalidation call.** In Next 16, `revalidateTag` takes a second argument. Route Handlers use `revalidateTag(tag, { expire: 0 })` for immediate expiry, because `updateTag` is Server-Action-only. **Confirm this against the installed `node_modules/next/dist/docs/` before coding.** Revalidation runs only after the step 4 PATCH succeeds, so a failed publish leaves both the content and the cache untouched.
 
@@ -110,14 +126,14 @@ The first request renders the page and caches it under its tags. Later requests 
 
 ## 5. Environment configuration
 
-| Variable | Scope | Notes |
-|---|---|---|
-| `DIRECTUS_URL` | server | Prefer the internal docker-network URL (e.g. `http://directus:8055`) if Next and Directus share a compose network; otherwise `https://directus.hmtc-its.com` |
-| `DIRECTUS_READ_TOKEN` | server, secret | Static token of the read-only "nextjs-reader" user/policy |
-| `CMS_REVALIDATE_SECRET` | server, secret | Shared with the Directus Flow |
-| `CMS_SESSION_COOKIE_DOMAIN` | server, optional | Defaults to host-only |
-| `CMS_EDITING_ENABLED` | server, optional | `false` on staging makes the editor read-only, since staging shares production Directus. Defaults to `true` |
-| `NEXT_PUBLIC_DIRECTUS_ASSET_URL` | public | `https://directus.hmtc-its.com/assets`, used only to build image URLs |
+| Variable                         | Scope            | Notes                                                                                                                                                        |
+| -------------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `DIRECTUS_URL`                   | server           | Prefer the internal docker-network URL (e.g. `http://directus:8055`) if Next and Directus share a compose network; otherwise `https://directus.hmtc-its.com` |
+| `DIRECTUS_READ_TOKEN`            | server, secret   | Static token of the read-only "nextjs-reader" user/policy                                                                                                    |
+| `CMS_REVALIDATE_SECRET`          | server, secret   | Shared with the Directus Flow                                                                                                                                |
+| `CMS_SESSION_COOKIE_DOMAIN`      | server, optional | Defaults to host-only                                                                                                                                        |
+| `CMS_EDITING_ENABLED`            | server, optional | `false` on staging makes the editor read-only, since staging shares production Directus. Defaults to `true`                                                  |
+| `NEXT_PUBLIC_DIRECTUS_ASSET_URL` | public           | `https://directus.hmtc-its.com/assets`, used only to build image URLs                                                                                        |
 
 - All of these are **runtime** env vars. They go in `.env.prod`/`.env.staging` on the host (read by `docker compose --env-file`), never in the image. The GitHub Actions build needs none of them because `generateStaticParams` returns `[]`. The one exception is `NEXT_PUBLIC_DIRECTUS_ASSET_URL`, which is inlined at build: pass it as a Docker build-arg, or derive asset URLs on the server so it can stay a non-public variable (preferred).
 - Add the variables to `.env.example` with empty values. `env.ts` throws on missing server vars only when a CMS code path runs, so non-CMS pages still work without them.

@@ -7,7 +7,7 @@
 
 > **Status: historical baseline — NOT the current state.** This audit is the evidence trail for findings F1–F18 and should be read as such. For what was decided, see `docs/hmtc-cms-decisions.md`; for what was implemented, see `docs/hmtc-cms-phase-0-report.md`; for the schema changes, see `docs/hmtc-cms-schema-migration-plan.md`. The Phase Two / Three recommendations in §5–§6 were superseded by `docs/hmtc-cms-implementation-specification.md`.
 
-**Revision 2 changes**
+## Revision 2 changes
 
 | #   | Change                                                                                                                                                                                                                        |
 | --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -39,7 +39,7 @@ The user's summary is confirmed and now provable: the pre-2026 data-fetching lay
 
 **The legacy client and the legacy server have diverged, and neither side knows about the other.**
 
-```
+```text
 FRONTEND calls                    SERVER has (Swagger, basePath /api)
 ──────────────────────────────    ─────────────────────────────────────
 GET  /api/galleries        404    POST /api/evaluasi-cmi/submit
@@ -137,7 +137,7 @@ Reachability was computed over a static import graph from all **71** route entry
 
 **Unreachable from any route (13):**
 
-```
+```text
 src/hooks/api/useAutoIsScheduleActive.ts     src/lib/api/repository.client.ts
 src/hooks/api/useChangeUserRole.ts           src/lib/api/upload.client.ts      (0 bytes)
 src/hooks/api/useUpdateUser.ts               src/lib/api/users.client.ts
@@ -229,7 +229,7 @@ Single-importer dependencies: `@tanstack/react-virtual` (`base-data-table.tsx`),
 
 This is the **only** end-to-end working data path, and the correct template for the CMS BFF.
 
-```
+```text
 src/app/magical-message/page.tsx                    ('use client')
   └─ fetch('/api/magical-message', { method: 'POST', body: JSON.stringify(...) })
        └─ src/app/api/magical-message/route.ts      POST()
@@ -255,7 +255,7 @@ Sibling handlers add: file validation (`/api/tc-run`: MIME `image/jpeg|png`, ≤
 
 ### 3.2 Trace B — the live axios path: Evaluasi CMI (works)
 
-```
+```text
 src/app/evaluasi-cmi/page.tsx                              (Server Component)
   └─ <EvaluasiCMIFormStep />                               ('use client')
        └─ useSubmitEvaluasiCMI({ onSuccess, onError })      src/hooks/api/useSubmitEvaluasiCMI.ts
@@ -274,7 +274,7 @@ src/app/evaluasi-cmi/page.tsx                              (Server Component)
 
 ### 3.3 Trace C — the dead path: dashboard reads
 
-```
+```text
 src/app/dashboard/user-requests/[id]/page.tsx                ('use client')
   ├─ useParams() → requestId
   ├─ getMockRequestDetail(requestId)                        ← MOCK. Renders fabricated data.
@@ -289,7 +289,7 @@ Same shape in `gallery/[id]/edit` (`USE_DUMMY = true`), `users`, `repository`, `
 
 ### 3.4 Trace D — period gating (middleware ↔ handler ↔ four client hooks)
 
-```
+```text
 src/proxy.ts   (Next 16 middleware — exported as `proxy`, config.matcher)
   ├─ isSafeMethod(req.method) → non-GET/HEAD passes untouched
   ├─ handlePeriodGating(req, pathname)      for /ayomeludaftarmagang, /hidden-page-cf
@@ -315,7 +315,7 @@ Four independent consumers of one endpoint:
 
 ### 3.5 Trace E — public page render (no data fetching at all)
 
-```
+```text
 src/app/page.tsx                                  (Server Component)
   ├─ import LandingPage from '@/app/landing/LandingPage'   ('use client')
   ├─ <JsonLd />, <Footer />
@@ -432,7 +432,7 @@ export type ApiResponse<T> = {
 
 `next.config.js`:
 
-```
+```text
 default-src 'self';
 connect-src 'self' https://api.hmtc-its.com;
 script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com;
@@ -876,11 +876,11 @@ pnpm typecheck && pnpm lint:strict && pnpm format:check && pnpm test
 
 **Q1 — What does the Directus schema contain?** ✅ **ANSWERED** — see §6.2 and §9.1. 17 collections; complete page/block/review/redirect/form/template/settings model; only `cms_departments` seeded (9 rows); 1 user; 0 flows; roles not enumerable via MCP. Three schema defects recorded in §4.3.
 
-#### Q2 — What is the initial set of approved React blocks?
+### Q2 — What is the initial set of approved React blocks?
 
 Since `blocks` is opaque JSON with no Directus-side editor (**S4**), this union _is_ the CMS contract and is the most expensive thing to change later. The editor mockup implies Hero / About / Event Details / Event Agenda / Gallery / Footer CTA under Layout / Text / Media / Embeds — a design artifact, not a contract. **Who owns this list, and when is it frozen?**
 
-#### Q3 — How do drafts, preview and publishing actually work?
+### Q3 — How do drafts, preview and publishing actually work?
 
 Revision 2 narrowed this. The schema answers the vocabulary question — `cms_pages.status` is `draft, in_review, changes_requested, published, archived`, and `cms_review_events` records `submitted, approved, changes_requested, unpublished, archived`. What is **not** settled:
 
@@ -906,7 +906,7 @@ A security-posture decision, not a preference.
 **Q7 — Should `src/app/sandbox/page-builder/**`be deleted after the CMS ships?**
 ≈10,900 lines of mockup.`AGENTS.md`§11 notes sandbox pages are 307'd to`/coming-soon` in production. Valuable as a spec during Phases 3–5; a maintenance liability afterwards.
 
-#### Q8 — `cms_pages.proker` is required (S3). What value do standalone pages use?
+### Q8 — `cms_pages.proker` is required (S3). What value do standalone pages use?
 
 Landing, `/info`, About, Contact have no proker. Either relax the constraint or introduce a sentinel — this affects the URL model, not just a column.
 

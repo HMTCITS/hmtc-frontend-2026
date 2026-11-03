@@ -6,7 +6,7 @@
 **Audit:** `docs/audits/hmtc-cms-data-fetching-audit.md` (rev. 2)
 **Date:** 2026-10-19
 
-#### Decisions taken before starting
+## Decisions taken before starting
 
 | Decision         | Value                                        |
 | ---------------- | -------------------------------------------- |
