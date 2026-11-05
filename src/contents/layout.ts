@@ -47,7 +47,7 @@ export const PROGRAM_KERJA_LINKS = [
   },
   {
     id: 6,
-    label: 'Seminar Dosen 4',
+    label: 'Seminar Teknologi',
     href: prokerHref(PROKER_BASE_PATHS.seminarDosen4),
     offset: -80,
   },

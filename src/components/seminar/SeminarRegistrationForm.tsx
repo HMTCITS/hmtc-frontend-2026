@@ -16,6 +16,15 @@ import {
 } from '@/components/ui/select';
 import { getCookie, setCookie } from '@/lib/cookies';
 
+/**
+ * Stable reference for the Threads background. Passing an inline array
+ * re-creates the WebGL context on every render (every keystroke), because
+ * Threads' effect depends on `color`.
+ */
+const THREADS_COLOR: [number, number, number] = [
+  0, 0.47058823529411764, 0.7058823529411765,
+];
+
 type SeminarFormField = {
   id: string;
   label: string;
@@ -242,7 +251,7 @@ export default function SeminarRegistrationForm({
       <div className='absolute inset-0 hidden md:block'>
         <Threads
           className='h-full w-full opacity-70'
-          color={[0, 0.47058823529411764, 0.7058823529411765]}
+          color={THREADS_COLOR}
           amplitude={1}
           distance={0}
           enableMouseInteraction
@@ -309,7 +318,9 @@ export default function SeminarRegistrationForm({
                 {field.type === 'select' && field.options ? (
                   <Select
                     value={formValues[field.id] || ''}
-                    onValueChange={(value) => handleInputChange(field.id, value)}
+                    onValueChange={(value) =>
+                      handleInputChange(field.id, value)
+                    }
                   >
                     <SelectTrigger
                       id={field.id}
