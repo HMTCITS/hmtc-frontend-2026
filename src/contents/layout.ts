@@ -47,12 +47,18 @@ export const PROGRAM_KERJA_LINKS = [
   },
   {
     id: 6,
+    label: 'Seminar Dosen 4',
+    href: prokerHref(PROKER_BASE_PATHS.seminarDosen4),
+    offset: -80,
+  },
+  {
+    id: 7,
     label: 'Bluecamp',
     href: prokerHref(PROKER_BASE_PATHS.bluecamp),
     offset: -80,
   },
   {
-    id: 7,
+    id: 8,
     label: 'TC Run',
     href: prokerHref(PROKER_BASE_PATHS.tcRun),
     offset: -80,

@@ -27,6 +27,7 @@ export const PROKER_BASE_PATHS = {
   seminarDosen: '/research-and-technology/seminar-dosen',
   seminarDosen2: '/research-and-technology/seminar-dosen-2',
   seminarDosen3: '/research-and-technology/seminar-dosen-3',
+  seminarDosen4: '/research-and-technology/seminar-dosen-4',
   bluecamp: '/research-and-technology/bluecamp',
   tcRun: '/student-social-development/tc-run',
 } as const;
