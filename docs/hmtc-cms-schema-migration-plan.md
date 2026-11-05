@@ -1,13 +1,15 @@
 # HMTC CMS — Directus Schema Migration Plan
 
-**Status:** **M1, M2, M3, M5, M6, M7, M8, M10 and M12 applied to production 2026-10-19.** Only M9 remains (deferred pending N3); M4 is a documented no-op; M11 is already satisfied.
+**Status:** **M1, M2, M3, M5, M6, M7, M8, M10 and M12 applied to production 2026-10-19; M9 applied 2026-11-03 (migration `003`).** M4 is a documented no-op; M11 is superseded by R2 — `003` removes the public read on `cms_pages`.
 **Deliverable:** Specification §17 item 2 ("Directus schema migration plan with rollback strategy")
 **Companion:** `docs/hmtc-cms-decisions.md` (**the decision log — read this first**), `docs/hmtc-cms-phase-0-report.md`, `docs/hmtc-cms-implementation-specification.md`, `docs/audits/hmtc-cms-data-fetching-audit.md` (rev. 2)
 **Target:** Directus 11.1.2 at `https://directus.hmtc-its.com`
 **Date:** 2026-10-19
 
+> **Updated 2026-11-03 — `003` is APPLIED to production.** It adds `cms_page_revisions`, `cms_preview_grants` and the `cms_pages` revision pointers, enforces M9 with CHECK constraints (vocabularies from R4/R6/R8), and deletes the public read on `cms_pages` (R2). Preceded by `pg_dump` (`~/pre-003.sql` on the host), followed by `docker restart directus`; anonymous `GET /items/cms_pages` now returns 403.
+>
 > **Updated 2026-10-19 — `001` and `002` are APPLIED to production.** See `scripts/directus-schema/`. M1, M2, M3, M5, M6, M7, M8, M10 and M12 are done; **M4 is a no-op; M11 already satisfied; M9 is deferred (N3).** ⚠️ **Operational rule: restart Directus after any DDL executed outside it.** Directus does **not** store `is_unique`/`is_nullable` in `directus_fields` (verified — those columns do not exist), it **introspects** Postgres — but the introspection is **cached in memory**, so out-of-band DDL is invisible until the cache rebuilds. Always `docker restart directus` and re-verify before trusting Studio or the REST API.
-
+>
 > **Scope note.** Phase 0 (Track B) was strictly read-only — no collection, field, index, relation, role, policy or permission was touched. The M2/M6/M12 changes were applied afterwards, on explicit approval, via the tracked SQL in `scripts/directus-schema/`.
 
 ---
@@ -36,20 +38,20 @@ Two migrations below are trivial against an empty table and expensive against a 
 
 ## 2. Migration inventory
 
-| ID      | Item                                                              | Origin           | Blocking decision        | Risk              |
-| ------- | ----------------------------------------------------------------- | ---------------- | ------------------------ | ----------------- |
-| **M1**  | `field_type_snapshow` → `field_type_snapshot`                     | S1               | ✅ **APPLIED**           | —                 |
-| **M2**  | `cms_pages.slug` unique constraint                                | S2               | ✅ **APPLIED**           | —                 |
-| **M3**  | `cms_pages.slug` / `department` / `proker` / `status` nullability | S6 (generalised) | ✅ **APPLIED**           | —                 |
-| **M4**  | `cms_pages.proker` required semantics                             | S3               | ✅ Q8/Q12 → **no-op**    | —                 |
-| **M5**  | `cms_prokers.department` nullability                              | Q12              | ✅ **APPLIED**           | —                 |
-| **M6**  | `cms_department_memberships` grant uniqueness                     | B5               | ✅ **APPLIED** (N7 open) | —                 |
-| **M7**  | Department slug canonicalisation                                  | F14              | ✅ **APPLIED**           | —                 |
-| **M8**  | Field interfaces for Directus Studio                              | S4               | ✅ **APPLIED** (partial) | —                 |
-| **M9**  | Enum enforcement for status vocabularies                          | S5               | ⛔ N3 (deferred)         | Low               |
-| **M10** | `cms_site_settings` singleton enforcement                         | S7               | ✅ **APPLIED**           | —                 |
-| **M11** | Public-role row-level rule for published content                  | Q9               | ✅ **already satisfied** | Low (verify once) |
-| **M12** | Page FK delete semantics → `ON DELETE RESTRICT`                   | FK review        | ✅ **APPLIED**           | —                 |
+| ID      | Item                                                              | Origin           | Blocking decision        | Risk |
+| ------- | ----------------------------------------------------------------- | ---------------- | ------------------------ | ---- |
+| **M1**  | `field_type_snapshow` → `field_type_snapshot`                     | S1               | ✅ **APPLIED**           | —    |
+| **M2**  | `cms_pages.slug` unique constraint                                | S2               | ✅ **APPLIED**           | —    |
+| **M3**  | `cms_pages.slug` / `department` / `proker` / `status` nullability | S6 (generalised) | ✅ **APPLIED**           | —    |
+| **M4**  | `cms_pages.proker` required semantics                             | S3               | ✅ Q8/Q12 → **no-op**    | —    |
+| **M5**  | `cms_prokers.department` nullability                              | Q12              | ✅ **APPLIED**           | —    |
+| **M6**  | `cms_department_memberships` grant uniqueness                     | B5               | ✅ **APPLIED** (N7 open) | —    |
+| **M7**  | Department slug canonicalisation                                  | F14              | ✅ **APPLIED**           | —    |
+| **M8**  | Field interfaces for Directus Studio                              | S4               | ✅ **APPLIED** (partial) | —    |
+| **M9**  | Enum enforcement for status vocabularies                          | S5               | ✅ **APPLIED** (`003`)   | —    |
+| **M10** | `cms_site_settings` singleton enforcement                         | S7               | ✅ **APPLIED**           | —    |
+| **M11** | Public-role row-level rule for published content                  | Q9               | ✅ **superseded** (R2)   | —    |
+| **M12** | Page FK delete semantics → `ON DELETE RESTRICT`                   | FK review        | ✅ **APPLIED**           | —    |
 
 ---
 
@@ -349,10 +351,13 @@ cms_pages.department_foreign  → ON DELETE RESTRICT
   M8   select-dropdown + choices on the six status/action fields
   M10  cms_site_settings singleton (CHECK id = 1 + seeded row)
 
-⛔ REMAINING
-  M9   enum enforcement (CHECK constraints)  ← blocked on the page_type vocabulary (N3)
+✅ DONE — 003 (scripts/directus-schema/003-revisions-preview-grants.*.sql), 2026-11-03
+  M9   enum enforcement (CHECK constraints)
+  —    cms_page_revisions, cms_preview_grants, cms_pages revision pointers
+  —    public read on cms_pages removed (R2, supersedes M11)
+
+NOT A MIGRATION
   M4   no-op — scope narrowed to proker pages
-  M11  already satisfied — one behavioural check outstanding
 ```
 
 **M11 is deliberately outside the structural sequence.** It is a permission check, not a schema migration, and it is already satisfied (Q9) — only one _behavioural_ verification remains, and that is a **precondition for creating the first page**, not part of a rollout.
@@ -361,7 +366,7 @@ cms_pages.department_foreign  → ON DELETE RESTRICT
 
 ## 5. Global rollback strategy
 
-#### Principles
+### Principles
 
 1. **Snapshot first.** Take a full logical backup of the Directus database **and** an export of Directus's own configuration (`directus_collections`, `directus_fields`, `directus_relations`, `directus_permissions`) before any migration. Directus keeps its schema metadata in those tables — a database restore that misses them leaves Directus desynchronised from the physical schema.
 2. **Migrate through Directus, not around it — with one exception.** Use the Directus schema API, Studio, or a tracked migration extension, so `directus_fields`/`directus_relations` stay consistent. An ad-hoc `psql`/`ALTER TABLE` run against the database will silently desync Directus's metadata and produce a UI that disagrees with reality. **The exception is composite unique indexes (M2, M6):** Directus has no metadata representation for those, so there is nothing to desync — but they must still go through a versioned migration extension rather than a manual statement, so the change is tracked, reviewable and reversible. See `docs/hmtc-cms-decisions.md` §4.
@@ -370,7 +375,7 @@ cms_pages.department_foreign  → ON DELETE RESTRICT
 5. **Record the "before" state in the commit message** (constraint definitions, field metadata, row values). A rollback you cannot describe is not a rollback.
 6. **Rollback rehearsal on a restored copy** before applying anything to production.
 
-#### Per-migration rollback
+### Per-migration rollback
 
 | Migration | Mechanism                                          | Data loss risk                             |
 | --------- | -------------------------------------------------- | ------------------------------------------ |

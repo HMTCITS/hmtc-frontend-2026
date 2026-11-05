@@ -19,21 +19,27 @@ const About = createDynamicImport(() => import('./components/about/About'));
 const RevealKabinet = createDynamicImport(
   () => import('./components/RevealKabinet/RevealKabinet'),
 );
+const GalleryCarousel = createDynamicImport(
+  () => import('./components/galleryCarousel/GalleryCarousel'),
+);
 
 // Sections
 interface SectionData {
   id?: string;
   Component: React.ElementType;
+  /** Mount only when the section nears the viewport. */
+  lazy?: boolean;
 }
 
 const HOME_SECTIONS: SectionData[] = [
   { id: 'about', Component: About },
   { id: 'showcase', Component: ShowCase },
-  { id: 'kabinet', Component: RevealKabinet },
+  { id: 'kabinet', Component: RevealKabinet, lazy: true },
+  { id: 'gallery', Component: GalleryCarousel, lazy: true },
 ];
 
-const SectionsWrapper = ({ Component, id }: SectionData) => {
-  if (id === 'kabinet') {
+const SectionsWrapper = ({ Component, lazy }: SectionData) => {
+  if (lazy) {
     return (
       <LazySection
         fallback={

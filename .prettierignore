@@ -5,3 +5,5 @@ package.json
 .prettierrc
 public
 next-env.d.ts
+# Generated: Directus schema export (docs/local-development.md)
+directus/snapshot.json

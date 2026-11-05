@@ -46,7 +46,8 @@ The audit is read-only. Its recommendations have not been implemented. Re-verify
 
 ### Responsibilities
 
-**Next.js**
+#### Next.js
+
 - CMS UI and public page rendering.
 - Server-side session verification.
 - Resource-level authorization for every protected operation.
@@ -55,7 +56,8 @@ The audit is read-only. Its recommendations have not been implemented. Re-verify
 - Private preview-link validation.
 - Public cache invalidation after successful publication changes.
 
-**Directus**
+#### Directus
+
 - User identity and account administration.
 - CMS data persistence and asset storage.
 - Role/policy enforcement where practical as a second layer.
@@ -91,17 +93,17 @@ A privileged static Directus token must not substitute for the acting user's per
 
 Resource scope must be checked against the requested page, not merely the user's role label.
 
-| Operation | Department editor | Cross-department editor | Reviewer/Publisher | Administrator |
-|---|---|---|---|---|
-| Read published public pages | Yes | Yes | Yes | Yes |
-| Read drafts | Assigned departments | Explicitly assigned departments | Authorized review scope | Yes |
-| Create/edit draft | Assigned departments | Explicitly assigned departments | Only if also granted editor rights | Yes |
-| Submit for review | Authorized pages | Authorized pages | Only if also granted editor rights | Yes |
-| Approve/publish | No | No by default | Authorized scope, and not if they authored the current submission | Yes, subject to the same self-approval rule |
-| Restore snapshot to a new draft | Authorized pages | Authorized pages | According to granted scope | Yes |
-| Manage templates | No by default | No by default | Only if designated template maintainer | Yes |
-| Manage users/departments | No | No | No by default | Yes |
-| Hard-delete page or revision | No | No | No | No through normal CMS UI; archival is the supported action |
+| Operation                       | Department editor    | Cross-department editor         | Reviewer/Publisher                                                | Administrator                                              |
+| ------------------------------- | -------------------- | ------------------------------- | ----------------------------------------------------------------- | ---------------------------------------------------------- |
+| Read published public pages     | Yes                  | Yes                             | Yes                                                               | Yes                                                        |
+| Read drafts                     | Assigned departments | Explicitly assigned departments | Authorized review scope                                           | Yes                                                        |
+| Create/edit draft               | Assigned departments | Explicitly assigned departments | Only if also granted editor rights                                | Yes                                                        |
+| Submit for review               | Authorized pages     | Authorized pages                | Only if also granted editor rights                                | Yes                                                        |
+| Approve/publish                 | No                   | No by default                   | Authorized scope, and not if they authored the current submission | Yes, subject to the same self-approval rule                |
+| Restore snapshot to a new draft | Authorized pages     | Authorized pages                | According to granted scope                                        | Yes                                                        |
+| Manage templates                | No by default        | No by default                   | Only if designated template maintainer                            | Yes                                                        |
+| Manage users/departments        | No                   | No                              | No by default                                                     | Yes                                                        |
+| Hard-delete page or revision    | No                   | No                              | No                                                                | No through normal CMS UI; archival is the supported action |
 
 ### Cross-department grants
 
@@ -115,15 +117,15 @@ Resource scope must be checked against the requested page, not merely the user's
 
 The audit records these Directus schema defects; no schema change was made during the audit.
 
-| Finding | Required action |
-|---|---|
-| S1: `cms_form_answers.field_type_snapshow` typo | Plan safe migration to `field_type_snapshot` before form functionality; preserve existing data/references. Not a first-release blocker while forms are deferred. |
-| S2: `cms_pages.slug` globally unique | Replace global uniqueness with a constraint consistent with annual route identity, after inspecting existing relationships and indexes. |
-| S3: `cms_pages.proker` required | Make the model compatible with the intended page scope, or explicitly constrain this release to proker-only pages. Avoid fake/sentinel relations without a clear need. |
-| S4: CMS fields lack configured interfaces | Configure useful Directus Studio interfaces where appropriate. The typed block editor remains in Next.js; raw JSON is not a visual editor. |
-| S5: status values only documented in notes | Validate values at runtime and enforce legal state transitions server-side. |
-| S6: `cms_pages.status` nullability mismatch | Align database metadata and application types before relying on generated types. |
-| S7: site settings not singleton-enforced | Implement a defined singleton strategy or defensively select and validate one canonical settings record. |
+| Finding                                         | Required action                                                                                                                                                        |
+| ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| S1: `cms_form_answers.field_type_snapshow` typo | Plan safe migration to `field_type_snapshot` before form functionality; preserve existing data/references. Not a first-release blocker while forms are deferred.       |
+| S2: `cms_pages.slug` globally unique            | Replace global uniqueness with a constraint consistent with annual route identity, after inspecting existing relationships and indexes.                                |
+| S3: `cms_pages.proker` required                 | Make the model compatible with the intended page scope, or explicitly constrain this release to proker-only pages. Avoid fake/sentinel relations without a clear need. |
+| S4: CMS fields lack configured interfaces       | Configure useful Directus Studio interfaces where appropriate. The typed block editor remains in Next.js; raw JSON is not a visual editor.                             |
+| S5: status values only documented in notes      | Validate values at runtime and enforce legal state transitions server-side.                                                                                            |
+| S6: `cms_pages.status` nullability mismatch     | Align database metadata and application types before relying on generated types.                                                                                       |
+| S7: site settings not singleton-enforced        | Implement a defined singleton strategy or defensively select and validate one canonical settings record.                                                               |
 
 ### Page identity
 
@@ -182,6 +184,7 @@ The user requires a defined retention period, but the duration is not yet specif
 **Recommended default for approval: retain snapshots for 2 years.** This is a proposal, not a confirmed requirement.
 
 Before implementation, decide:
+
 - Exact retention period.
 - Whether published revisions receive longer retention than drafts.
 - Whether snapshots associated with a currently published page can ever be purged.
@@ -224,6 +227,7 @@ Anyone who obtains a valid link can view the scoped preview until expiry/revocat
 ## 10. Directus Assets and caching
 
 ### Media
+
 - Directus Assets is the canonical CMS media library.
 - Validate asset references before save/publish.
 - Restrict file types and sizes according to approved requirements.
@@ -231,6 +235,7 @@ Anyone who obtains a valid link can view the scoped preview until expiry/revocat
 - Allow only the trusted Directus asset hostname in Next.js image configuration.
 
 ### Cache
+
 - Use consistent cache tags for page-specific content, public listings, and route data.
 - Invalidate affected public data only after successful publication/unpublication.
 - Preview reads must not leak draft content into a shared public cache.
@@ -242,21 +247,22 @@ Anyone who obtains a valid link can view the scoped preview until expiry/revocat
 
 Logical contract only; these routes do not yet exist.
 
-| Operation | Example endpoint | Access |
-|---|---|---|
-| List pages | `GET /api/cms/pages` | Authenticated; permission-filtered |
-| Read editor page | `GET /api/cms/pages/{id}` | Authenticated; resource authorization |
-| Create page | `POST /api/cms/pages` | Authorized editor |
-| Save draft | `PATCH /api/cms/pages/{id}` | Authorized editor; valid draft state |
-| Submit for review | `POST /api/cms/pages/{id}/submit` | Authorized editor |
-| Publish | `POST /api/cms/pages/{id}/publish` | Authorized Reviewer/Publisher; different from submitter |
-| List revisions | `GET /api/cms/pages/{id}/revisions` | Authorized user |
-| Restore revision | `POST /api/cms/pages/{id}/revisions/{revisionId}/restore` | Authorized user; creates a draft |
-| Create preview grant | `POST /api/cms/pages/{id}/preview-grants` | Authorized user |
-| Revoke preview grant | `DELETE /api/cms/preview-grants/{grantId}` | Grant creator or authorized administrator |
-| Public page read | Server-only Directus read | Published content only |
+| Operation            | Example endpoint                                          | Access                                                  |
+| -------------------- | --------------------------------------------------------- | ------------------------------------------------------- |
+| List pages           | `GET /api/cms/pages`                                      | Authenticated; permission-filtered                      |
+| Read editor page     | `GET /api/cms/pages/{id}`                                 | Authenticated; resource authorization                   |
+| Create page          | `POST /api/cms/pages`                                     | Authorized editor                                       |
+| Save draft           | `PATCH /api/cms/pages/{id}`                               | Authorized editor; valid draft state                    |
+| Submit for review    | `POST /api/cms/pages/{id}/submit`                         | Authorized editor                                       |
+| Publish              | `POST /api/cms/pages/{id}/publish`                        | Authorized Reviewer/Publisher; different from submitter |
+| List revisions       | `GET /api/cms/pages/{id}/revisions`                       | Authorized user                                         |
+| Restore revision     | `POST /api/cms/pages/{id}/revisions/{revisionId}/restore` | Authorized user; creates a draft                        |
+| Create preview grant | `POST /api/cms/pages/{id}/preview-grants`                 | Authorized user                                         |
+| Revoke preview grant | `DELETE /api/cms/preview-grants/{grantId}`                | Grant creator or authorized administrator               |
+| Public page read     | Server-only Directus read                                 | Published content only                                  |
 
 Contract requirements:
+
 - Validate bodies, path parameters, and query parameters with Zod or equivalent.
 - Derive identity only from the verified session.
 - Use consistent errors: `401` unauthenticated, `403` unauthorized, `404` missing or deliberately concealed resource, `409` state/concurrency conflict, `422` invalid content.
@@ -268,6 +274,7 @@ Contract requirements:
 ## 12. Automated acceptance criteria
 
 ### Authentication and authorization
+
 - Unauthenticated users cannot access protected editor pages or mutation routes.
 - Invalid/expired sessions cannot access drafts or mutate content.
 - An editor cannot access another department's drafts without an explicit grant.
@@ -277,6 +284,7 @@ Contract requirements:
 - Privileged credentials never appear in browser bundles, URLs, or client-visible errors.
 
 ### Content and workflow
+
 - Valid typed blocks can be saved and rendered.
 - Malformed/unknown blocks fail safely.
 - Only authorized users can submit, review, publish, restore, and archive.
@@ -286,6 +294,7 @@ Contract requirements:
 - Failed publication preserves the prior published version.
 
 ### Templates and revisions
+
 - Editors can use approved templates.
 - Template edits do not silently overwrite existing pages.
 - Restoring a snapshot creates a new draft and preserves later history.
@@ -293,6 +302,7 @@ Contract requirements:
 - Concurrent edits are detected rather than silently overwritten.
 
 ### Preview and media
+
 - A preview link grants access only to its designated page and revision.
 - The link expires after 72 hours by default.
 - Revoked/expired links fail.
@@ -301,6 +311,7 @@ Contract requirements:
 - Trusted assets render; invalid/unauthorized asset references fail safely.
 
 ### Routing
+
 - Year-specific URLs always serve the requested year.
 - Legacy no-year URLs redirect to the configured default year.
 - Changing the default year does not alter year-specific behavior.
@@ -344,21 +355,27 @@ Do not make destructive migrations or switch all public pages at once. Do not re
 ## 16. Remaining implementation blockers
 
 ### B1 — Revision retention duration
+
 **Unresolved policy decision.** The duration has not been selected. Proposed default: **2 years**. Confirm this and whether currently published revisions are exempt from routine cleanup.
 
 ### B2 — Exact Directus authentication and authorization integration
+
 **Technical verification required.** Verify deployed Directus version, supported auth flow, cookie/session behavior, refresh/revocation semantics, current roles/policies, and how Next.js can safely enforce acting-user permissions. Record the selected approach before implementation.
 
 ### B3 — Exact annual uniqueness constraint
+
 **Schema verification required.** Confirm the real page identity and route uniqueness scope against current relations and indexes before changing `cms_pages.slug`. The likely target is a constraint matching department/proker/year routing, but it must be grounded in the actual schema.
 
 ### B4 — Default-year configuration source
+
 **Verify against existing project configuration.** Earlier decisions specify a centrally configured default year. Verify the source of truth and ensure Directus settings cannot conflict with it. Do not create competing default-year values.
 
 ### B5 — Cross-department grant representation
+
 **Schema/permission mapping required.** Inspect `cms_department_memberships` and Directus policies to determine how explicit exceptions are represented, queried, revoked, and audited. Do not assume the schema alone enforces resource access.
 
 ### B6 — Directus media visibility policy
+
 **Verify per asset use case.** Confirm whether all proker assets become public when published or whether some media must remain private. Asset delivery and authorization tests depend on this.
 
 Resolve B2–B6 through repository/schema/deployment inspection wherever possible. Only B1 necessarily requires a product-policy confirmation; ask the user about B2–B6 only if inspection reveals a genuine product decision.
@@ -366,6 +383,7 @@ Resolve B2–B6 through repository/schema/deployment inspection wherever possibl
 ## 17. Definition of done for the specification phase
 
 The planning package should contain:
+
 1. This implementation specification.
 2. Directus schema migration plan with rollback strategy.
 3. Final permission matrix with cross-department scope.

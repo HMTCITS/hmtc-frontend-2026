@@ -3,7 +3,8 @@ export type GalleryItem = {
   date: string;
   title: string;
   image: string;
-  link: string;
+  /** Optional album link; the card hides "View More" when absent. */
+  link?: string;
   width: number;
   height: number;
 };

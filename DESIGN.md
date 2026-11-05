@@ -184,7 +184,7 @@ Tailwind v4 defaults are in force and are the only scale to use:
 
 Observed usage: `md:` is by far the most common (≈417 uses), then `lg:` (≈220) and `sm:` (≈199). `2xl:` is used **once**. `min-lg:` is used 12 times and is identical to `lg:`.
 
-**Rules**
+#### Breakpoint rules
 
 - Prefer `md:` → `lg:` → `xl:` for section layout. **Do not add breakpoints beyond this scale.**
 - Do not hand-write `@media` queries. Two legacy exceptions are tolerated and are **not** precedents: `styles/embla.css` (`500px`, plus 1024/768/640px) and `globals.css`'s swiper block (now `768px` after the B6 fix).
@@ -215,6 +215,7 @@ Applies to L1/L3; L4 uses the shadcn scale (§8).
 | Entrance choreography           | `500–780ms`                                                                                             |
 | Line-mask reveal                | `translateY(108%)` → `0` inside `overflow-hidden`                                                       |
 | Loading screen                  | 2.45 s, dismisses once, then releases hero animation                                                    |
+| Scale transitions               | Tailwind v4 `scale-*` sets the `scale` property — use `transition-[scale,…]`, not `transform`           |
 
 **Mandate:** every motion must respect `prefers-reduced-motion`. A global CSS guard now covers transitions and keyframes (§10 B2), but **JS and WebGL motion is not covered** — guard it inside the component.
 
@@ -225,7 +226,7 @@ Navbar/Announcement  →  Hero (dark, full-bleed, display type)  →  alternatin
 surface sections (bg-white / bg-[#121212] / bg-gray-100)  →  Footer
 ```
 
-Reference: `src/app/landing/LandingPage.tsx` — `LoadingScreen` → `HeaderAnnouncement` → `Cover` → `Navbar` → `About` → `ShowCase` (Vision/Mission, Quotes, Ketua carousel) → `RevealKabinet`. The opening animation is preserved; `RevealKabinet` loads as it approaches the viewport.
+Reference: `src/app/landing/LandingPage.tsx` — `LoadingScreen` → `HeaderAnnouncement` → `Cover` → `Navbar` → `About` → `ShowCase` (Vision/Mission, Quotes, Ketua carousel) → `RevealKabinet` → `GalleryCarousel` ("Gallery of HMTC", `#gallery`). The opening animation is preserved; `RevealKabinet` and `GalleryCarousel` load as they approach the viewport (`lazy: true` in `HOME_SECTIONS`, mounted through `LazySection`). Two requested exceptions in `GalleryCarousel`: its heading copies the `RevealKabinet` heading above it (`font-serif text-[48px]`, raw classes) so the pair reads as one, and its cards use `rounded-lg` instead of the `rounded-2xl` card default.
 
 `src/layouts/Navbar.tsx` = scroll-reveal over a dark hero (transparent → `bg-black` at `scrollY ≥ 80`).
 `src/layouts/NavbarLanding.tsx` = sticky, always `bg-[#040404]`. **Use this one for L3 template pages** (`<NavbarLanding isActive />`).
@@ -382,7 +383,7 @@ Weights: `thin` `extralight` `light` `regular` `medium` `semibold` `bold` `extra
 
 - **`NextImage` is mandatory** for all content imagery.
 - Bare `src` values are auto-prefixed with `/images/`. Pass `serverStaticImg` to bypass, or a leading `/` for root-absolute.
-- **All content imagery must live in `public/`.** `next.config.js` `images.remotePatterns` allows **only** `**.cloudflareinsights.com`. A remote hero image will not render.
+- **Static content imagery lives in `public/`.** `next.config.js` `images.remotePatterns` allows only `**.cloudflareinsights.com` and Directus assets (`https://directus.hmtc-its.com/assets/**`, public by decision Q10). Any other remote image will not render.
 - Formats: AVIF → WebP (`images.formats`). `dangerouslyAllowSVG: true`.
 - Presets: `ImageSizes.{Square|Widescreen|Standard}.{sm|md|lg|xl}` in `src/constants/components/image-sizes.ts`.
 - `useSkeleton` for lists and anything loaded asynchronously; `priority` for the hero and the navbar logo only.

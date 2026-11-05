@@ -4,6 +4,7 @@ Copyright (C) 2026 HMTC 2026
 This project is licensed under the GNU General Public License v3.
 For more details, see https://www.gnu.org/licenses/gpl-3.0.en.html.
 -->
+
 # HMTC Frontend Repository - 2026
 
 ![Status](https://uptime-kuma.hmtc-its.com/api/badge/1/status?style=flat-square)
@@ -11,6 +12,8 @@ For more details, see https://www.gnu.org/licenses/gpl-3.0.en.html.
 ![Response](https://uptime-kuma.hmtc-its.com/api/badge/1/response?style=flat-square)
 
 ## Getting Started
+
+> Full guide, including a local Directus for CMS work: [`docs/local-development.md`](docs/local-development.md).
 
 ### 1. Clone the Repository
 
@@ -54,13 +57,13 @@ This project follows [Conventional Commits](https://www.conventionalcommits.org/
 
 ### Commit Message Format
 
-```
+```text
 <type>(optional scope): <description>
 ```
 
-#### Example:
+#### Example
 
-```
+```text
 feat(pre-event): add speakers section
 ```
 

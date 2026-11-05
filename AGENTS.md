@@ -58,7 +58,7 @@ Public marketing + event site for HMTC ITS, plus an internal dashboard and auth 
 1. **Identify your layer first** (`DESIGN.md` §1). Most new work is **L1 Canonical**.
 2. **Use `<Typography>` for all text.** Do not write raw `font-*`/`text-*` size classes on headings and body copy. See §5 below.
 3. **Use `<NextImage>` for all images.** Bare `src` values are auto-prefixed with `/images/`.
-4. **All content imagery must live in `public/`.** `next.config.js` `images.remotePatterns` allows only `**.cloudflareinsights.com`; a remote URL will not render.
+4. **Static content imagery lives in `public/`.** `next.config.js` `images.remotePatterns` allows only `**.cloudflareinsights.com` and Directus assets (`https://directus.hmtc-its.com/assets/**`); any other remote URL will not render.
 5. **Footer is mandatory on every public page.**
 6. **Seminar blue `#2F6FED` is scoped to `/research-and-technology/seminar-dosen*` only.** Do not use it anywhere else — including the announcement bar.
 7. **Sanctioned bespoke themes are frozen.** `DESIGN.md` §9 lists them. Do not "fix" their palettes or fonts.
@@ -185,15 +185,18 @@ Consequence: **the sandbox pages are not a live visual reference.** Verify compo
 
 ## 12. Documentation index
 
-| Document                                        | Purpose                                                                            |
-| ----------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `DESIGN.md`                                     | Design contract — layers, tokens, components, a11y, cleanup queue, new-page recipe |
-| `README.md`                                     | Setup, commit convention, deployment                                               |
-| `docs/hmtc-cms-implementation-specification.md` | CMS requirements, permission matrix, API contract, acceptance criteria             |
-| `docs/hmtc-cms-decisions.md`                    | **Decision log** — what is confirmed vs. still open, with the reasoning            |
-| `docs/hmtc-cms-schema-migration-plan.md`        | Directus migrations M1–M11 with rollback (plan only, nothing applied)              |
-| `docs/hmtc-cms-phase-0-report.md`               | What Phase 0 changed, and the verification evidence                                |
-| `docs/audits/hmtc-cms-data-fetching-audit.md`   | Read-only audit of the existing data-fetching layer (findings F1–F18)              |
+| Document                                        | Purpose                                                                                    |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `DESIGN.md`                                     | Design contract — layers, tokens, components, a11y, cleanup queue, new-page recipe         |
+| `README.md`                                     | Setup, commit convention, deployment                                                       |
+| `docs/local-development.md`                     | Local setup, including a local Directus with the production schema (`pnpm directus:setup`) |
+| `docs/hmtc-cms-implementation-specification.md` | CMS requirements, permission matrix, API contract, acceptance criteria                     |
+| `docs/hmtc-cms-api-contract.md`                 | Readable index of the `/api/cms/*` contract (source of truth: `src/lib/cms/**`)            |
+| `docs/hmtc-cms-integration-plan.md`             | How Next.js and Directus connect end to end: credentials, flows, cache, deploy             |
+| `docs/hmtc-cms-decisions.md`                    | **Decision log** — what is confirmed vs. still open, with the reasoning                    |
+| `docs/hmtc-cms-schema-migration-plan.md`        | Directus migrations M1–M12 with rollback (`001`–`003` applied to production)               |
+| `docs/hmtc-cms-phase-0-report.md`               | What Phase 0 changed, and the verification evidence                                        |
+| `docs/audits/hmtc-cms-data-fetching-audit.md`   | Read-only audit of the existing data-fetching layer (findings F1–F18)                      |
 
 When you make a decision that changes either document, **update it in the same change.**
 
@@ -201,7 +204,10 @@ When you make a decision that changes either document, **update it in the same c
 
 ## 13. The CMS (Directus) — in progress
 
-**Status:** Phase 0 complete (dead-code cleanup + verification). **No CMS code has been written yet.** Everything below is the agreed contract — read it before adding CMS code.
+**Status:** Phase 0 complete; block schema (`src/lib/directus/blocks.ts`) and the API contract (`src/lib/cms/**`, `docs/hmtc-cms-api-contract.md`) are merged; migration `003` (revisions, preview grants, vocabularies) is applied to production as of 2026-11-03. No session, Route Handler or editor code exists yet. Everything below is the agreed contract — read it before adding CMS code.
+
+- **Develop against local Directus only:** `pnpm directus:setup` (`docs/local-development.md`). Never point a dev server at production Directus with write credentials.
+- **Contract first:** a new endpoint, DTO field, status or role is added to `src/lib/cms/**` (and, for vocabularies, a migration) before any handler or UI uses it.
 
 - **Mount point:** `/dashboard/cms/**`. It is **L4** (`DESIGN.md` §8) — `ui/*` primitives and shadcn tokens. Never surface L4 styling on a public page.
 - **Directus:** 11.1.2 at `directus.hmtc-its.com`. It is the source of truth for CMS content, media and CMS identity. It does **not** replace `api.hmtc-its.com`; see §14.
