@@ -31,6 +31,7 @@ type SeminarFormField = {
   placeholder: string;
   type?: 'input' | 'select';
   options?: string[];
+  optional?: boolean;
 };
 
 export type SeminarRegistrationConfig = {
@@ -185,7 +186,7 @@ export default function SeminarRegistrationForm({
     }
 
     const hasEmptyField = registration.fields.some(
-      (field) => !formValues[field.id]?.trim(),
+      (field) => !field.optional && !formValues[field.id]?.trim(),
     );
 
     if (hasEmptyField) {
@@ -314,6 +315,12 @@ export default function SeminarRegistrationForm({
                   className='font-plus-jakarta-sans text-sm font-semibold text-black md:text-base'
                 >
                   {field.label}
+                  {field.optional && (
+                    <span className='font-normal text-[#575757]'>
+                      {' '}
+                      (opsional)
+                    </span>
+                  )}
                 </label>
                 {field.type === 'select' && field.options ? (
                   <Select

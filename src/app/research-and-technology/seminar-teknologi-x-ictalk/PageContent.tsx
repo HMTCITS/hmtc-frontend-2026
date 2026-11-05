@@ -78,11 +78,17 @@ const seminarDosen4Content: SeminarEventContent = {
     fields: [
       { id: 'fullName', label: 'Nama', placeholder: 'Laila S. Chudori' },
       { id: 'email', label: 'Email', placeholder: 'nama@email.com' },
-      { id: 'phone', label: 'Nomor HP', placeholder: '08XXXXXXXXXX' },
+      {
+        id: 'phone',
+        label: 'Nomor HP',
+        placeholder: '08XXXXXXXXXX',
+        optional: true,
+      },
       {
         id: 'linkedin',
         label: 'LinkedIn',
         placeholder: 'https://linkedin.com/in/username',
+        optional: true,
       },
       { id: 'company', label: 'Company', placeholder: 'Nama perusahaan' },
     ],

@@ -59,15 +59,15 @@ export async function POST(request: Request) {
 
   const fullName = body.fullName?.trim();
   const email = body.email?.trim();
-  const phone = body.phone?.trim();
-  const linkedin = body.linkedin?.trim();
+  const phone = body.phone?.trim() ?? '';
+  const linkedin = body.linkedin?.trim() ?? '';
   const company = body.company?.trim();
   const submittedAt = body.submittedAt?.trim() || new Date().toISOString();
 
-  if (!fullName || !email || !phone || !linkedin || !company) {
+  if (!fullName || !email || !company) {
     return NextResponse.json(
       {
-        message: 'Nama, Email, Nomor HP, LinkedIn, dan Company wajib diisi.',
+        message: 'Nama, Email, dan Company wajib diisi.',
       },
       { status: 400 },
     );
