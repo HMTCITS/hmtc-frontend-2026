@@ -45,12 +45,14 @@ export const validationIssueSchema = z.object({
   path: z.string(),
   message: z.string(),
 });
+export type ValidationIssue = z.infer<typeof validationIssueSchema>;
 
 export const invalidBlockSchema = z.object({
   index: z.number().int(),
   type: z.string().nullable(),
   reason: z.string(),
 });
+export type InvalidBlock = z.infer<typeof invalidBlockSchema>;
 
 export const cmsErrorBodySchema = z.object({
   error: z.object({
