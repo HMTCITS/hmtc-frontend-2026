@@ -74,6 +74,38 @@ export function cmsError(
   return { error: { code, message, ...extra } };
 }
 
+/**
+ * A thrown error that carries the exact `CmsErrorBody` shape the client will
+ * see. Handlers throw this for business errors (`self_approval`,
+ * `invalid_transition`, `stale_write`, `forbidden`, `not_found`, …) instead of
+ * building a `Response` themselves.
+ *
+ * `DirectusRequestError` (server-only) covers Directus failures;
+ * `CmsError` covers Next.js-side rules and is safe to construct from the
+ * handler's perspective regardless of which module the handler lives in.
+ */
+export class CmsError extends Error {
+  constructor(
+    public readonly code: CmsErrorCode,
+    message: string,
+    public readonly extra: Pick<
+      CmsErrorBody['error'],
+      'issues' | 'invalidBlocks'
+    > = {},
+  ) {
+    super(message);
+    this.name = 'CmsError';
+  }
+
+  get status(): number {
+    return CMS_ERROR_STATUS[this.code];
+  }
+
+  toBody(): CmsErrorBody {
+    return cmsError(this.code, this.message, this.extra);
+  }
+}
+
 /** Convert Zod issues to the wire format. */
 export function toValidationIssues(error: z.ZodError) {
   return error.issues.map((issue) => ({
