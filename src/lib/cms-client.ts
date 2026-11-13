@@ -179,6 +179,8 @@ function codeFromStatus(status: number): CmsErrorCode {
       return 'forbidden';
     case 404:
       return 'not_found';
+    case 409:
+      return 'invalid_transition';
     case 422:
       return 'validation_failed';
     case 429:
@@ -267,21 +269,53 @@ export async function cmsFetch<N extends CmsClientEndpoint>(
 }
 
 /**
+ * The request data that distinguishes one call of an endpoint from another,
+ * normalised through the contract schemas so equal requests produce equal keys
+ * (query defaults are applied, so `{ page: 1 }` and `{}` are the same key).
+ *
+ * Invalid params or query throw here, before anything is sent.
+ */
+function requestIdentity<N extends CmsClientEndpoint>(
+  name: N,
+  options: CmsUrlOptions<N>,
+): Record<string, unknown> {
+  const endpoint: EndpointDef = cmsEndpoints[name];
+  const loose = options as { params?: unknown; query?: unknown };
+  const identity: Record<string, unknown> = {};
+
+  if (endpoint.params) identity.params = endpoint.params.parse(loose.params);
+  if (endpoint.query) identity.query = endpoint.query.parse(loose.query ?? {});
+
+  return identity;
+}
+
+/**
  * TanStack Query options for a CMS read.
+ *
+ * `scope` is the stable part of the key (e.g. `cmsKeys.pageLists()`); the
+ * request data (`params`, `query`) is appended to it automatically from
+ * `options`, so the cache key and the request can never disagree. Pass a scope
+ * that does not already encode params or query — the variable part is derived,
+ * not written by hand.
  *
  * `queryFn` is created here and cannot be omitted, which is the rule Phase 0
  * established: no query may rely on a key-derived fetcher.
  */
 export function cmsQuery<N extends CmsClientEndpoint>(
   name: N,
-  key: QueryKey,
+  scope: QueryKey,
   options?: CmsUrlOptions<N>,
 ) {
+  const request = (options ?? {}) as CmsUrlOptions<N>;
+  const identity = requestIdentity(name, request);
+  const queryKey =
+    Object.keys(identity).length > 0 ? [...scope, identity] : [...scope];
+
   return {
-    queryKey: key,
+    queryKey,
     queryFn: ({ signal }: { signal?: AbortSignal }) =>
       cmsFetch(name, {
-        ...((options ?? {}) as CmsUrlOptions<N>),
+        ...request,
         signal,
       } as CmsFetchOptions<N>),
   };

@@ -224,6 +224,18 @@ describe('cmsFetch error parsing', () => {
     expect(error.message).not.toContain('html');
   });
 
+  it('treats a broken-body 409 as a conflict, not a server error', async () => {
+    mockFetch(nonJsonResponse(409));
+
+    const error = (await cmsFetch('submitPage', {
+      params: { id: PAGE_ID },
+      body: { expectedUpdatedAt: '2026-11-10T00:00:00.000Z' },
+    }).catch((e: unknown) => e)) as CmsClientError;
+
+    expect(error.code).toBe('invalid_transition');
+    expect(error.status).toBe(409);
+  });
+
   it('treats an out-of-contract success body as internal, not success', async () => {
     mockFetch(jsonResponse({ unexpected: true }));
 
@@ -251,13 +263,59 @@ describe('cmsQuery', () => {
   it('always provides a queryFn that calls the endpoint', async () => {
     const fetchMock = mockFetch(jsonResponse({ items: [], total: 0 }));
 
-    const options = cmsQuery('listPages', ['cms', 'pages']);
-    expect(options.queryKey).toEqual(['cms', 'pages']);
+    const options = cmsQuery('listPages', ['cms', 'pages', 'list']);
     expect(typeof options.queryFn).toBe('function');
 
     await options.queryFn({ signal: undefined });
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(calledWith(fetchMock)[0]).toBe('/api/cms/pages?page=1&limit=25');
+  });
+
+  it('derives the key from the options, never from a hand-written one', () => {
+    const { queryKey } = cmsQuery('listPages', ['cms', 'pages', 'list'], {
+      query: { page: 2 },
+    });
+
+    expect(queryKey).toEqual([
+      'cms',
+      'pages',
+      'list',
+      { query: { page: 2, limit: 25 } },
+    ]);
+  });
+
+  it('gives equal requests the same key, defaults included', () => {
+    const explicit = cmsQuery('listPages', ['cms', 'pages', 'list'], {
+      query: { page: 1 },
+    }).queryKey;
+    const implicit = cmsQuery('listPages', ['cms', 'pages', 'list']).queryKey;
+
+    expect(explicit).toEqual([
+      'cms',
+      'pages',
+      'list',
+      { query: { page: 1, limit: 25 } },
+    ]);
+    expect(implicit).toEqual(explicit);
+  });
+
+  it('puts path params into the derived key', () => {
+    const { queryKey } = cmsQuery('getPage', ['cms', 'pages', 'detail'], {
+      params: { id: PAGE_ID },
+    });
+
+    expect(queryKey).toEqual([
+      'cms',
+      'pages',
+      'detail',
+      { params: { id: PAGE_ID } },
+    ]);
+  });
+
+  it('keeps a bare scope for endpoints without params or query', () => {
+    const { queryKey } = cmsQuery('me', ['cms', 'session']);
+
+    expect(queryKey).toEqual(['cms', 'session']);
   });
 });
