@@ -42,4 +42,19 @@ export const uploadKeys = {
   detail: (id: string) => [...uploadKeys.details(), id] as const,
 } as const;
 
-
+export const cmsKeys = {
+  all: ['cms'] as const,
+  session: () => [...cmsKeys.all, 'session'] as const,
+  departments: () => [...cmsKeys.all, 'departments'] as const,
+  prokers: (query?: Record<string, unknown>) =>
+    [...cmsKeys.all, 'prokers', query ?? {}] as const,
+  pages: () => [...cmsKeys.all, 'pages'] as const,
+  pageLists: () => [...cmsKeys.pages(), 'list'] as const,
+  pageList: (query?: Record<string, unknown>) =>
+    [...cmsKeys.pageLists(), query ?? {}] as const,
+  pageDetails: () => [...cmsKeys.pages(), 'detail'] as const,
+  pageDetail: (id: string) => [...cmsKeys.pageDetails(), id] as const,
+  revisions: (id: string) => [...cmsKeys.pageDetail(id), 'revisions'] as const,
+  previewGrants: (id: string) =>
+    [...cmsKeys.pageDetail(id), 'preview-grants'] as const,
+} as const;
