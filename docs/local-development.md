@@ -37,7 +37,7 @@ This starts `compose.directus.yml` (Directus 11.1.2 + Postgres 16) and then:
 1. applies `directus/snapshot.json` — the production schema exported after migration 002;
 2. applies `directus/post-snapshot.sql` — composite unique indexes and the site-settings singleton, which a snapshot cannot store;
 3. applies `scripts/directus-schema/003+` migrations that have not run yet (tracked in `hmtc_local_migrations`);
-4. runs every file in `directus/seed/` (departments with production IDs, sample prokers, public permissions);
+4. runs every file in `directus/seed/` (departments with production IDs, sample prokers, public permissions, development users);
 5. restarts Directus so it sees the DDL.
 
 Every step is idempotent: re-run `pnpm directus:setup` after pulling a branch that adds a migration or seed file.
@@ -50,10 +50,26 @@ Every step is idempotent: re-run `pnpm directus:setup` after pulling a branch th
 | Wipe and start over | `pnpm directus:reset && pnpm directus:setup`                                                     |
 | SQL shell           | `docker compose -f compose.directus.yml exec directus_postgres psql -U directuspg -d directusdb` |
 
+#### Development users (`directus/seed/30-dev-users.sql`)
+
+Created on top of migration `004`. All three CMS users are members of **Research Technology** (`research-and-technology`), so they can work on the same page and exercise the review workflow.
+
+| User                    | Password          | Directus role   | Membership role |
+| ----------------------- | ----------------- | --------------- | --------------- |
+| `editor@example.com`    | `editor-local`    | `CMS member`    | `editor`        |
+| `reviewer@example.com`  | `reviewer-local`  | `CMS member`    | `reviewer`      |
+| `publisher@example.com` | `publisher-local` | `CMS member`    | `publisher`     |
+| `reader@example.com`    | — (token only)    | `nextjs-reader` | —               |
+
+The reader's static token is `local-nextjs-reader-token`. It is a local-only value; production uses its own token, set by DevOps.
+
+`CMS member` has no Studio access by design (the editor is `/dashboard/cms`), so these users can only log in through the API. What each one may do is decided by their `cms_department_memberships` row — add a row (as admin) to give a user a role in another department.
+
 Point the app at it in `.env.local`:
 
 ```env
 DIRECTUS_URL=http://localhost:8055
+DIRECTUS_READ_TOKEN=local-nextjs-reader-token
 ```
 
 The CMS-specific variables are listed in `.env.example`.
