@@ -67,6 +67,7 @@ const seminarDosen4Content: SeminarEventContent = {
     'Get direct access to discuss topics with the speaker.',
     'Learn how to optimize your cloud spending.',
     'Attractive door prizes for lucky participants.',
+    'Receive a Certificate.',
   ],
   registration: {
     id: 'seminar-registration-4',
@@ -74,17 +75,22 @@ const seminarDosen4Content: SeminarEventContent = {
     title: 'Secure Your Spot',
     description:
       'Registration is mandatory to attend this session. Please fill out the form below to secure your spot.',
-    eligibilityNote:
-      'Please note that this seminar is exclusively for students of the Institut Teknologi Sepuluh Nopember (ITS).',
     fields: [
       { id: 'fullName', label: 'Nama', placeholder: 'Laila S. Chudori' },
-      { id: 'nrp', label: 'NRP', placeholder: '50XXXXXXX' },
-      { id: 'angkatan', label: 'Angkatan', placeholder: '2023' },
+      { id: 'email', label: 'Email', placeholder: 'nama@email.com' },
       {
-        id: 'prodi',
-        label: 'Prodi / Departemen',
-        placeholder: 'e.g. Teknik Informatika',
+        id: 'phone',
+        label: 'Nomor HP',
+        placeholder: '08XXXXXXXXXX',
+        optional: true,
       },
+      {
+        id: 'linkedin',
+        label: 'LinkedIn',
+        placeholder: 'https://linkedin.com/in/username',
+        optional: true,
+      },
+      { id: 'company', label: 'Company', placeholder: 'Nama perusahaan' },
     ],
     submitLabel: 'Daftar',
     apiEndpoint: '/api/seminar-dosen-4',

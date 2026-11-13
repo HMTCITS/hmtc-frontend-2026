@@ -2,9 +2,10 @@ import { NextResponse } from 'next/server';
 
 type SeminarDosen4Payload = {
   fullName?: string;
-  nrp?: string;
-  angkatan?: string;
-  prodi?: string;
+  email?: string;
+  phone?: string;
+  linkedin?: string;
+  company?: string;
   submittedAt?: string;
 };
 
@@ -30,10 +31,11 @@ function getRequiredEnv() {
       process.env.NOCODB_SEMINAR_DOSEN_4_VIEW_ID || process.env.NOCODB_VIEW_ID,
     fieldFullName:
       process.env.NOCODB_FIELD_SEMINAR_DOSEN_4_FULL_NAME || 'fullName',
-    fieldNrp: process.env.NOCODB_FIELD_SEMINAR_DOSEN_4_NRP || 'nrp',
-    fieldAngkatan:
-      process.env.NOCODB_FIELD_SEMINAR_DOSEN_4_ANGKATAN || 'angkatan',
-    fieldProdi: process.env.NOCODB_FIELD_SEMINAR_DOSEN_4_PRODI || 'prodi',
+    fieldEmail: process.env.NOCODB_FIELD_SEMINAR_DOSEN_4_EMAIL || 'email',
+    fieldPhone: process.env.NOCODB_FIELD_SEMINAR_DOSEN_4_PHONE || 'phone',
+    fieldLinkedin:
+      process.env.NOCODB_FIELD_SEMINAR_DOSEN_4_LINKEDIN || 'linkedin',
+    fieldCompany: process.env.NOCODB_FIELD_SEMINAR_DOSEN_4_COMPANY || 'company',
     fieldSubmittedAt:
       process.env.NOCODB_FIELD_SEMINAR_DOSEN_4_SUBMITTED_AT || 'submittedAt',
   };
@@ -56,14 +58,17 @@ export async function POST(request: Request) {
   }
 
   const fullName = body.fullName?.trim();
-  const nrp = body.nrp?.trim();
-  const angkatan = body.angkatan?.trim();
-  const prodi = body.prodi?.trim();
+  const email = body.email?.trim();
+  const phone = body.phone?.trim() ?? '';
+  const linkedin = body.linkedin?.trim() ?? '';
+  const company = body.company?.trim();
   const submittedAt = body.submittedAt?.trim() || new Date().toISOString();
 
-  if (!fullName || !nrp || !angkatan || !prodi) {
+  if (!fullName || !email || !company) {
     return NextResponse.json(
-      { message: 'Nama, NRP, Angkatan, dan Prodi wajib diisi.' },
+      {
+        message: 'Nama, Email, dan Company wajib diisi.',
+      },
       { status: 400 },
     );
   }
@@ -78,9 +83,10 @@ export async function POST(request: Request) {
 
   const rowData: Record<string, string> = {
     [env.fieldFullName]: fullName,
-    [env.fieldNrp]: nrp,
-    [env.fieldAngkatan]: angkatan,
-    [env.fieldProdi]: prodi,
+    [env.fieldEmail]: email,
+    [env.fieldPhone]: phone,
+    [env.fieldLinkedin]: linkedin,
+    [env.fieldCompany]: company,
     [env.fieldSubmittedAt]: submittedAt,
   };
 
