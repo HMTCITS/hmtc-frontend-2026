@@ -9,6 +9,7 @@ jest.mock('next/navigation', () => ({
 jest.mock('lucide-react', () => ({
   FileText: () => null,
   Images: () => null,
+  LayoutDashboard: () => null,
   Users: () => null,
 }));
 
