@@ -216,7 +216,11 @@ INSERT INTO directus_permissions (collection, action, permissions, validation, p
    '586ae88a-b88c-462a-a436-496fb6784102'),
   ('cms_review_events', 'read', pg_temp.member_of('{page,department}', 'editor_department'), NULL, NULL,
    '*', '586ae88a-b88c-462a-a436-496fb6784102'),
-  ('cms_review_events', 'create', NULL, NULL, NULL,
+  -- actor is not a user-created field, so Directus would store NULL and the
+  -- self-approval check (latest `submitted` actor ≠ publisher) would never
+  -- fire. The preset fills it; leaving actor out of `fields` makes it
+  -- unforgeable (a payload that sets it is rejected). Same in 3c and 3d.
+  ('cms_review_events', 'create', NULL, NULL, '{"actor":"$CURRENT_USER"}',
    'page,action,from_status,to_status,comment',
    '586ae88a-b88c-462a-a436-496fb6784102');
 
@@ -247,7 +251,7 @@ INSERT INTO directus_permissions (collection, action, permissions, validation, p
    '40dadbab-35a6-4de0-946b-12591398a625'),
   ('cms_review_events', 'read', pg_temp.member_of('{page,department}', 'reviewer_department'), NULL, NULL,
    '*', '40dadbab-35a6-4de0-946b-12591398a625'),
-  ('cms_review_events', 'create', NULL, NULL, NULL,
+  ('cms_review_events', 'create', NULL, NULL, '{"actor":"$CURRENT_USER"}',
    'page,action,from_status,to_status,comment',
    '40dadbab-35a6-4de0-946b-12591398a625');
 
@@ -257,7 +261,7 @@ INSERT INTO directus_permissions (collection, action, permissions, validation, p
    NULL, NULL,
    'status,published_revision,current_revision,published_at,published_by',
    '3c0f2269-1938-48e0-afe0-656262f798c8'),
-  ('cms_review_events', 'create', NULL, NULL, NULL,
+  ('cms_review_events', 'create', NULL, NULL, '{"actor":"$CURRENT_USER"}',
    'page,action,from_status,to_status,comment',
    '3c0f2269-1938-48e0-afe0-656262f798c8');
 
