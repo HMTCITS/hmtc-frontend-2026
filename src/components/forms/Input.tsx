@@ -1,11 +1,6 @@
 import { Eye, EyeClosed, Info, LucideIcon } from 'lucide-react';
 import * as React from 'react';
-import {
-  FieldError,
-  get,
-  RegisterOptions,
-  useFormContext,
-} from 'react-hook-form';
+import { get, RegisterOptions, useFormContext } from 'react-hook-form';
 
 import { cn } from '@/lib/utils';
 
@@ -50,8 +45,8 @@ export default function Input({
   const {
     register,
     formState: { errors },
-  } = useFormContext<Record<string, any>>();
-  const error = get(errors, id) as FieldError | undefined;
+  } = useFormContext();
+  const error = get(errors, id);
   const withLabel = label !== null;
 
   const [showPassword, setShowPassword] = React.useState(false);
