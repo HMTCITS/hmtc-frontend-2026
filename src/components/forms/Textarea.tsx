@@ -1,6 +1,11 @@
 import { Info } from 'lucide-react';
 import * as React from 'react';
-import { get, RegisterOptions, useFormContext } from 'react-hook-form';
+import {
+  FieldError,
+  get,
+  RegisterOptions,
+  useFormContext,
+} from 'react-hook-form';
 
 import { cn } from '@/lib/utils';
 
@@ -39,8 +44,8 @@ export default function Textarea({
   const {
     register,
     formState: { errors },
-  } = useFormContext();
-  const error = get(errors, id);
+  } = useFormContext<Record<string, any>>();
+  const error = get(errors, id) as (FieldError & { _errors?: string[] }) | undefined;
   const withLabel = label !== null;
 
   React.useEffect(() => {
