@@ -6,7 +6,12 @@ import {
   PAGE_STATUSES,
   type PageAction,
 } from '@/lib/cms/vocab';
-import { allowedActions, type AuthzPage, can } from '@/lib/directus/authz';
+import {
+  allowedActions,
+  authorize,
+  type AuthzPage,
+  can,
+} from '@/lib/directus/authz';
 
 const DEPT_A = '00000000-0000-4000-8000-00000000000a';
 const DEPT_B = '00000000-0000-4000-8000-00000000000b';
@@ -113,6 +118,94 @@ describe('can — publishing and self-approval', () => {
     expect(can(admin, 'publish', own)).toBe(false);
     expect(allowedActions(admin, own)).not.toContain('publish');
   });
+
+  it('no one can publish when the submission is not recorded', () => {
+    const u = user([{ departmentId: DEPT_A, role: 'publisher' }]);
+    const unattributed = page({ status: 'in_review', lastSubmission: null });
+    expect(can(u, 'publish', unattributed)).toBe(false);
+    expect(can(user([], true), 'publish', unattributed)).toBe(false);
+    expect(can(u, 'request_changes', unattributed)).toBe(true);
+  });
+});
+
+describe('authorize — denial reasons', () => {
+  it('returns null when allowed', () => {
+    const u = user([{ departmentId: DEPT_A, role: 'publisher' }]);
+    expect(authorize(u, 'publish', inReview)).toBeNull();
+  });
+
+  it('not a member of the page department → not_found', () => {
+    const u = user([{ departmentId: DEPT_B, role: 'publisher' }]);
+    expect(authorize(u, 'publish', inReview)).toBe('not_found');
+    expect(authorize(user(), 'edit', page())).toBe('not_found');
+  });
+
+  it('member without the role → forbidden', () => {
+    const u = user([{ departmentId: DEPT_A, role: 'reviewer' }]);
+    expect(authorize(u, 'publish', inReview)).toBe('forbidden');
+  });
+
+  it('wrong state → invalid_transition', () => {
+    const u = user([{ departmentId: DEPT_A, role: 'publisher' }]);
+    expect(authorize(u, 'publish', page({ status: 'draft' }))).toBe(
+      'invalid_transition',
+    );
+    expect(authorize(u, 'unpublish', page({ status: 'published' }))).toBe(
+      'invalid_transition',
+    );
+  });
+
+  it('own or unattributed submission → self_approval', () => {
+    const u = user([{ departmentId: DEPT_A, role: 'publisher' }]);
+    const own = page({
+      status: 'in_review',
+      lastSubmission: { actorId: u.id, at: '2026-11-13T00:00:00+07:00' },
+    });
+    expect(authorize(u, 'publish', own)).toBe('self_approval');
+    expect(
+      authorize(
+        u,
+        'publish',
+        page({ status: 'in_review', lastSubmission: null }),
+      ),
+    ).toBe('self_approval');
+  });
+
+  it('checks run in contract order: membership, role, state, self-approval', () => {
+    // Not a member and wrong state: membership wins (no existence leak).
+    const outsider = user([{ departmentId: DEPT_B, role: 'publisher' }]);
+    expect(authorize(outsider, 'publish', page())).toBe('not_found');
+    // Wrong role and wrong state: role wins.
+    const editor = user([{ departmentId: DEPT_A, role: 'editor' }]);
+    expect(authorize(editor, 'publish', page())).toBe('forbidden');
+  });
+
+  it('admins skip membership and role but not state or self-approval', () => {
+    const admin = user([], true);
+    expect(authorize(admin, 'edit', page({ departmentId: DEPT_B }))).toBeNull();
+    expect(authorize(admin, 'publish', page())).toBe('invalid_transition');
+    const own = page({
+      status: 'in_review',
+      lastSubmission: { actorId: admin.id, at: '2026-11-13T00:00:00+07:00' },
+    });
+    expect(authorize(admin, 'publish', own)).toBe('self_approval');
+  });
+
+  it('agrees with can() for every role, action and status', () => {
+    for (const role of MEMBERSHIP_ROLES) {
+      const u = user([{ departmentId: DEPT_A, role }]);
+      for (const status of PAGE_STATUSES) {
+        const p = page({
+          status,
+          isLive: true,
+          lastSubmission: inReview.lastSubmission,
+        });
+        for (const action of ACTIONS) {
+          expect(can(u, action, p)).toBe(authorize(u, action, p) === null);
+        }
+      }
+    }
+  });
 });
 
 describe('can — admin', () => {
@@ -125,7 +218,11 @@ describe('can — admin', () => {
   it('is still bound by the workflow', () => {
     const admin = user([], true);
     for (const status of PAGE_STATUSES) {
-      const p = page({ status, isLive: false });
+      const p = page({
+        status,
+        isLive: false,
+        lastSubmission: status === 'in_review' ? inReview.lastSubmission : null,
+      });
       for (const action of ACTIONS) {
         const rule = PAGE_ACTIONS[action];
         const fromOk =
