@@ -23,11 +23,6 @@ export default function SandboxIndexPage() {
       label: 'Page Builder',
       desc: 'CMS dashboard prototype + approved building blocks',
     },
-    {
-      href: '/sandbox/cms-authz',
-      label: 'CMS Authorization',
-      desc: 'authorize() / allowedActions() playground',
-    },
   ];
   return (
     <main className='mx-auto max-w-5xl space-y-8 p-8'>
