@@ -2,7 +2,7 @@
 --
 -- Removes the nextjs-reader and CMS member roles, their policies and
 -- permissions, the generated membership columns and the
--- directus_users.cms_memberships alias. Users that held those roles are kept
+-- directus_users.cms_memberships alias and the department-scope triggers. Users that held those roles are kept
 -- but left without a role (no access).
 --
 -- ⚠️  After:   docker restart directus   (Directus caches its schema — N8)
@@ -10,6 +10,12 @@
 SET lock_timeout = '5s';
 
 BEGIN;
+
+DROP TRIGGER cms_pages_department_scope          ON cms_pages;
+DROP TRIGGER cms_page_revisions_department_scope ON cms_page_revisions;
+DROP TRIGGER cms_preview_grants_department_scope ON cms_preview_grants;
+DROP TRIGGER cms_review_events_department_scope  ON cms_review_events;
+DROP FUNCTION cms_enforce_department_scope();
 
 UPDATE directus_users
    SET role = NULL

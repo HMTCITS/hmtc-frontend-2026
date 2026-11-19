@@ -20,11 +20,15 @@
 --      attached to one role "CMS member". Every page-scoped rule filters on
 --      cms_department_memberships of $CURRENT_USER *with the matching role*,
 --      so a user who is editor in A and publisher in B may only publish in B.
+--   4. BEFORE INSERT triggers on cms_pages, cms_page_revisions,
+--      cms_preview_grants and cms_review_events: the creating user must hold
+--      an active membership with a matching role in the page's department.
+--      Create permissions only see the payload and cannot check this, and CMS
+--      members can call the Directus API directly with their own password.
 --
 -- These policies are the SECOND layer. Next.js (src/lib/directus/authz.ts) is
 -- the first, and is the only place that enforces what Directus cannot express:
 --   - self-approval (C3);
---   - the department of a NEW page (create permissions only see the payload);
 --   - which revision a page may point to;
 --   - which status / review action each membership role may write. Directus
 --     11.1 ANDs `validation` across all policies of a user, so per-role
@@ -264,5 +268,69 @@ INSERT INTO directus_permissions (collection, action, permissions, validation, p
   ('cms_review_events', 'create', NULL, NULL, '{"actor":"$CURRENT_USER"}',
    'page,action,from_status,to_status,comment',
    '3c0f2269-1938-48e0-afe0-656262f798c8');
+
+-- 4. Department scope on create ---------------------------------------------------
+-- Directus create permissions only see the payload, so they cannot check the
+-- department. These triggers can, because Directus always records the creating
+-- user: user-created fields (user_created, author, created_by) and the actor
+-- preset above. None of these is writable through the API.
+-- Update paths need no trigger: no role may write department or page.
+CREATE FUNCTION cms_enforce_department_scope() RETURNS trigger
+LANGUAGE plpgsql AS $$
+DECLARE
+  row_json jsonb  := to_jsonb(NEW);
+  v_user   uuid   := (row_json ->> TG_ARGV[0])::uuid;   -- user column
+  v_roles  text[] := string_to_array(TG_ARGV[1], ',');  -- allowed membership roles
+  v_dept   uuid;
+BEGIN
+  -- No user: not written through the Directus API (psql, migrations, seeds).
+  IF v_user IS NULL THEN
+    RETURN NEW;
+  END IF;
+
+  -- Directus admins may act in every department.
+  IF EXISTS (
+    SELECT 1
+      FROM directus_users u
+      JOIN directus_access a ON a.role = u.role OR a."user" = u.id
+      JOIN directus_policies p ON p.id = a.policy
+     WHERE u.id = v_user AND p.admin_access
+  ) THEN
+    RETURN NEW;
+  END IF;
+
+  IF row_json ? 'department' THEN
+    v_dept := (row_json ->> 'department')::uuid;
+  ELSE
+    SELECT department INTO v_dept FROM cms_pages WHERE id = (row_json ->> 'page')::uuid;
+  END IF;
+
+  IF v_dept IS NULL OR NOT EXISTS (
+    SELECT 1 FROM cms_department_memberships m
+     WHERE m."user" = v_user
+       AND m.department = v_dept
+       AND m.is_active IS TRUE
+       AND m.membership_role = ANY (v_roles)
+  ) THEN
+    RAISE EXCEPTION 'cms: user % has no active % membership in department % (%)',
+      v_user, TG_ARGV[1], v_dept, TG_TABLE_NAME
+      USING ERRCODE = 'insufficient_privilege';
+  END IF;
+
+  RETURN NEW;
+END $$;
+
+CREATE TRIGGER cms_pages_department_scope
+  BEFORE INSERT ON cms_pages FOR EACH ROW
+  EXECUTE FUNCTION cms_enforce_department_scope('user_created', 'editor');
+CREATE TRIGGER cms_page_revisions_department_scope
+  BEFORE INSERT ON cms_page_revisions FOR EACH ROW
+  EXECUTE FUNCTION cms_enforce_department_scope('author', 'editor,reviewer,publisher');
+CREATE TRIGGER cms_preview_grants_department_scope
+  BEFORE INSERT ON cms_preview_grants FOR EACH ROW
+  EXECUTE FUNCTION cms_enforce_department_scope('created_by', 'editor,reviewer,publisher');
+CREATE TRIGGER cms_review_events_department_scope
+  BEFORE INSERT ON cms_review_events FOR EACH ROW
+  EXECUTE FUNCTION cms_enforce_department_scope('actor', 'editor,reviewer,publisher');
 
 COMMIT;
