@@ -272,7 +272,7 @@ Phase 0 deleted 15 modules that were unreachable from every route. **They were r
 
 **Still present, but legacy:**
 
-- `api.hmtc-its.com` still serves `/auth/*`, `/evaluasi-cmi/submit`, `/magang/*` and `/shortlink/*`. Only **two** frontend callers remain: `src/hooks/api/useSubmitEvaluasiCMI.ts` (works) and `src/app/gallery/hooks/useValidateNrp.ts` (**broken** — it sends `nrp` to an endpoint that requires `email`, so it always resolves `false` and the `/gallery` gate can never open). Do not build on this API; its Swagger document is stale and incomplete.
+- `api.hmtc-its.com` still serves `/auth/*`, `/evaluasi-cmi/submit`, `/magang/*` and `/shortlink/*`. The only remaining frontend caller is `src/hooks/api/useSubmitEvaluasiCMI.ts`. The broken `/gallery` NRP gate was removed under R5. Do not build on this API; its Swagger document is stale and incomplete.
 - The five NocoDB route handlers are live and correct. Migrating them to `cms_forms` is a separate workstream.
 
 **Do not reintroduce deriving a fetch URL from a React Query key.** That footgun was removed from `src/app/providers.tsx` in Phase 0 — every `useQuery` must pass an explicit `queryFn`, and `suspense` is not set as a client default.
