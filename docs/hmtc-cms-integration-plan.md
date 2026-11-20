@@ -81,7 +81,7 @@ Restore copies a snapshot into `cms_pages.blocks` as a new draft and never publi
 
 ## 4. How published content reaches the public website
 
-**Remove the soft-404 trap (user decision).** Move the root `<React.Suspense>` out of `src/app/providers.tsx:48`, and give the routes that use `next/dynamic` fallbacks or `useSearchParams` (`gallery/container/galleryPage.tsx`, `coming-soon/page.tsx`) their own local boundaries or `loading.tsx`. Then `notFound()` before the first flush returns HTTP 404. Verify with `curl -I`. The existing `dynamicParams=false` proker routes keep working unchanged.
+**Soft-404 trap fixed (R1).** `src/app/providers.tsx` no longer wraps every page in `<React.Suspense>`. The `gallery` and `coming-soon` routes have local boundaries for `useSearchParams`, while lazy landing sections retain their own boundary. A `notFound()` call before the first flush now returns HTTP 404. Local HTTP checks confirmed 200 for an existing 2026 proker route, 404 for a missing year, and 404 for a temporary route calling `notFound()`; the temporary route was removed. The existing `dynamicParams=false` proker routes remain unchanged.
 
 **Route shape.** Keep the existing per-proker folders (`src/app/<dept>/<proker>/[year]/page.tsx`). A proker moves to the CMS **one at a time** (the controlled rollout from spec §13). Its `[year]/page.tsx` switches from hardcoded `PageContent` to this:
 

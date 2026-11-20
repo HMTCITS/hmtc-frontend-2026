@@ -1,7 +1,9 @@
 import { Metadata } from 'next';
+import { Suspense } from 'react';
 
 import GalleryPage from '@/app/gallery/container/galleryPage';
 import JsonLd from '@/components/JsonLd';
+import Loading from '@/components/Loading';
 
 export const metadata: Metadata = {
   title: {
@@ -40,7 +42,9 @@ export default function Page() {
         title='Gallery HMTC ITS'
         description='Kumpulan foto dan momen HMTC ITS - dari workshop hingga gathering.'
       />
-      <GalleryPage />
+      <Suspense fallback={<Loading />}>
+        <GalleryPage />
+      </Suspense>
     </>
   );
 }

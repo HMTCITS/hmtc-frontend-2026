@@ -4,6 +4,7 @@ import { motion } from 'motion/react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import React, {
+  Suspense,
   useCallback,
   useEffect,
   useMemo,
@@ -11,6 +12,7 @@ import React, {
   useState,
 } from 'react';
 
+import Loading from '@/components/Loading';
 import NextImage from '@/components/NextImage';
 import Typography from '@/components/Typography';
 import { useSchedule } from '@/hooks/api/useSchedule';
@@ -77,7 +79,7 @@ LogoGraphic.displayName = 'LogoGraphic';
    Component
    ------------------------- */
 
-export default function ComingSoon() {
+function ComingSoonContent() {
   // routing / query
   const search = useSearchParams();
   const router = useRouter();
@@ -472,5 +474,13 @@ export default function ComingSoon() {
         </motion.div>
       </motion.div>
     </main>
+  );
+}
+
+export default function ComingSoon() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <ComingSoonContent />
+    </Suspense>
   );
 }

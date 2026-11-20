@@ -2,9 +2,8 @@
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import * as React from 'react';
+import type { ReactNode } from 'react';
 
-import Loading from '@/components/Loading';
 import { Toaster } from '@/components/ui/sonner';
 
 /**
@@ -33,19 +32,18 @@ const queryClient = new QueryClient({
 });
 
 type ProvidersProps = {
-  children: React.ReactNode;
+  children: ReactNode;
 };
 
 /**
  * Providers membungkus aplikasi dengan QueryClientProvider dan Toaster.
- * The Suspense boundary remains for page-level `next/dynamic` fallbacks.
  * React Query Devtools hanya ditampilkan saat development.
  */
 export default function Providers({ children }: ProvidersProps) {
   return (
     <QueryClientProvider client={queryClient}>
       <Toaster position='top-center' />
-      <React.Suspense fallback={<Loading />}>{children}</React.Suspense>
+      {children}
       {process.env.NEXT_PUBLIC_RUN_MODE === 'development' && (
         <ReactQueryDevtools initialIsOpen={false} />
       )}
