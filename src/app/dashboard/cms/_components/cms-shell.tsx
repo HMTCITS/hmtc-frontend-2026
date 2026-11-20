@@ -1,6 +1,6 @@
 'use client';
 
-import { FileText, Images, LayoutDashboard, Users } from 'lucide-react';
+import { FileText, Images, Users } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
@@ -15,11 +15,6 @@ import { cn } from '@/lib/utils';
  */
 const NAV_ITEMS = [
   { href: '/dashboard/cms', label: 'Posts & Pages', icon: FileText },
-  {
-    href: '/dashboard/cms/blocks-preview',
-    label: 'Form Blok',
-    icon: LayoutDashboard,
-  },
 ] as const;
 
 const PLANNED_ITEMS = [

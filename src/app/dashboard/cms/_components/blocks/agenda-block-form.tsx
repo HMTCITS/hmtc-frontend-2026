@@ -1,139 +1,101 @@
 'use client';
 
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { agendaBlock, BLOCK_LIMITS, type BlockOf } from '@/lib/directus/blocks';
-
+import { FieldSet } from '@/components/ui/field';
 import {
-  blockErrorAt,
-  BlockField,
-  blockFieldClasses,
-  useBlockIssues,
-} from './block-field';
+  agendaBlock,
+  BLOCK_LIMITS,
+  BLOCK_META,
+  type BlockOf,
+} from '@/lib/directus/blocks';
+
+import { TextField } from './block-fields';
+import {
+  type BlockFormProps,
+  optionalText,
+  withProps,
+} from './block-form-utils';
 import { ItemListEditor } from './item-list-editor';
+import { useBlockForm } from './use-block-form';
 
-export type AgendaBlockFormProps = {
-  value: BlockOf<'agenda'>;
-  onChange: (next: BlockOf<'agenda'>) => void;
-};
+type AgendaItem = BlockOf<'agenda'>['props']['items'][number];
 
-export function AgendaBlockForm({ value, onChange }: AgendaBlockFormProps) {
-  const issues = useBlockIssues(agendaBlock, value);
+export function AgendaBlockForm({
+  value,
+  onChange,
+  disabled,
+}: BlockFormProps<'agenda'>) {
+  const form = useBlockForm(agendaBlock, value);
   const { props } = value;
 
-  const update = (patch: Partial<BlockOf<'agenda'>['props']>) =>
-    onChange({ ...value, props: { ...props, ...patch } });
+  const setItems = (items: AgendaItem[]) =>
+    onChange(withProps(value, { items }));
 
-  const setItem = (
-    index: number,
-    patch: Partial<{ time: string; title: string; description: string }>,
-  ) =>
-    update({
-      items: props.items.map((item, i) =>
-        i === index ? { ...item, ...patch } : item,
-      ),
-    });
+  const setItem = (index: number, patch: Partial<AgendaItem>) =>
+    setItems(
+      props.items.map((item, position) => {
+        if (position !== index) return item;
+        const next: Record<string, unknown> = { ...item, ...patch };
+        // An emptied optional field is removed, never stored as `''`.
+        if (next.description === undefined) delete next.description;
+        return next as AgendaItem;
+      }),
+    );
 
   return (
-    <div className='space-y-5'>
-      <BlockField
-        id={`agenda-heading-${value.id}`}
+    <FieldSet
+      disabled={disabled}
+      aria-label={`Pengaturan blok ${BLOCK_META.agenda.label}`}
+      className='gap-5'
+    >
+      <TextField
         label='Judul bagian'
-        optional
-        error={blockErrorAt(issues, 'props', 'heading')}
-      >
-        <Input
-          id={`agenda-heading-${value.id}`}
-          value={props.heading ?? ''}
-          onChange={(event) =>
-            update({ heading: event.target.value || undefined })
-          }
-          maxLength={BLOCK_LIMITS.headingChars}
-          placeholder='Susunan Acara'
-          className={blockFieldClasses()}
-        />
-      </BlockField>
+        value={props.heading ?? ''}
+        onValueChange={(text) =>
+          onChange(withProps(value, { heading: optionalText(text) }))
+        }
+        {...form.field('props.heading')}
+      />
 
       <ItemListEditor
         label='Sesi acara'
         items={props.items}
-        onChange={(items) => update({ items })}
-        createItem={() => ({
-          time: '00.00',
-          title: 'Sesi baru',
-          description: undefined,
-        })}
+        onChange={setItems}
+        // Prefilled so a new row is valid until the user edits it.
+        createItem={(): AgendaItem => ({ time: '00.00', title: 'Sesi baru' })}
         itemAriaLabel={(_, index) => `sesi ${index + 1}`}
         max={BLOCK_LIMITS.agendaItems}
+        error={form.errorAt('props.items')}
         addLabel='Tambah sesi'
-        emptyLabel='Belum ada sesi.'
+        emptyLabel='Belum ada sesi. Halaman tidak bisa dipublikasikan selama blok ini kosong.'
         renderFields={(item, index) => (
-          <div className='space-y-3'>
-            <div className='grid gap-3 sm:grid-cols-[auto_1fr]'>
-              <BlockField
-                id={`agenda-time-${value.id}-${index}`}
+          <>
+            <div className='grid gap-3 @md:grid-cols-[8rem_1fr]'>
+              <TextField
                 label='Jam'
-                error={blockErrorAt(issues, 'props', 'items', index, 'time')}
-              >
-                <Input
-                  id={`agenda-time-${value.id}-${index}`}
-                  value={item.time}
-                  onChange={(event) =>
-                    setItem(index, { time: event.target.value })
-                  }
-                  maxLength={40}
-                  placeholder='09.00'
-                  className={blockFieldClasses('w-24')}
-                />
-              </BlockField>
-
-              <BlockField
-                id={`agenda-title-${value.id}-${index}`}
-                label='Judul sesi'
-                error={blockErrorAt(issues, 'props', 'items', index, 'title')}
-              >
-                <Input
-                  id={`agenda-title-${value.id}-${index}`}
-                  value={item.title}
-                  onChange={(event) =>
-                    setItem(index, { title: event.target.value })
-                  }
-                  maxLength={120}
-                  placeholder='Registrasi'
-                  className={blockFieldClasses()}
-                />
-              </BlockField>
-            </div>
-
-            <BlockField
-              id={`agenda-description-${value.id}-${index}`}
-              label='Deskripsi'
-              optional
-              error={blockErrorAt(
-                issues,
-                'props',
-                'items',
-                index,
-                'description',
-              )}
-            >
-              <Textarea
-                id={`agenda-description-${value.id}-${index}`}
-                value={item.description ?? ''}
-                onChange={(event) =>
-                  setItem(index, {
-                    description: event.target.value || undefined,
-                  })
-                }
-                maxLength={300}
-                rows={2}
-                placeholder='Keterangan singkat sesi ini.'
-                className={blockFieldClasses()}
+                value={item.time}
+                onValueChange={(time) => setItem(index, { time })}
+                {...form.field(`props.items.${index}.time`)}
               />
-            </BlockField>
-          </div>
+              <TextField
+                label='Judul sesi'
+                value={item.title}
+                onValueChange={(title) => setItem(index, { title })}
+                {...form.field(`props.items.${index}.title`)}
+              />
+            </div>
+            <TextField
+              label='Deskripsi'
+              multiline
+              rows={2}
+              value={item.description ?? ''}
+              onValueChange={(text) =>
+                setItem(index, { description: optionalText(text) })
+              }
+              {...form.field(`props.items.${index}.description`)}
+            />
+          </>
         )}
       />
-    </div>
+    </FieldSet>
   );
 }

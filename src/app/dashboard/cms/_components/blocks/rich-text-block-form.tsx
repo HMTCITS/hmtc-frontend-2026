@@ -7,13 +7,13 @@ import { Button } from '@/components/ui/button';
 import { FieldDescription, FieldError, FieldSet } from '@/components/ui/field';
 import { BLOCK_LIMITS, BLOCK_META, richTextBlock } from '@/lib/directus/blocks';
 
+import { TextField } from './block-fields';
 import {
   type BlockFormProps,
   optionalText,
   withProps,
 } from './block-form-utils';
-import { TextField } from './BlockFormFields';
-import { useBlockForm } from './useBlockForm';
+import { useBlockForm } from './use-block-form';
 
 const paragraphPath = (index: number) => `props.paragraphs.${index}`;
 
@@ -65,11 +65,11 @@ export function RichTextBlockForm({
   return (
     <FieldSet
       disabled={disabled}
-      aria-label={`${BLOCK_META.richText.label} block settings`}
+      aria-label={`Pengaturan blok ${BLOCK_META.richText.label}`}
       className='gap-5'
     >
       <TextField
-        label='Heading'
+        label='Judul bagian'
         value={heading ?? ''}
         onValueChange={(text) =>
           onChange(withProps(value, { heading: optionalText(text) }))
@@ -77,7 +77,7 @@ export function RichTextBlockForm({
         {...form.field('props.heading')}
       />
 
-      <FieldSet aria-label='Paragraphs' className='gap-4'>
+      <FieldSet aria-label='Paragraf' className='gap-4'>
         {paragraphs.length === 0 ? (
           <FieldDescription>
             Belum ada paragraf. Halaman tidak bisa dipublikasikan selama blok
@@ -90,7 +90,7 @@ export function RichTextBlockForm({
             // Rows are fully controlled and hold no state of their own, so
             // position is a safe key.
             key={index}
-            label={`Paragraph ${index + 1}`}
+            label={`Paragraf ${index + 1}`}
             multiline
             rows={4}
             value={paragraph}
@@ -112,7 +112,7 @@ export function RichTextBlockForm({
                 // Without its own colour the icon would turn red with the
                 // rest of an invalid row and read as a warning.
                 className='size-7 text-muted-foreground'
-                aria-label={`Remove paragraph ${index + 1}`}
+                aria-label={`Hapus paragraf ${index + 1}`}
                 onClick={() => removeParagraph(index)}
               >
                 <Trash2 aria-hidden='true' />
@@ -134,7 +134,7 @@ export function RichTextBlockForm({
           onClick={addParagraph}
         >
           <Plus aria-hidden='true' />
-          Add paragraph
+          Tambah paragraf
         </Button>
         {atLimit ? (
           <FieldDescription>

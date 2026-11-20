@@ -15,7 +15,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 
-import type { FieldBinding } from './useBlockForm';
+import type { FieldBinding } from './use-block-form';
 
 type TextControl = HTMLInputElement | HTMLTextAreaElement;
 
@@ -100,7 +100,8 @@ export function TextField({
 
 type ChoiceFieldProps<V extends string> = {
   label: string;
-  value: V;
+  /** `undefined` for an optional enum that has not been chosen yet. */
+  value: V | undefined;
   /**
    * Label per option. Typing it as a `Record` over the schema's enum makes a
    * newly added enum value a compile error here.
@@ -119,13 +120,13 @@ export function ChoiceField<V extends string>({
   const name = useId();
 
   return (
-    <FieldSet className='gap-0'>
+    <FieldSet className='min-w-0 gap-0'>
       <FieldLegend variant='label' className='mb-2'>
         {label}
       </FieldLegend>
       {/* The chosen option is already filled with the ring colour, so focus is
           drawn around the whole control, the same way `Input` shows it. */}
-      <div className='flex gap-0.5 rounded-md border border-input p-0.5 has-focus-visible:ring-1 has-focus-visible:ring-ring'>
+      <div className='flex flex-wrap gap-0.5 rounded-md border border-input p-0.5 has-focus-visible:ring-1 has-focus-visible:ring-ring'>
         {(Object.keys(options) as V[]).map((option) => (
           <label key={option} className='flex-1'>
             <input
@@ -171,13 +172,13 @@ export function ActionFields({
   return (
     <>
       <TextField
-        label='Button label'
+        label='Label tombol'
         value={value.label}
         onValueChange={(text) => onValueChange({ ...value, label: text })}
         {...label}
       />
       <TextField
-        label='Button link'
+        label='Tautan tombol'
         hint='Path internal seperti /nama-halaman, atau tautan https:// atau mailto:.'
         value={value.href}
         onValueChange={(text) => onValueChange({ ...value, href: text })}

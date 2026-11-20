@@ -5,6 +5,7 @@ import type { ReactNode } from 'react';
 
 import Typography from '@/components/Typography';
 import { Button } from '@/components/ui/button';
+import { FieldError } from '@/components/ui/field';
 
 function moveItem<T>(items: readonly T[], from: number, to: number): T[] {
   if (
@@ -39,6 +40,7 @@ export function ItemListEditor<T>({
   renderFields,
   itemAriaLabel,
   max,
+  error,
   addLabel = 'Tambah item',
   emptyLabel = 'Belum ada item.',
 }: {
@@ -51,6 +53,8 @@ export function ItemListEditor<T>({
   /** Human label per item, used inside the aria-labels of row controls. */
   itemAriaLabel: (item: T, index: number) => string;
   max?: number;
+  /** Error on the list itself, e.g. over the limit, from `useBlockForm`. */
+  error?: string;
   addLabel?: string;
   emptyLabel?: string;
 }) {
@@ -102,7 +106,7 @@ export function ItemListEditor<T>({
             return (
               <li key={index} className='rounded-lg border border-border p-3'>
                 <div className='flex items-start gap-3'>
-                  <div className='min-w-0 flex-1 space-y-3'>
+                  <div className='@container min-w-0 flex-1 space-y-3'>
                     {renderFields(item, index)}
                   </div>
 
@@ -151,6 +155,8 @@ export function ItemListEditor<T>({
           })}
         </ul>
       )}
+
+      <FieldError>{error}</FieldError>
 
       <Button
         type='button'

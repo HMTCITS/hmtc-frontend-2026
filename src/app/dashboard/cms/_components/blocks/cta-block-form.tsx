@@ -3,19 +3,19 @@
 import { FieldSet } from '@/components/ui/field';
 import { BLOCK_META, type BlockOf, ctaBlock } from '@/lib/directus/blocks';
 
+import { ActionFields, ChoiceField, TextField } from './block-fields';
 import {
   type BlockFormProps,
   optionalText,
   withProps,
 } from './block-form-utils';
-import { ActionFields, ChoiceField, TextField } from './BlockFormFields';
-import { useBlockForm } from './useBlockForm';
+import { useBlockForm } from './use-block-form';
 
 type CtaProps = BlockOf<'cta'>['props'];
 
 const TONE_LABELS: Record<CtaProps['tone'], string> = {
-  accent: 'Accent',
-  neutral: 'Neutral',
+  accent: 'Aksen',
+  neutral: 'Netral',
 };
 
 export function CtaBlockForm({
@@ -31,17 +31,17 @@ export function CtaBlockForm({
   return (
     <FieldSet
       disabled={disabled}
-      aria-label={`${BLOCK_META.cta.label} block settings`}
+      aria-label={`Pengaturan blok ${BLOCK_META.cta.label}`}
       className='gap-5'
     >
       <TextField
-        label='Heading'
+        label='Judul'
         value={props.heading}
         onValueChange={(heading) => set({ heading })}
         {...form.field('props.heading')}
       />
       <TextField
-        label='Description'
+        label='Deskripsi'
         multiline
         value={props.description ?? ''}
         onValueChange={(text) => set({ description: optionalText(text) })}
@@ -54,7 +54,7 @@ export function CtaBlockForm({
         href={form.field('props.action.href')}
       />
       <ChoiceField
-        label='Tone'
+        label='Warna'
         value={props.tone}
         options={TONE_LABELS}
         onValueChange={(tone) => set({ tone })}

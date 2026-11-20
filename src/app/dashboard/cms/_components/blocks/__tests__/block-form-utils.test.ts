@@ -65,18 +65,26 @@ describe('collectFieldErrors', () => {
 
   it('keys a list item by its index and the list by its own path', () => {
     const richText = createBlock('richText');
-    const paragraphs = Array.from(
-      { length: BLOCK_LIMITS.paragraphsPerBlock + 1 },
-      (_, index) => (index === 3 ? '' : 'Isi'),
-    );
 
-    const errors = collectFieldErrors(richTextBlock, {
-      ...richText,
-      props: { paragraphs },
+    expect(
+      collectFieldErrors(richTextBlock, {
+        ...richText,
+        props: { paragraphs: ['Isi', 'Isi', 'Isi', ''] },
+      }),
+    ).toEqual({
+      'props.paragraphs.3': { message: 'Wajib diisi', immediate: false },
     });
 
-    expect(errors).toEqual({
-      'props.paragraphs.3': { message: 'Wajib diisi', immediate: false },
+    // Since zod 4.6 an over-long array stops before its items are checked, so
+    // only the list error is reported until the list is back under the limit.
+    expect(
+      collectFieldErrors(richTextBlock, {
+        ...richText,
+        props: {
+          paragraphs: Array(BLOCK_LIMITS.paragraphsPerBlock + 1).fill('Isi'),
+        },
+      }),
+    ).toEqual({
       'props.paragraphs': { message: 'Maksimal 40 item', immediate: true },
     });
   });

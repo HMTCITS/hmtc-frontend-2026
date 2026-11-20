@@ -3,15 +3,15 @@
 import { FieldSet } from '@/components/ui/field';
 import { BLOCK_META, type BlockOf } from '@/lib/directus/blocks';
 
+import { ChoiceField } from './block-fields';
 import { type BlockFormProps, withProps } from './block-form-utils';
-import { ChoiceField } from './BlockFormFields';
 
 type DividerProps = BlockOf<'divider'>['props'];
 
 const SPACING_LABELS: Record<DividerProps['spacing'], string> = {
-  sm: 'Small',
-  md: 'Medium',
-  lg: 'Large',
+  sm: 'Kecil',
+  md: 'Sedang',
+  lg: 'Besar',
 };
 
 /** A divider has one enum prop, so it has no state the schema could reject. */
@@ -23,10 +23,10 @@ export function DividerBlockForm({
   return (
     <FieldSet
       disabled={disabled}
-      aria-label={`${BLOCK_META.divider.label} block settings`}
+      aria-label={`Pengaturan blok ${BLOCK_META.divider.label}`}
     >
       <ChoiceField
-        label='Spacing'
+        label='Jarak'
         value={value.props.spacing}
         options={SPACING_LABELS}
         onValueChange={(spacing) => onChange(withProps(value, { spacing }))}

@@ -18,11 +18,12 @@ import {
   createBlock,
 } from '@/lib/directus/blocks';
 
+import { MOCK_ASSETS } from '../asset-picker';
 import type { BlockFormProps } from '../block-form-utils';
-import { CtaBlockForm } from '../CtaBlockForm';
-import { DividerBlockForm } from '../DividerBlockForm';
-import { HeroBlockForm } from '../HeroBlockForm';
-import { RichTextBlockForm } from '../RichTextBlockForm';
+import { CtaBlockForm } from '../cta-block-form';
+import { DividerBlockForm } from '../divider-block-form';
+import { HeroBlockForm } from '../hero-block-form';
+import { RichTextBlockForm } from '../rich-text-block-form';
 
 /** Mounts a form the way the editor will: the parent owns the block. */
 function renderForm<T extends BlockType>(
@@ -73,11 +74,11 @@ describe('HeroBlockForm', () => {
   it('starts from the blockDefaults values with nothing flagged', () => {
     renderForm(HeroBlockForm, createBlock('hero'));
 
-    expect(field('Heading')).toHaveValue('Judul halaman');
-    expect(field('Eyebrow')).toHaveValue('');
-    expect(option('Center')).toBeChecked();
+    expect(field('Judul')).toHaveValue('Judul halaman');
+    expect(field('Teks kecil di atas judul')).toHaveValue('');
+    expect(option('Tengah')).toBeChecked();
     expect(
-      screen.getByRole('switch', { name: 'Show button' }),
+      screen.getByRole('switch', { name: 'Tampilkan tombol' }),
     ).not.toBeChecked();
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
@@ -86,8 +87,8 @@ describe('HeroBlockForm', () => {
     const hero = createBlock('hero');
     const { latest } = renderForm(HeroBlockForm, hero);
 
-    fill(field('Heading'), 'Syukuran Wisudawan');
-    fireEvent.click(option('Left'));
+    fill(field('Judul'), 'Syukuran Wisudawan');
+    fireEvent.click(option('Kiri'));
 
     expect(latest()).toEqual({
       ...hero,
@@ -98,16 +99,16 @@ describe('HeroBlockForm', () => {
   it('removes an optional prop when its field is emptied', () => {
     const { latest } = renderForm(HeroBlockForm, createBlock('hero'));
 
-    fill(field('Eyebrow'), 'Internal Affairs');
+    fill(field('Teks kecil di atas judul'), 'Internal Affairs');
     expect(latest().props.eyebrow).toBe('Internal Affairs');
 
-    fill(field('Eyebrow'), '');
+    fill(field('Teks kecil di atas judul'), '');
     expect(latest().props).not.toHaveProperty('eyebrow');
   });
 
   it('holds an error back while the field is being typed in, then shows it on blur', () => {
     const { latest } = renderForm(HeroBlockForm, createBlock('hero'));
-    const heading = field('Heading');
+    const heading = field('Judul');
 
     fireEvent.focus(heading);
     type(heading, '');
@@ -124,7 +125,7 @@ describe('HeroBlockForm', () => {
 
   it('clears a shown error as soon as the value is valid again', () => {
     renderForm(HeroBlockForm, createBlock('hero'));
-    const heading = field('Heading');
+    const heading = field('Judul');
     fill(heading, '');
 
     fireEvent.focus(heading);
@@ -136,7 +137,7 @@ describe('HeroBlockForm', () => {
 
   it('flags overflow at once, without waiting for blur', () => {
     renderForm(HeroBlockForm, createBlock('hero'));
-    const heading = field('Heading');
+    const heading = field('Judul');
 
     fireEvent.focus(heading);
     type(heading, 'J'.repeat(BLOCK_LIMITS.heroTitleChars + 1));
@@ -159,49 +160,61 @@ describe('HeroBlockForm', () => {
     });
 
     const described = (text: string) => expect.stringContaining(text);
-    expect(field('Eyebrow')).toHaveAccessibleDescription(
+    expect(field('Teks kecil di atas judul')).toHaveAccessibleDescription(
       'Maksimal 80 karakter',
     );
-    expect(field('Heading')).toHaveAccessibleDescription('Wajib diisi');
-    expect(field('Description')).toHaveAccessibleDescription(
+    expect(field('Judul')).toHaveAccessibleDescription('Wajib diisi');
+    expect(field('Deskripsi')).toHaveAccessibleDescription(
       'Maksimal 600 karakter',
     );
-    expect(field('Image asset ID')).toHaveAccessibleDescription(
+    expect(field('Gambar')).toHaveAccessibleDescription(
       described('Harus uuid aset Directus'),
     );
-    expect(field('Alt text')).toHaveAccessibleDescription(
+    expect(field('Teks alternatif gambar')).toHaveAccessibleDescription(
       described('Maksimal 160 karakter'),
     );
-    expect(field('Button label')).toHaveAccessibleDescription('Wajib diisi');
-    expect(field('Button link')).toHaveAccessibleDescription(
+    expect(field('Label tombol')).toHaveAccessibleDescription('Wajib diisi');
+    expect(field('Tautan tombol')).toHaveAccessibleDescription(
       described('Tautan harus path internal, https, atau mailto'),
     );
   });
 
   it('adds the button with the default action and removes it again', () => {
     const { latest } = renderForm(HeroBlockForm, createBlock('hero'));
-    const toggle = screen.getByRole('switch', { name: 'Show button' });
+    const toggle = screen.getByRole('switch', { name: 'Tampilkan tombol' });
 
     fireEvent.click(toggle);
 
     expect(latest().props.cta).toEqual(createBlock('cta').props.action);
-    expect(field('Button label')).toHaveValue('Lihat proker lain');
-    expect(field('Button link')).toHaveValue('/');
+    expect(field('Label tombol')).toHaveValue('Lihat proker lain');
+    expect(field('Tautan tombol')).toHaveValue('/');
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
 
     fireEvent.click(toggle);
 
     expect(latest().props).not.toHaveProperty('cta');
-    expect(screen.queryByLabelText('Button label')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Label tombol')).not.toBeInTheDocument();
   });
 
   it('trims pasted whitespace when the field is left', () => {
     const { latest } = renderForm(HeroBlockForm, createBlock('hero'));
 
-    fill(field('Image asset ID'), '  11111111-1111-4111-8111-111111111111 ');
+    fill(field('Judul'), '  Syukuran Wisudawan ');
 
-    expect(latest().props.image).toBe('11111111-1111-4111-8111-111111111111');
+    expect(latest().props.title).toBe('Syukuran Wisudawan');
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+
+  it('picks an image from the mock library and removes it again', () => {
+    const { latest } = renderForm(HeroBlockForm, createBlock('hero'));
+    const image = field('Gambar');
+
+    expect(image).toHaveValue('');
+    fireEvent.change(image, { target: { value: MOCK_ASSETS[1].id } });
+    expect(latest().props.image).toBe(MOCK_ASSETS[1].id);
+
+    fireEvent.change(image, { target: { value: '' } });
+    expect(latest().props).not.toHaveProperty('image');
   });
 
   it('locks every control when disabled', () => {
@@ -221,7 +234,8 @@ describe('HeroBlockForm', () => {
     const controls = [
       ...screen.getAllByRole('textbox'),
       ...screen.getAllByRole('radio'),
-      screen.getByRole('switch', { name: 'Show button' }),
+      screen.getByRole('combobox', { name: 'Gambar' }),
+      screen.getByRole('switch', { name: 'Tampilkan tombol' }),
     ];
     expect(controls).toHaveLength(10);
     controls.forEach((control) => expect(control).toBeDisabled());
@@ -237,18 +251,18 @@ describe('RichTextBlockForm', () => {
   it('starts from the blockDefaults values with nothing flagged', () => {
     renderForm(RichTextBlockForm, createBlock('richText'));
 
-    expect(field('Heading')).toHaveValue('');
-    expect(field('Paragraph 1')).toHaveValue('Tulis isi bagian ini.');
+    expect(field('Judul bagian')).toHaveValue('');
+    expect(field('Paragraf 1')).toHaveValue('Tulis isi bagian ini.');
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
 
   it('omits the heading when it is emptied, because the schema rejects an empty string', () => {
     const { latest } = renderForm(RichTextBlockForm, createBlock('richText'));
 
-    fill(field('Heading'), 'Tentang Acara');
+    fill(field('Judul bagian'), 'Tentang Acara');
     expect(latest().props.heading).toBe('Tentang Acara');
 
-    fill(field('Heading'), '');
+    fill(field('Judul bagian'), '');
     expect(latest().props).not.toHaveProperty('heading');
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
@@ -259,7 +273,7 @@ describe('RichTextBlockForm', () => {
       withParagraphs(['Satu', 'Dua', 'Tiga']),
     );
 
-    fill(field('Paragraph 2'), 'Dua, diperbarui');
+    fill(field('Paragraf 2'), 'Dua, diperbarui');
 
     expect(latest().props.paragraphs).toEqual([
       'Satu',
@@ -271,15 +285,15 @@ describe('RichTextBlockForm', () => {
   it('adds an empty paragraph, focuses it, and flags it only once it is left empty', () => {
     const { latest } = renderForm(RichTextBlockForm, createBlock('richText'));
 
-    fireEvent.click(button('Add paragraph'));
+    fireEvent.click(button('Tambah paragraf'));
 
     expect(latest().props.paragraphs).toEqual(['Tulis isi bagian ini.', '']);
-    expect(field('Paragraph 2')).toHaveFocus();
+    expect(field('Paragraf 2')).toHaveFocus();
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
 
-    fireEvent.blur(field('Paragraph 2'));
+    fireEvent.blur(field('Paragraf 2'));
 
-    expect(field('Paragraph 2')).toHaveAccessibleDescription('Wajib diisi');
+    expect(field('Paragraf 2')).toHaveAccessibleDescription('Wajib diisi');
   });
 
   it('removes a paragraph and moves focus to a row that still exists', () => {
@@ -288,18 +302,18 @@ describe('RichTextBlockForm', () => {
       withParagraphs(['Satu', 'Dua', 'Tiga']),
     );
 
-    fireEvent.click(button('Remove paragraph 2'));
+    fireEvent.click(button('Hapus paragraf 2'));
     expect(latest().props.paragraphs).toEqual(['Satu', 'Tiga']);
-    expect(field('Paragraph 2')).toHaveValue('Tiga');
-    expect(field('Paragraph 2')).toHaveFocus();
+    expect(field('Paragraf 2')).toHaveValue('Tiga');
+    expect(field('Paragraf 2')).toHaveFocus();
 
-    fireEvent.click(button('Remove paragraph 2'));
+    fireEvent.click(button('Hapus paragraf 2'));
     expect(latest().props.paragraphs).toEqual(['Satu']);
-    expect(field('Paragraph 1')).toHaveFocus();
+    expect(field('Paragraf 1')).toHaveFocus();
 
-    fireEvent.click(button('Remove paragraph 1'));
+    fireEvent.click(button('Hapus paragraf 1'));
     expect(latest().props.paragraphs).toEqual([]);
-    expect(button('Add paragraph')).toHaveFocus();
+    expect(button('Tambah paragraf')).toHaveFocus();
     expect(screen.getByText(/Belum ada paragraf/)).toBeInTheDocument();
   });
 
@@ -309,7 +323,7 @@ describe('RichTextBlockForm', () => {
       withParagraphs(Array(BLOCK_LIMITS.paragraphsPerBlock).fill('Isi')),
     );
 
-    expect(button('Add paragraph')).toBeDisabled();
+    expect(button('Tambah paragraf')).toBeDisabled();
     expect(
       screen.getByText('Satu blok memuat paling banyak 40 paragraf.'),
     ).toBeInTheDocument();
@@ -324,11 +338,11 @@ describe('RichTextBlockForm', () => {
       },
     });
 
-    expect(field('Heading')).toHaveAccessibleDescription(
+    expect(field('Judul bagian')).toHaveAccessibleDescription(
       'Maksimal 120 karakter',
     );
-    expect(field('Paragraph 1')).toHaveAccessibleDescription('Wajib diisi');
-    expect(field('Paragraph 2')).toHaveAccessibleDescription(
+    expect(field('Paragraf 1')).toHaveAccessibleDescription('Wajib diisi');
+    expect(field('Paragraf 2')).toHaveAccessibleDescription(
       'Maksimal 2000 karakter',
     );
   });
@@ -336,7 +350,7 @@ describe('RichTextBlockForm', () => {
   it('keeps markup as plain text', () => {
     const { latest } = renderForm(RichTextBlockForm, createBlock('richText'));
 
-    fill(field('Paragraph 1'), '<img src=x onerror=alert(1)>');
+    fill(field('Paragraf 1'), '<img src=x onerror=alert(1)>');
 
     expect(latest().props.paragraphs).toEqual(['<img src=x onerror=alert(1)>']);
     expect(document.querySelector('img')).not.toBeInTheDocument();
@@ -358,10 +372,10 @@ describe('CtaBlockForm', () => {
   it('starts from the blockDefaults values with nothing flagged', () => {
     renderForm(CtaBlockForm, createBlock('cta'));
 
-    expect(field('Heading')).toHaveValue('Sampai jumpa di acara berikutnya');
-    expect(field('Button label')).toHaveValue('Lihat proker lain');
-    expect(field('Button link')).toHaveValue('/');
-    expect(option('Accent')).toBeChecked();
+    expect(field('Judul')).toHaveValue('Sampai jumpa di acara berikutnya');
+    expect(field('Label tombol')).toHaveValue('Lihat proker lain');
+    expect(field('Tautan tombol')).toHaveValue('/');
+    expect(option('Aksen')).toBeChecked();
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
 
@@ -369,10 +383,10 @@ describe('CtaBlockForm', () => {
     const cta = createBlock('cta');
     const { latest } = renderForm(CtaBlockForm, cta);
 
-    fill(field('Description'), 'Pendaftaran dibuka sampai Jumat.');
-    fill(field('Button label'), 'Daftar');
-    fill(field('Button link'), ' https://hmtc-its.com/daftar ');
-    fireEvent.click(option('Neutral'));
+    fill(field('Deskripsi'), 'Pendaftaran dibuka sampai Jumat.');
+    fill(field('Label tombol'), 'Daftar');
+    fill(field('Tautan tombol'), ' https://hmtc-its.com/daftar ');
+    fireEvent.click(option('Netral'));
 
     expect(latest()).toEqual({
       ...cta,
@@ -387,7 +401,7 @@ describe('CtaBlockForm', () => {
 
   it('rejects a link outside the allowlist with the message from the schema', () => {
     renderForm(CtaBlockForm, createBlock('cta'));
-    const link = field('Button link');
+    const link = field('Tautan tombol');
 
     fireEvent.focus(link);
     type(link, 'javascript:alert(1)');
@@ -413,14 +427,14 @@ describe('CtaBlockForm', () => {
       },
     });
 
-    expect(field('Heading')).toHaveAccessibleDescription('Wajib diisi');
-    expect(field('Description')).toHaveAccessibleDescription(
+    expect(field('Judul')).toHaveAccessibleDescription('Wajib diisi');
+    expect(field('Deskripsi')).toHaveAccessibleDescription(
       'Maksimal 300 karakter',
     );
-    expect(field('Button label')).toHaveAccessibleDescription(
+    expect(field('Label tombol')).toHaveAccessibleDescription(
       'Maksimal 40 karakter',
     );
-    expect(field('Button link')).toHaveAccessibleDescription(
+    expect(field('Tautan tombol')).toHaveAccessibleDescription(
       expect.stringContaining('Tautan harus path internal, https, atau mailto'),
     );
   });
@@ -431,12 +445,12 @@ describe('DividerBlockForm', () => {
     const divider = createBlock('divider');
     const { latest } = renderForm(DividerBlockForm, divider);
 
-    expect(option('Medium')).toBeChecked();
+    expect(option('Sedang')).toBeChecked();
 
-    fireEvent.click(option('Large'));
+    fireEvent.click(option('Besar'));
 
     expect(latest()).toEqual({ ...divider, props: { spacing: 'lg' } });
-    expect(option('Large')).toBeChecked();
+    expect(option('Besar')).toBeChecked();
   });
 
   it('locks every control when disabled', () => {

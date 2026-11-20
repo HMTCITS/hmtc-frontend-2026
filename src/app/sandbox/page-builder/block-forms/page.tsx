@@ -4,39 +4,50 @@ import Link from 'next/link';
 import { type ComponentType, useId, useState } from 'react';
 import type { z } from 'zod';
 
-import type { BlockFormProps } from '@/app/dashboard/cms/_components/blocks/block-form-utils';
-import { CtaBlockForm } from '@/app/dashboard/cms/_components/blocks/CtaBlockForm';
-import { DividerBlockForm } from '@/app/dashboard/cms/_components/blocks/DividerBlockForm';
-import { HeroBlockForm } from '@/app/dashboard/cms/_components/blocks/HeroBlockForm';
-import { RichTextBlockForm } from '@/app/dashboard/cms/_components/blocks/RichTextBlockForm';
+import {
+  AgendaBlockForm,
+  type BlockFormProps,
+  CtaBlockForm,
+  DividerBlockForm,
+  EventDetailsBlockForm,
+  GalleryBlockForm,
+  HeroBlockForm,
+  MOCK_ASSETS,
+  RichTextBlockForm,
+} from '@/app/dashboard/cms/_components/blocks';
 import Typography from '@/components/Typography';
 import { Button } from '@/components/ui/button';
 import { toValidationIssues } from '@/lib/cms/errors';
 import { BlockRenderer } from '@/lib/directus/block-renderers';
 import {
+  agendaBlock,
   BLOCK_META,
   type BlockOf,
+  type BlockType,
   createBlock,
   ctaBlock,
   dividerBlock,
+  eventDetailsBlock,
+  galleryBlock,
   heroBlock,
   richTextBlock,
 } from '@/lib/directus/blocks';
 import { cn } from '@/lib/utils';
 
-type DemoType = 'hero' | 'richText' | 'cta' | 'divider';
+type DemoType = BlockType;
 
 type Preset<T extends DemoType> = {
   label: string;
   block: BlockOf<T>;
 };
 
-/** The schema stores asset uuids, so the demo maps one to a local file. */
-const SAMPLE_IMAGE = '11111111-1111-4111-8111-111111111111';
+/** The schema stores asset uuids, so the demo maps the mock library to a local file. */
+const SAMPLE_IMAGE: string = MOCK_ASSETS[0].id;
+const MOCK_IDS = new Set<string>(MOCK_ASSETS.map((asset) => asset.id));
 
 const context = {
   resolveAssetUrl: (assetId: string) =>
-    assetId === SAMPLE_IMAGE
+    MOCK_IDS.has(assetId)
       ? '/images/halamandepan.png'
       : '/images/not-exist.png',
 };
@@ -113,6 +124,108 @@ const RICH_TEXT_PRESETS: readonly Preset<'richText'>[] = [
       props: {
         heading: 'Judul bagian ini sengaja dibuat terlalu panjang. '.repeat(3),
         paragraphs: ['', 'Paragraf pertama di atas sengaja dikosongkan.'],
+      },
+    },
+  },
+];
+
+const EVENT_DETAILS_PRESETS: readonly Preset<'eventDetails'>[] = [
+  { label: 'Default', block: defaultBlock('eventDetails') },
+  {
+    label: 'Contoh terisi',
+    block: {
+      type: 'eventDetails',
+      version: 1,
+      id: 'demo-eventDetails',
+      props: {
+        heading: 'Detail Acara',
+        items: [
+          {
+            label: 'Tanggal',
+            value: 'Sabtu, 12 Desember 2026',
+            icon: 'calendar',
+          },
+          { label: 'Waktu', value: '08.00–12.00 WIB', icon: 'clock' },
+          {
+            label: 'Tempat',
+            value: 'Gedung Teknik Informatika ITS',
+            icon: 'location',
+          },
+        ],
+      },
+    },
+  },
+  {
+    label: 'Contoh tidak valid',
+    block: {
+      type: 'eventDetails',
+      version: 1,
+      id: 'demo-eventDetails',
+      props: { items: [{ label: '', value: 'Isi tanpa label' }] },
+    },
+  },
+];
+
+const AGENDA_PRESETS: readonly Preset<'agenda'>[] = [
+  { label: 'Default', block: defaultBlock('agenda') },
+  {
+    label: 'Contoh terisi',
+    block: {
+      type: 'agenda',
+      version: 1,
+      id: 'demo-agenda',
+      props: {
+        heading: 'Susunan Acara',
+        items: [
+          { time: '08.00', title: 'Registrasi' },
+          {
+            time: '08.30',
+            title: 'Sambutan',
+            description: 'Ketua HMTC dan Kaprodi.',
+          },
+          { time: '09.00', title: 'Sesi materi' },
+        ],
+      },
+    },
+  },
+  {
+    label: 'Contoh tidak valid',
+    block: {
+      type: 'agenda',
+      version: 1,
+      id: 'demo-agenda',
+      props: { items: [{ time: '', title: '' }] },
+    },
+  },
+];
+
+const GALLERY_PRESETS: readonly Preset<'gallery'>[] = [
+  { label: 'Default', block: defaultBlock('gallery') },
+  {
+    label: 'Contoh terisi',
+    block: {
+      type: 'gallery',
+      version: 1,
+      id: 'demo-gallery',
+      props: {
+        heading: 'Dokumentasi',
+        layout: 'grid',
+        images: MOCK_ASSETS.map((asset) => ({
+          asset: asset.id,
+          alt: asset.label,
+        })),
+      },
+    },
+  },
+  {
+    label: 'Contoh tidak valid',
+    block: {
+      type: 'gallery',
+      version: 1,
+      id: 'demo-gallery',
+      props: {
+        layout: 'masonry',
+        images: [{ asset: '/images/foto.png', alt: '' }],
       },
     },
   },
@@ -340,7 +453,7 @@ export default function BlockFormsDemoPage() {
             variant='b4'
             className='max-w-3xl leading-6 text-gray-500'
           >
-            Empat form editor blok dengan data contoh. Setiap form mulai dari
+            Tujuh form editor blok dengan data contoh. Setiap form mulai dari
             blockDefaults, divalidasi dengan skema di blocks.ts, dan menampilkan
             error per field. Di sebelahnya ada pratinjau, hasil validasi skema,
             dan JSON yang dihasilkan form. Tidak ada koneksi ke Directus dan
@@ -387,6 +500,27 @@ export default function BlockFormsDemoPage() {
           schema={richTextBlock}
           Form={RichTextBlockForm}
           presets={RICH_TEXT_PRESETS}
+          readOnly={readOnly}
+        />
+        <FormDemo
+          type='eventDetails'
+          schema={eventDetailsBlock}
+          Form={EventDetailsBlockForm}
+          presets={EVENT_DETAILS_PRESETS}
+          readOnly={readOnly}
+        />
+        <FormDemo
+          type='agenda'
+          schema={agendaBlock}
+          Form={AgendaBlockForm}
+          presets={AGENDA_PRESETS}
+          readOnly={readOnly}
+        />
+        <FormDemo
+          type='gallery'
+          schema={galleryBlock}
+          Form={GalleryBlockForm}
+          presets={GALLERY_PRESETS}
           readOnly={readOnly}
         />
         <FormDemo
