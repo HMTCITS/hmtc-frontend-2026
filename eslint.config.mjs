@@ -1,26 +1,18 @@
-import { FlatCompat } from '@eslint/eslintrc';
 import js from '@eslint/js';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import nextVitals from 'eslint-config-next/core-web-vitals';
+import nextTs from 'eslint-config-next/typescript';
+import prettier from 'eslint-config-prettier/flat';
 import simpleImportSort from 'eslint-plugin-simple-import-sort';
 import unusedImports from 'eslint-plugin-unused-imports';
 import globals from 'globals';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-  recommendedConfig: js.configs.recommended,
-});
-
+// eslint-config-next 16 ships native flat configs; the FlatCompat bridge used
+// with 15.x fails on them (circular plugin objects), so they are spread here.
 export default [
-  ...compat.extends(
-    'eslint:recommended',
-    'next/core-web-vitals',
-    'plugin:@typescript-eslint/recommended',
-    'prettier',
-  ),
+  js.configs.recommended,
+  ...nextVitals,
+  ...nextTs,
+  prettier,
   {
     plugins: {
       'simple-import-sort': simpleImportSort,
@@ -41,6 +33,18 @@ export default [
     },
     files: ['src/**/*.{js,jsx,ts,tsx}'],
     rules: {
+      // New in eslint-config-next 16 (react-hooks 7 / React Compiler rules).
+      // They flag ~50 existing call sites; off until a follow-up fixes them
+      // (B7 upgrade kept behaviour-neutral). Re-enable one by one.
+      'react-hooks/set-state-in-effect': 'off',
+      'react-hooks/static-components': 'off',
+      'react-hooks/incompatible-library': 'off',
+      'react-hooks/preserve-manual-memoization': 'off',
+      'react-hooks/refs': 'off',
+      'react-hooks/purity': 'off',
+      'react-hooks/immutability': 'off',
+      '@next/next/no-location-assign-relative-destination': 'off',
+
       'react/prop-types': 'off',
       'no-console': 'warn',
       'react/display-name': 'off',
