@@ -18,6 +18,7 @@
     "prepare": "husky",
     "test": "jest --passWithNoTests",
     "test:watch": "jest --watch",
+    "test:integration": "jest -c jest.integration.config.ts",
     "directus:setup": "node scripts/directus-local.mjs setup",
     "directus:down": "node scripts/directus-local.mjs down",
     "directus:reset": "node scripts/directus-local.mjs reset",
