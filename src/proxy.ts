@@ -14,7 +14,15 @@
  *      (e.g., `/dashboard`, `/sandbox`, auth pages) in production unless
  *      explicitly enabled.
  *
- * NOTE: Logic preserved exactly from original file — only restructured for clarity.
+ * 3) CMS cookie-presence routing & preview pass-through:
+ *    - Redirect `/dashboard/cms/**` (except `/dashboard/cms/login`) to
+ *      `/dashboard/cms/login` when neither `cms_at` nor `cms_rt` cookie is
+ *      present.
+ *    - Allow `/preview/**` to pass through without period gating or `/coming-soon`
+ *      redirects.
+ *
+ * NOTE: Middleware is NOT a security boundary — real authentication, session
+ * verification, and authorization happen in the CMS layout and route handlers.
  */
 
 import type { NextRequest } from 'next/server';
@@ -32,6 +40,13 @@ const BLOCKED_PREFIX_AUTH = ['/change-password'];
 // Period-gated prefixes used for schedule checks (kept as in original)
 const GATED_PREFIXES: string[] = ['/ayomeludaftarmagang', '/hidden-page-cf'];
 
+// CMS & preview routing configuration
+const CMS_BASE_PATH = '/dashboard/cms';
+const CMS_LOGIN_PATH = '/dashboard/cms/login';
+const PREVIEW_PREFIX = '/preview';
+const CMS_ACCESS_COOKIE = 'cms_at';
+const CMS_REFRESH_COOKIE = 'cms_rt';
+
 /* ---------------------------
    Helpers
    --------------------------- */
@@ -42,6 +57,27 @@ function isSafeMethod(method: string) {
 
 function isPathUnderPrefixes(pathname: string, prefixes: string[]) {
   return prefixes.some((p) => pathname === p || pathname.startsWith(p + '/'));
+}
+
+function isCmsPath(pathname: string) {
+  return pathname === CMS_BASE_PATH || pathname.startsWith(CMS_BASE_PATH + '/');
+}
+
+function isCmsLoginPath(pathname: string) {
+  return pathname === CMS_LOGIN_PATH;
+}
+
+function isPreviewPath(pathname: string) {
+  return (
+    pathname === PREVIEW_PREFIX || pathname.startsWith(PREVIEW_PREFIX + '/')
+  );
+}
+
+function hasCmsSessionCookie(req: NextRequest): boolean {
+  return Boolean(
+    req.cookies.get(CMS_ACCESS_COOKIE)?.value ||
+      req.cookies.get(CMS_REFRESH_COOKIE)?.value,
+  );
 }
 
 /**
@@ -205,12 +241,14 @@ function handleAdminBlocking(
 ) {
   if (!shouldDisable) return null;
 
-  // blocked prefixes (e.g., /sandbox/*)
-  for (const p of BLOCKED_PREFIXES) {
-    if (pathname === p || pathname.startsWith(p + '/')) {
-      const url = cloneUrl(req.nextUrl);
-      url.pathname = '/coming-soon';
-      return NextResponse.redirect(url);
+  // blocked prefixes (e.g., /sandbox/*, /dashboard/*; /dashboard/cms/* is excluded)
+  if (!isCmsPath(pathname)) {
+    for (const p of BLOCKED_PREFIXES) {
+      if (pathname === p || pathname.startsWith(p + '/')) {
+        const url = cloneUrl(req.nextUrl);
+        url.pathname = '/coming-soon';
+        return NextResponse.redirect(url);
+      }
     }
   }
 
@@ -245,6 +283,22 @@ export async function proxy(req: NextRequest) {
 
   const pathname = req.nextUrl.pathname;
 
+  // Preview routes are bearer-token gated in the page handler; bypass gating here
+  if (isPreviewPath(pathname)) {
+    return NextResponse.next();
+  }
+
+  // CMS cookie presence check: cheap UX redirect only (middleware is not a security boundary;
+  // real session/token verification happens in the CMS layout and route handlers).
+  if (isCmsPath(pathname)) {
+    if (!isCmsLoginPath(pathname) && !hasCmsSessionCookie(req)) {
+      const loginUrl = cloneUrl(req.nextUrl);
+      loginUrl.pathname = CMS_LOGIN_PATH;
+      return NextResponse.redirect(loginUrl);
+    }
+    return NextResponse.next();
+  }
+
   // 1) Period-based gating (public pages) — run first
   const scheduleDecision = await handlePeriodGating(req, pathname);
   if (scheduleDecision) return scheduleDecision;
@@ -269,6 +323,7 @@ export const config = {
     '/hidden-page-cf/:path*',
     '/sandbox/:path*',
     '/dashboard/:path*',
+    '/preview/:path*',
     '/login',
     '/login/:path*',
     '/register',
