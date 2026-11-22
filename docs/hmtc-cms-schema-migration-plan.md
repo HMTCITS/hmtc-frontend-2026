@@ -451,3 +451,24 @@ curl -s -o /dev/null -w '%{http_code}\n' 'https://directus.hmtc-its.com/items/cm
 ```
 
 **No mutation of any kind was performed against Directus.** No credentials were transmitted, and none appear in this document.
+
+---
+
+## 9. Pending — 005 `directus_files` create for CMS editor (task B10)
+
+**Status: written, not applied to production.** File: `005-access-policies-files.{up,down}.sql`.
+
+`POST /api/cms/assets` (task B10) forwards editor uploads to Directus with the
+acting user's token. Migration 004 grants no `directus_files` access at all, so
+Directus rejects every upload with 403 until this migration is applied.
+
+| Item       | Value                                                           |
+| ---------- | --------------------------------------------------------------- |
+| Grant      | `directus_files.create` on policy **CMS editor** (`586ae88a-…`) |
+| Constraint | `folder = Public Assets` (`3141e283-…`, fixed by the seed)      |
+| Fields     | `*` — the multipart `file` part is not a row field              |
+| Read side  | none needed; the public policy already covers Public Assets     |
+
+Apply steps are the standing ones (AGENTS.md §13): `pg_dump` snapshot first,
+apply, then `docker restart directus` (N8). Locally `pnpm directus:setup`
+applies it automatically (migrations 003+ are replayed on top of the snapshot).
