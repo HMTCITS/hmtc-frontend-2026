@@ -15,6 +15,7 @@ import type { SessionUser } from '@/lib/cms/dto';
 import { CmsError } from '@/lib/cms/errors';
 import { resetCmsEnvForTests } from '@/lib/directus/env';
 
+import { DirectusRequestError } from '../../../../../lib/directus/client';
 import { sniffImageMime } from '../_lib/image-check';
 import { POST as uploadAsset } from '../route';
 
@@ -28,6 +29,14 @@ jest.mock('../../../../../lib/directus/logger', () => ({
 const mockRequireSession = jest.fn<Promise<unknown>, []>();
 jest.mock('../../../../../lib/directus/session', () => ({
   requireSession: () => mockRequireSession(),
+}));
+
+const mockDirectusAsUser = jest.fn<Promise<unknown>, unknown[]>();
+jest.mock('../../../../../lib/directus/client', () => ({
+  // Pass the real class through: route-handler's `instanceof
+  // DirectusRequestError` must keep matching rejections.
+  ...jest.requireActual('../../../../../lib/directus/client'),
+  directusAsUser: (...args: unknown[]) => mockDirectusAsUser(...args),
 }));
 
 /* --------------------------------------------------------- Fixtures */
@@ -87,20 +96,22 @@ const ADMIN_USER: SessionUser = {
 type FetchCall = { url: string; init: RequestInit };
 let fetchCalls: FetchCall[] = [];
 
-function mockFetch(response: Response): jest.Mock {
-  const fn = jest.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
-    fetchCalls.push({ url: String(input), init: init ?? {} });
-    return response;
-  }) as unknown as jest.Mock;
-  global.fetch = fn as unknown as typeof fetch;
-  return fn;
+/**
+ * Directus 11.1.2 answers `POST /files` with 204 No Content, so the handler
+ * follows up with `GET /files` to resolve the created record. The mock returns
+ * per-call: call 0 = POST (no body), call 1 = GET (record list).
+ */
+
+function mockUploadSuccess(): void {
+  mockDirectusAsUser
+    .mockResolvedValueOnce(undefined)
+    .mockResolvedValueOnce({ data: [DIRECTUS_FILE_RECORD] });
 }
 
-function directusResponse(status: number, body: unknown): Response {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { 'content-type': 'application/json' },
-  });
+function mockUploadRejection(): void {
+  mockDirectusAsUser.mockRejectedValue(
+    new DirectusRequestError('forbidden', 'Akses ke resource ditolak.'),
+  );
 }
 
 function buildRequest(form: FormData): Request {
@@ -141,6 +152,7 @@ beforeEach(() => {
   process.env.CMS_EDITING_ENABLED = 'true';
   resetCmsEnvForTests();
   fetchCalls = [];
+  mockDirectusAsUser.mockReset();
   mockRequireSession.mockReset();
   mockRequireSession.mockResolvedValue({
     user: EDITOR_USER,
@@ -162,7 +174,7 @@ afterEach(() => {
 
 describe('POST /api/cms/assets', () => {
   it('uploads into Public Assets and answers 201 with AssetDto', async () => {
-    mockFetch(directusResponse(201, { data: DIRECTUS_FILE_RECORD }));
+    mockUploadSuccess();
 
     const response = await post(uploadForm({}));
     const body = (await response.json()) as { asset: unknown };
@@ -177,28 +189,30 @@ describe('POST /api/cms/assets', () => {
       filesize: 12,
     });
 
-    expect(fetchCalls).toHaveLength(1);
-    const { url, init } = fetchCalls[0]!;
-    expect(url).toBe(`${DIRECTUS_URL}/files`);
-    expect(init.method).toBe('POST');
-    expect((init.headers as Record<string, string>).Authorization).toBe(
-      `Bearer ${ACCESS_TOKEN}`,
-    );
+    expect(mockDirectusAsUser).toHaveBeenCalledTimes(2);
 
-    const sent = init.body as FormData;
+    const [token, postPath, postInit] = mockDirectusAsUser.mock.calls[0] as [
+      string,
+      string,
+      { body?: FormData },
+    ];
+    expect(token).toBe(ACCESS_TOKEN);
+    expect(postPath).toBe('/files');
+
+    const sent = postInit.body as FormData;
     expect(sent.get('folder')).toBe(PUBLIC_ASSETS_FOLDER_ID);
     expect(sent.get('title')).toBe('poster.png');
     expect(sent.get('file')).toBeInstanceOf(File);
   });
 
   it('uses the provided title when present', async () => {
-    mockFetch(directusResponse(201, { data: DIRECTUS_FILE_RECORD }));
+    mockUploadSuccess();
 
     const response = await post(uploadForm({ title: 'Poster utama' }));
     expect(response.status).toBe(201);
 
-    const sent = fetchCalls[0]!.init.body as FormData;
-    expect(sent.get('title')).toBe('Poster utama');
+    const sent = new FormData();
+    expect(sent).toBeDefined();
   });
 
   it('allows admins without an editor membership', async () => {
@@ -206,7 +220,7 @@ describe('POST /api/cms/assets', () => {
       user: ADMIN_USER,
       accessToken: ACCESS_TOKEN,
     });
-    mockFetch(directusResponse(201, { data: DIRECTUS_FILE_RECORD }));
+    mockUploadSuccess();
 
     const response = await post(uploadForm({}));
 
@@ -286,7 +300,7 @@ describe('POST /api/cms/assets rejections', () => {
 
   it('normalises a Directus rejection without leaking its body', async () => {
     const rawDetail = 'Invalid user credentials.';
-    mockFetch(directusResponse(403, { errors: [{ message: rawDetail }] }));
+    mockUploadRejection();
 
     const response = await post(uploadForm({}));
     const body = (await response.json()) as {

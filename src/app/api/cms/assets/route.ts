@@ -64,15 +64,27 @@ export const POST = defineCmsRoute('uploadAsset', async ({ formData }) => {
   upload.set('folder', PUBLIC_ASSETS_FOLDER_ID);
   upload.set('title', title);
 
-  const response = await directusAsUser<{ data?: DirectusFileRecord }>(
+  // Directus 11.1.2 answers POST /files with 204 No Content — no body. The
+  // created record is fetched afterwards by folder, newest first. If the
+  // fetch-after-upload ever fails, the uploaded file itself is still safe in
+  // the folder; only the id could not be resolved, which is reported as 500
+  // rather than a silent success.
+  await directusAsUser<void>(accessToken, '/files', {
+    method: 'POST',
+    body: upload,
+  });
+
+  const listResponse = await directusAsUser<{ data?: DirectusFileRecord[] }>(
     accessToken,
-    '/files',
-    { method: 'POST', body: upload },
+    '/files?filter[folder][_eq]=' +
+      PUBLIC_ASSETS_FOLDER_ID +
+      '&fields=id,title,type,width,height,filesize' +
+      '&sort=-uploaded_on&page=1&limit=1',
   );
 
-  const record = response.data;
+  const record = listResponse.data?.[0];
   if (!record || typeof record.id !== 'string') {
-    logError('uploadAsset', 'Directus file record has no id');
+    logError('uploadAsset', 'uploaded file record could not be resolved');
     throw new CmsError('internal', 'Upload gagal diproses.');
   }
 

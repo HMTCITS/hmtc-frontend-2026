@@ -18,9 +18,9 @@
 -- Fields are `*` because the multipart `file` field is not a row field and an
 -- explicit column list would block the upload payload.
 --
--- Readers need no new permission: the public policy already reads files in
--- "Public Assets" (directus/seed/20-public-permissions.sql), and editors see
--- their uploads the same way.
+-- `directus_files.read` (same folder) is also granted: the upload route
+-- resolves the created record with GET /files after the 204 No Content
+-- response, and the C5 media browser will need the same read for editors.
 --
 -- Users are not created or changed here.
 --
@@ -39,6 +39,12 @@ INSERT INTO directus_permissions (collection, action, permissions, validation, p
    NULL,
    '{"folder":"3141e283-12e9-478b-a262-bd74fde9012b"}',
    '*',
+   '586ae88a-b88c-462a-a436-496fb6784102'),
+  ('directus_files', 'read',
+   '{"folder":{"_eq":"3141e283-12e9-478b-a262-bd74fde9012b"}}',
+   NULL,
+   NULL,
+   'id,title,type,width,height,filesize,folder,uploaded_on',
    '586ae88a-b88c-462a-a436-496fb6784102');
 
 COMMIT;

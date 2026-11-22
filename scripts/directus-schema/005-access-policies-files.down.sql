@@ -11,7 +11,7 @@ BEGIN;
 
 DELETE FROM directus_permissions
  WHERE collection = 'directus_files'
-   AND action = 'create'
+   AND action IN ('create', 'read')
    AND policy = '586ae88a-b88c-462a-a436-496fb6784102';
 
 COMMIT;
