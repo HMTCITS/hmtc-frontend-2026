@@ -337,6 +337,45 @@ describe('POST /api/cms/pages/:id/submit', () => {
     expect(patchCalls()).toHaveLength(0);
   });
 
+  it('rejects a template_maintainer with 403', async () => {
+    memberships = [
+      {
+        role: 'template_maintainer',
+        deptId: RT_DEPT,
+        deptSlug: 'research-and-technology',
+      },
+    ];
+
+    const res = await submitRequest(PAGE_ID, { expectedUpdatedAt: UPDATED_AT });
+    const body = (await res.json()) as { error: { code: string } };
+
+    // 404, not 403: the page's existence is not revealed to a member who
+    // holds no content role in the department (contract item 4).
+    expect(res.status).toBe(404);
+    expect(body.error.code).toBe('not_found');
+    expect(patchCalls()).toHaveLength(0);
+  });
+
+  it('allows a Directus admin to submit', async () => {
+    isAdmin = true;
+    const res = await submitRequest(PAGE_ID, { expectedUpdatedAt: UPDATED_AT });
+
+    expect(res.status).toBe(200);
+  });
+
+  it('rejects a comment over 1000 chars with 422', async () => {
+    const res = await submitRequest(PAGE_ID, {
+      expectedUpdatedAt: UPDATED_AT,
+      comment: 'x'.repeat(1001),
+    });
+    const body = (await res.json()) as {
+      error: { code: string; issues?: Array<{ path: string }> };
+    };
+
+    expect(res.status).toBe(422);
+    expect(body.error.code).toBe('validation_failed');
+  });
+
   it('maps a Directus policy rejection to 409 invalid_transition', async () => {
     routes = {
       ...defaultRoutes(),
