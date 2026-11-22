@@ -59,32 +59,30 @@ export const POST = defineCmsRoute('uploadAsset', async ({ formData }) => {
       ? rawTitle.trim()
       : file.name;
 
+  // Re-wrap dengan tipe hasil sniff. Menyambung `file` mentah akan meneruskan
+  // content-type dari client, dan Directus menyimpan/menyajikan aset dengan
+  // tipe itu — file berheader PNG yang dikirim sebagai text/html akan
+  // tersaji sebagai HTML di domain Directus (stored XSS).
+  const typedFile = new File([file], file.name, { type: check.mime });
   const upload = new FormData();
-  upload.set('file', file, file.name);
+  upload.set('file', typedFile, file.name);
   upload.set('folder', PUBLIC_ASSETS_FOLDER_ID);
   upload.set('title', title);
 
-  // Directus 11.1.2 answers POST /files with 204 No Content — no body. The
-  // created record is fetched afterwards by folder, newest first. If the
-  // fetch-after-upload ever fails, the uploaded file itself is still safe in
-  // the folder; only the id could not be resolved, which is reported as 500
-  // rather than a silent success.
-  await directusAsUser<void>(accessToken, '/files', {
+  // `fields` memaksa Directus mengembalikan record di respons POST. Tanpa itu
+  // Directus 11.1.2 menjawab 204 No Content, dan resolve lewat "file terbaru
+  // di folder" akan salah saat dua editor upload hampir bersamaan — id milik
+  // editor lain bisa sampai ke respons ini.
+  const uploadResponse = await directusAsUser<{
+    data?: DirectusFileRecord;
+  }>(accessToken, '/files?fields=id,title,type,width,height,filesize', {
     method: 'POST',
     body: upload,
   });
 
-  const listResponse = await directusAsUser<{ data?: DirectusFileRecord[] }>(
-    accessToken,
-    '/files?filter[folder][_eq]=' +
-      PUBLIC_ASSETS_FOLDER_ID +
-      '&fields=id,title,type,width,height,filesize' +
-      '&sort=-uploaded_on&page=1&limit=1',
-  );
-
-  const record = listResponse.data?.[0];
+  const record = uploadResponse?.data;
   if (!record || typeof record.id !== 'string') {
-    logError('uploadAsset', 'uploaded file record could not be resolved');
+    logError('uploadAsset', 'Directus did not return the created file record');
     throw new CmsError('internal', 'Upload gagal diproses.');
   }
 
@@ -94,7 +92,9 @@ export const POST = defineCmsRoute('uploadAsset', async ({ formData }) => {
   const candidate = {
     id: record.id,
     title: typeof record.title === 'string' ? record.title : title,
-    type: typeof record.type === 'string' ? record.type : check.mime,
+    // check.mime (hasil sniff) adalah sumber kebenaran tipe; Directus bisa
+    // mengembalikan tipe lain dan itu tidak boleh dipercaya untuk penyajian.
+    type: check.mime,
     width: typeof record.width === 'number' ? record.width : null,
     height: typeof record.height === 'number' ? record.height : null,
     filesize: typeof record.filesize === 'number' ? record.filesize : file.size,

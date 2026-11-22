@@ -16,6 +16,7 @@ import { CmsError } from '@/lib/cms/errors';
 import { resetCmsEnvForTests } from '@/lib/directus/env';
 
 import { DirectusRequestError } from '../../../../../lib/directus/client';
+import { logError } from '../../../../../lib/directus/logger';
 import { sniffImageMime } from '../_lib/image-check';
 import { POST as uploadAsset } from '../route';
 
@@ -102,10 +103,8 @@ let fetchCalls: FetchCall[] = [];
  * per-call: call 0 = POST (no body), call 1 = GET (record list).
  */
 
-function mockUploadSuccess(): void {
-  mockDirectusAsUser
-    .mockResolvedValueOnce(undefined)
-    .mockResolvedValueOnce({ data: [DIRECTUS_FILE_RECORD] });
+function mockUploadSuccess(record = DIRECTUS_FILE_RECORD): void {
+  mockDirectusAsUser.mockResolvedValueOnce({ data: record });
 }
 
 function mockUploadRejection(): void {
@@ -180,6 +179,7 @@ describe('POST /api/cms/assets', () => {
     const body = (await response.json()) as { asset: unknown };
 
     expect(response.status).toBe(201);
+    expect(logError).not.toHaveBeenCalled();
     expect(body.asset).toEqual({
       id: DIRECTUS_FILE_RECORD.id,
       title: 'poster.png',
@@ -189,7 +189,7 @@ describe('POST /api/cms/assets', () => {
       filesize: 12,
     });
 
-    expect(mockDirectusAsUser).toHaveBeenCalledTimes(2);
+    expect(mockDirectusAsUser).toHaveBeenCalledTimes(1);
 
     const [token, postPath, postInit] = mockDirectusAsUser.mock.calls[0] as [
       string,
@@ -197,12 +197,39 @@ describe('POST /api/cms/assets', () => {
       { body?: FormData },
     ];
     expect(token).toBe(ACCESS_TOKEN);
-    expect(postPath).toBe('/files');
+    expect(postPath).toBe('/files?fields=id,title,type,width,height,filesize');
 
     const sent = postInit.body as FormData;
     expect(sent.get('folder')).toBe(PUBLIC_ASSETS_FOLDER_ID);
     expect(sent.get('title')).toBe('poster.png');
-    expect(sent.get('file')).toBeInstanceOf(File);
+    const forwarded = sent.get('file') as File;
+    expect(forwarded).toBeInstanceOf(File);
+    expect(forwarded.type).toBe('image/png');
+  });
+
+  it('re-wraps the file with the sniffed type, not the client content-type', async () => {
+    mockUploadSuccess({
+      ...DIRECTUS_FILE_RECORD,
+      type: 'text/html',
+    });
+
+    // PNG asli, dikirim dengan content-type berbahaya.
+    const response = await post(
+      uploadForm({ bytes: PNG_BYTES, name: 'payload.png', mime: 'text/html' }),
+    );
+    const body = (await response.json()) as { asset: unknown };
+
+    expect(response.status).toBe(201);
+    // Stored type harus image/png — bukan text/html dari client.
+    expect((body as { asset: { type: string } }).asset.type).toBe('image/png');
+
+    const [, , postInit] = mockDirectusAsUser.mock.calls[0] as [
+      string,
+      string,
+      { body?: FormData },
+    ];
+    const forwarded = (postInit.body as FormData).get('file') as File;
+    expect(forwarded.type).toBe('image/png');
   });
 
   it('uses the provided title when present', async () => {
