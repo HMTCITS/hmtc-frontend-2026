@@ -74,6 +74,17 @@ DIRECTUS_READ_TOKEN=local-nextjs-reader-token
 
 The CMS-specific variables are listed in `.env.example`.
 
+### Integration tests
+
+`src/**/*.integration.test.ts` run against this local Directus and use the development users above. They are not part of `pnpm test`.
+
+```bash
+pnpm directus:setup
+pnpm test:integration
+```
+
+CI runs the same two commands in `.github/workflows/integration.yml` when Directus, CMS or test-config files change. If a migration or seed file breaks `pnpm directus:setup`, that job fails too.
+
 ### Changing the Directus schema
 
 1. Write `scripts/directus-schema/NNN-name.up.sql` and a matching `.down.sql` (next free number).

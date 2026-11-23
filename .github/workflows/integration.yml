@@ -1,0 +1,78 @@
+name: Directus Integration
+
+# Runs the integration tests against a real Directus 11.1.2 + Postgres 16,
+# started with the same `pnpm directus:setup` developers use locally
+# (snapshot + post-snapshot SQL + migrations 003+ + seed). Compose is used
+# instead of `services:` because service containers start before checkout and
+# cannot mount `directus/` for `schema apply`.
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+    paths: &paths
+      - 'directus/**'
+      - 'scripts/directus-local.mjs'
+      - 'scripts/directus-schema/**'
+      - 'compose.directus.yml'
+      - 'src/lib/directus/**'
+      - 'src/lib/cms/**'
+      - 'src/app/api/cms/**'
+      - 'jest.config.ts'
+      - 'jest.integration.config.ts'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/integration.yml'
+  pull_request:
+    branches:
+      - main
+      - staging
+    paths: *paths
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  directus-integration:
+    name: 🗄️ Directus Integration Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: ⬇️ Checkout Repository
+        uses: actions/checkout@v4
+
+      # No `version:` — the pnpm version comes from `packageManager` in package.json.
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: ⎔ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'pnpm'
+
+      - name: ⚡ Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: 🗄️ Start Directus (snapshot, migrations, seed)
+        run: pnpm directus:setup
+
+      - name: 🧪 Run Integration Tests
+        run: pnpm test:integration
+        env:
+          DIRECTUS_URL: http://localhost:8055
+          DIRECTUS_READ_TOKEN: local-nextjs-reader-token
+
+      - name: 📜 Directus logs
+        if: failure()
+        run: docker compose -f compose.directus.yml logs --tail=200
+
+      - name: 🧹 Stop Directus
+        if: always()
+        run: pnpm directus:reset
