@@ -15,7 +15,7 @@ import {
   listPublishedRoutes,
   PUBLIC_PAGE_FIELDS,
   PUBLIC_ROUTE_FIELDS,
-} from '@/lib/directus/pages';
+} from '@/lib/directus/public-pages';
 
 import { logError, logWarn } from '../logger';
 
