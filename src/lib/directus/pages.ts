@@ -63,7 +63,7 @@ const READ_ROLES: readonly MembershipRole[] = [
 /** Shown for review events by other users: members may only read their own user row. */
 const OTHER_ACTOR_NAME = 'Anggota CMS';
 
-const NOT_FOUND_MESSAGE = 'Halaman tidak ditemukan.';
+export const NOT_FOUND_MESSAGE = 'Halaman tidak ditemukan.';
 const INTERNAL_MESSAGE = 'Terjadi kesalahan pada server.';
 
 /* ------------------------------------------------------------ Row shapes */
@@ -151,10 +151,10 @@ const templateRowSchema = z.object({
   is_global: z.boolean().nullable(),
 });
 
-const itemSchema = <T extends z.ZodType>(schema: T) =>
+export const itemSchema = <T extends z.ZodType>(schema: T) =>
   z.object({ data: schema });
 
-const listSchema = <T extends z.ZodType>(schema: T) =>
+export const listSchema = <T extends z.ZodType>(schema: T) =>
   z.object({
     data: z.array(schema),
     meta: z
@@ -164,7 +164,11 @@ const listSchema = <T extends z.ZodType>(schema: T) =>
 
 /* --------------------------------------------------------------- Helpers */
 
-function parseRow<T>(schema: z.ZodType<T>, input: unknown, what: string): T {
+export function parseRow<T>(
+  schema: z.ZodType<T>,
+  input: unknown,
+  what: string,
+): T {
   const result = schema.safeParse(input);
   if (!result.success) {
     logError(LOG_SCOPE, `Directus response does not match schema: ${what}`, {
@@ -177,7 +181,7 @@ function parseRow<T>(schema: z.ZodType<T>, input: unknown, what: string): T {
   return result.data;
 }
 
-function query(params: Record<string, unknown>): string {
+export function query(params: Record<string, unknown>): string {
   const search = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {
     if (value === undefined) continue;
@@ -187,7 +191,7 @@ function query(params: Record<string, unknown>): string {
 }
 
 /** Directus timestamps → ISO-8601 with offset, as the DTOs require. */
-function iso(value: string): string {
+export function iso(value: string): string {
   return new Date(value).toISOString();
 }
 
@@ -199,7 +203,7 @@ export function readableDepartmentIds(user: SessionUser): string[] | null {
     .map((m) => m.departmentId);
 }
 
-function canRead(user: SessionUser, departmentId: string): boolean {
+export function canRead(user: SessionUser, departmentId: string): boolean {
   if (user.isAdmin) return true;
   const role = roleInDepartment(user, departmentId);
   return role !== null && READ_ROLES.includes(role);
@@ -275,7 +279,7 @@ function toReviewEvents(
 }
 
 /** Missing or hidden by Directus policy — both are a plain 404 to the caller. */
-function isHidden(error: unknown): boolean {
+export function isHidden(error: unknown): boolean {
   return (
     error instanceof DirectusRequestError &&
     (error.code === 'forbidden' || error.code === 'not_found')
