@@ -7,7 +7,7 @@
  *
  * @jest-environment node
  */
-import { createBlock } from '@/lib/directus/blocks';
+import { BLOCKS_SCHEMA_VERSION, createBlock } from '@/lib/directus/blocks';
 import { DirectusRequestError } from '@/lib/directus/client';
 import { resetCmsEnvForTests } from '@/lib/directus/env';
 import {
@@ -224,10 +224,30 @@ describe('getPublishedPage', () => {
     ['all blocks invalid', [{ type: 'mystery' }]],
     ['blocks not an array', { nope: true }],
     ['empty blocks', []],
-  ])('returns null and logs an error when %s', async (_, blocks) => {
+  ])('throws internal and logs an error when %s', async (_, blocks) => {
     mockHappyPath(revisionRow({ blocks }));
-    await expect(getPublishedPage(DEPT, PROKER, YEAR)).resolves.toBeNull();
+    await expect(getPublishedPage(DEPT, PROKER, YEAR)).rejects.toMatchObject({
+      code: 'internal',
+    });
     expect(logError).toHaveBeenCalled();
+  });
+
+  it('throws internal when the revision uses a newer blocks schema', async () => {
+    mockHappyPath(
+      revisionRow({ blocks_schema_version: BLOCKS_SCHEMA_VERSION + 1 }),
+    );
+    await expect(getPublishedPage(DEPT, PROKER, YEAR)).rejects.toMatchObject({
+      code: 'internal',
+    });
+    expect(logError).toHaveBeenCalled();
+  });
+
+  it('renders a revision on the current blocks schema', async () => {
+    mockHappyPath(
+      revisionRow({ blocks_schema_version: BLOCKS_SCHEMA_VERSION }),
+    );
+    const page = await getPublishedPage(DEPT, PROKER, YEAR);
+    expect(page?.blocks.map((b) => b.type)).toEqual(['hero']);
   });
 
   it('throws on a Directus 5xx in the identity read (outage ≠ 404)', async () => {

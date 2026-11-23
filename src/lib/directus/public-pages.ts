@@ -13,8 +13,10 @@
  *
  * Return contract:
  *  - `null`  → nothing public at this address; the caller runs `notFound()`.
- *  - throw   → Directus is unreachable or misbehaving; the error boundary
- *              renders. An outage must never turn into a 404.
+ *  - throw   → Directus is unreachable or misbehaving, or the published
+ *              revision cannot be rendered (blocks schema newer than this
+ *              build, or no valid block). The error boundary renders. An
+ *              outage or corrupt live page must never turn into a 404.
  */
 
 import 'server-only';
@@ -23,7 +25,11 @@ import { z } from 'zod';
 
 import { cmsTags } from '@/lib/cms/cache-tags';
 import { pageTypeSchema } from '@/lib/cms/vocab';
-import { type Block, parseBlocksForRead } from '@/lib/directus/blocks';
+import {
+  type Block,
+  BLOCKS_SCHEMA_VERSION,
+  parseBlocksForRead,
+} from '@/lib/directus/blocks';
 import { directusRead, DirectusRequestError } from '@/lib/directus/client';
 import { logError, logWarn } from '@/lib/directus/logger';
 
@@ -263,7 +269,25 @@ export async function getPublishedPage(
     );
   }
 
-  // 3. Validate blocks. Invalid ones are logged, never rendered.
+  // 3. Schema version. Older snapshots go through `migrateBlock` inside
+  //    `parseBlocksForRead`; a newer one was written by a newer deploy this
+  //    build cannot read. That is a server fault, not a missing page.
+  if (revision.blocks_schema_version > BLOCKS_SCHEMA_VERSION) {
+    logError(LOG_SCOPE, 'revisi terbit memakai skema blok yang lebih baru', {
+      pageId: page.id,
+      revisionId: revision.id,
+      revisionVersion: revision.blocks_schema_version,
+      supportedVersion: BLOCKS_SCHEMA_VERSION,
+    });
+    throw new DirectusRequestError(
+      'internal',
+      'Terjadi kesalahan pada server.',
+    );
+  }
+
+  // 4. Validate blocks. Invalid ones are logged, never rendered. A live page
+  //    with no valid block is corrupt data: throw so it reaches the error
+  //    boundary and monitoring instead of quietly becoming a 404.
   const { blocks, invalid } = parseBlocksForRead(revision.blocks);
   if (blocks.length === 0) {
     logError(LOG_SCOPE, 'revisi terbit tidak punya blok yang valid', {
@@ -271,7 +295,10 @@ export async function getPublishedPage(
       revisionId: revision.id,
       invalid,
     });
-    return null;
+    throw new DirectusRequestError(
+      'internal',
+      'Terjadi kesalahan pada server.',
+    );
   }
   if (invalid.length > 0) {
     logWarn(
