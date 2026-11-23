@@ -1,7 +1,7 @@
 /**
  * Unit tests for the public page accessors.
  *
- * DoD coverage: reads `published_revision` with the read token, tagged per
+ * Covers: reads `published_revision` with the read token, tagged per
  * `cmsTags`; never selects `cms_pages.blocks`; blocks go through
  * `parseBlocksForRead`.
  *

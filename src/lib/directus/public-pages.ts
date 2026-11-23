@@ -3,21 +3,18 @@
  *
  * What the public site renders is the page's **published revision**, an
  * immutable snapshot in `cms_page_revisions`. `cms_pages.blocks` is the
- * working copy and is never selected here (C4 / Q9): reading it would put an
+ * working copy and is never selected here: reading it would put an
  * unreviewed draft live the moment an editor saves. The `nextjs-reader` policy
  * (migration 004) withholds that field too, so the rule is enforced twice.
  *
  * Every read goes through `directusRead` (static `DIRECTUS_READ_TOKEN`,
  * `force-cache`) and carries `cmsTags`, so publish/unpublish/archive and the
- * Directus webhook can invalidate it. No time-based `revalidate` (D7).
+ * Directus webhook can invalidate it. No time-based `revalidate`.
  *
  * Return contract:
  *  - `null`  → nothing public at this address; the caller runs `notFound()`.
  *  - throw   → Directus is unreachable or misbehaving; the error boundary
  *              renders. An outage must never turn into a 404.
- *
- * See `docs/hmtc-cms-integration-plan.md` §4 and
- * `docs/plans/221-public-page-accessors.md`.
  */
 
 import 'server-only';
