@@ -28,12 +28,19 @@ import type {
 import { CmsError, toValidationIssues } from '@/lib/cms/errors';
 import {
   type MembershipRole,
+  nextStatus,
+  type PageAction,
   type PageStatus,
   pageStatusSchema,
   pageTypeSchema,
   reviewActionSchema,
 } from '@/lib/cms/vocab';
-import { allowedActions, roleInDepartment } from '@/lib/directus/authz';
+import {
+  allowedActions,
+  authorize,
+  type AuthzDenial,
+  roleInDepartment,
+} from '@/lib/directus/authz';
 import {
   BLOCK_LIMITS,
   createBlock,
@@ -581,4 +588,138 @@ export async function createPage(
   ).data;
 
   return getPageDetail(session, id);
+}
+
+/* ------------------------------------------------------- Workflow actions */
+
+const STALE_WRITE_MESSAGE =
+  'Halaman sudah diubah sejak terakhir kamu melihatnya. Muat ulang.';
+
+const DENIAL_MESSAGE: Record<AuthzDenial, string> = {
+  not_found: NOT_FOUND_MESSAGE,
+  forbidden: 'Peranmu tidak diizinkan melakukan aksi ini.',
+  invalid_transition: 'Aksi ini tidak tersedia pada status halaman saat ini.',
+  self_approval: 'Pengajuan ini dibuat oleh akunmu. Minta reviewer lain.',
+};
+
+function assertAuthorized(
+  user: SessionUser,
+  action: PageAction,
+  page: PageDetail,
+): void {
+  const denial = authorize(user, action, {
+    departmentId: page.departmentId,
+    status: page.status,
+    isLive: page.isLive,
+    lastSubmission: page.lastSubmission,
+  });
+  if (denial !== null) throw new CmsError(denial, DENIAL_MESSAGE[denial]);
+}
+
+function assertFresh(page: PageDetail, expectedUpdatedAt: string): void {
+  if (page.updatedAt !== expectedUpdatedAt) {
+    throw new CmsError('stale_write', STALE_WRITE_MESSAGE);
+  }
+}
+
+/**
+ * PATCH the working-copy status with the user's token.
+ *
+ * The Directus update policies (migration 004) pin the allowed *from* statuses,
+ * so a rejection here means the row changed between the read above and this
+ * write — the same stale-write race, caught by the second layer.
+ */
+async function patchStatus(
+  session: CmsSession,
+  id: string,
+  to: PageStatus,
+): Promise<void> {
+  try {
+    await directusAsUser(
+      session.accessToken,
+      `/items/cms_pages/${encodeURIComponent(id)}`,
+      {
+        method: 'PATCH',
+        body: { status: to },
+      },
+    );
+  } catch (error) {
+    if (error instanceof DirectusRequestError && error.code === 'forbidden') {
+      throw new CmsError(
+        'invalid_transition',
+        DENIAL_MESSAGE.invalid_transition,
+      );
+    }
+    throw error;
+  }
+}
+
+/** `actor` is filled by the Directus preset (`$CURRENT_USER`) — never sent. */
+async function createReviewEvent(
+  session: CmsSession,
+  pageId: string,
+  action: 'submitted' | 'changes_requested',
+  from: PageStatus,
+  to: PageStatus,
+  comment: string | null,
+): Promise<void> {
+  await directusAsUser(session.accessToken, '/items/cms_review_events', {
+    method: 'POST',
+    body: {
+      page: pageId,
+      action,
+      from_status: from,
+      to_status: to,
+      comment,
+    },
+  });
+}
+
+async function transitionPage(
+  session: CmsSession,
+  action: PageAction,
+  id: string,
+  input: { expectedUpdatedAt: string; comment?: string | null },
+  event: 'submitted' | 'changes_requested',
+): Promise<PageDetail> {
+  const page = await getPageDetail(session, id);
+  assertAuthorized(session.user, action, page);
+  assertFresh(page, input.expectedUpdatedAt);
+
+  const to = nextStatus(action, page.status);
+  await patchStatus(session, id, to);
+  await createReviewEvent(
+    session,
+    id,
+    event,
+    page.status,
+    to,
+    input.comment ?? null,
+  );
+
+  return getPageDetail(session, id);
+}
+
+/** `draft | changes_requested → in_review`, editor only. Writes the event. */
+export async function submitPage(
+  session: CmsSession,
+  id: string,
+  input: CmsRequestBody<'submitPage'>,
+): Promise<PageDetail> {
+  return transitionPage(session, 'submit', id, input, 'submitted');
+}
+
+/** `in_review → changes_requested`, reviewer/publisher only. Comment required. */
+export async function requestChangesPage(
+  session: CmsSession,
+  id: string,
+  input: CmsRequestBody<'requestChanges'>,
+): Promise<PageDetail> {
+  return transitionPage(
+    session,
+    'request_changes',
+    id,
+    input,
+    'changes_requested',
+  );
 }
