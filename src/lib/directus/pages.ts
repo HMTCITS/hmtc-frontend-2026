@@ -44,6 +44,8 @@ import {
 import {
   BLOCK_LIMITS,
   createBlock,
+  type InvalidBlock,
+  type PageBlocks,
   parseBlocksForRead,
   parseBlocksForWrite,
 } from '@/lib/directus/blocks';
@@ -726,4 +728,99 @@ export async function requestChangesPage(
     input,
     'changes_requested',
   );
+}
+
+/* ------------------------------------------------------------------ Save */
+
+export type SavePageInput = CmsRequestBody<'savePage'>;
+
+/** Zod issues from `parseBlocksForWrite` → one entry per offending block. */
+function toInvalidBlocks(error: ZodError, blocks: unknown[]): InvalidBlock[] {
+  const byIndex = new Map<number, InvalidBlock>();
+  for (const issue of error.issues) {
+    const [head, ...rest] = issue.path;
+    const index = typeof head === 'number' ? head : -1;
+    if (byIndex.has(index)) continue;
+    const raw = index >= 0 ? blocks[index] : undefined;
+    const type =
+      typeof raw === 'object' &&
+      raw !== null &&
+      typeof (raw as { type?: unknown }).type === 'string'
+        ? (raw as { type: string }).type
+        : null;
+    const where = rest.map(String).join('.');
+    byIndex.set(index, {
+      index,
+      type,
+      reason: where ? `${where}: ${issue.message}` : issue.message,
+    });
+  }
+  return Array.from(byIndex.values()).sort((a, b) => a.index - b.index);
+}
+
+function validateDraftBlocks(blocks: unknown[]): PageBlocks {
+  try {
+    return parseBlocksForWrite(blocks, 'draft');
+  } catch (error) {
+    if (error instanceof ZodError) {
+      throw new CmsError('invalid_blocks', 'Blok tidak valid.', {
+        invalidBlocks: toInvalidBlocks(error, blocks),
+      });
+    }
+    throw error;
+  }
+}
+
+/**
+ * Save the working copy. Only `cms_pages` fields are written — never
+ * `published_revision` — so public output does not change. A `published`
+ * working copy becomes `draft` (`nextStatus('edit')`).
+ *
+ * Throws `stale_write` when `expectedUpdatedAt` no longer matches, and
+ * `invalid_blocks` when blocks fail draft validation.
+ */
+export async function savePage(
+  session: CmsSession,
+  id: string,
+  input: SavePageInput,
+): Promise<PageDetail> {
+  const page = await getPageDetail(session, id);
+  assertAuthorized(session.user, 'edit', page);
+  assertFresh(page, input.expectedUpdatedAt);
+
+  const body: Record<string, unknown> = {};
+  if (input.title !== undefined) body.title = input.title;
+  if (input.blocks !== undefined)
+    body.blocks = validateDraftBlocks(input.blocks);
+  if (input.excerpt !== undefined) body.excerpt = input.excerpt;
+  if (input.featuredImageId !== undefined)
+    body.featured_image = input.featuredImageId;
+  if (input.seoTitle !== undefined) body.seo_title = input.seoTitle;
+  if (input.seoDescription !== undefined)
+    body.seo_description = input.seoDescription;
+
+  const to = nextStatus('edit', page.status);
+  if (to !== page.status) body.status = to;
+
+  if (Object.keys(body).length > 0) {
+    try {
+      await directusAsUser(
+        session.accessToken,
+        `/items/cms_pages/${encodeURIComponent(id)}`,
+        { method: 'PATCH', body },
+      );
+    } catch (error) {
+      // The update policy pins editable statuses: a rejection means the row
+      // left an editable status after our read (same race as patchStatus).
+      if (error instanceof DirectusRequestError && error.code === 'forbidden') {
+        throw new CmsError(
+          'invalid_transition',
+          DENIAL_MESSAGE.invalid_transition,
+        );
+      }
+      throw error;
+    }
+  }
+
+  return getPageDetail(session, id);
 }
