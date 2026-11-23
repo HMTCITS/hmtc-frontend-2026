@@ -155,6 +155,8 @@ const config: Config = {
 
   // The test environment that will be used for testing
   testEnvironment: 'jsdom',
+  // Integration tests need a running Directus; run them with `pnpm test:integration`.
+  testPathIgnorePatterns: ['/node_modules/', '\\.integration\\.test\\.'],
 
   // Options that will be passed to the testEnvironment
   // testEnvironmentOptions: {},
