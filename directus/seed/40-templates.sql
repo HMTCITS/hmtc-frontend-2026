@@ -1,9 +1,11 @@
 -- Starter page templates: `event` and `program`.
 --
 -- Both are published and global, so every department can create a page from
--- them. Their blocks must pass `publishBlocksSchema`
--- (src/lib/directus/blocks.ts); src/lib/directus/__tests__/template-seed.test.ts
--- reads the JSON between the $json$ markers below and checks that.
+-- them. Their content is template placeholders: a whole string in `[...]`, and
+-- `/#ganti-tautan` for links. Blocks pass the draft schema but publishing is
+-- refused until every placeholder is replaced (`publishBlocksSchema` in
+-- src/lib/directus/blocks.ts). src/lib/directus/__tests__/template-seed.test.ts
+-- reads the JSON between the $json$ markers below and checks both.
 --
 -- The program gallery points at a placeholder image ("Ganti foto ini") in the
 -- "Public Assets" folder. Locally, `pnpm directus:setup` copies
@@ -76,7 +78,7 @@ VALUES
        "version": 1,
        "props": {
          "heading": "[Ajakan untuk mendaftar atau hadir]",
-         "action": { "label": "[Daftar sekarang]", "href": "/" },
+         "action": { "label": "[Daftar sekarang]", "href": "/#ganti-tautan" },
          "tone": "accent"
        }
      }
@@ -119,7 +121,7 @@ VALUES
          "images": [
            {
              "asset": "4fb657b6-1b26-4389-b00e-a1f64be8e5d3",
-             "alt": "Placeholder: ganti foto ini dengan dokumentasi program"
+             "alt": "[Deskripsikan foto dokumentasi program]"
            }
          ]
        }

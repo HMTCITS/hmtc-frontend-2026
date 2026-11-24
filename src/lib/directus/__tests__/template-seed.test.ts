@@ -1,7 +1,11 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-import { type BlockType, publishBlocksSchema } from '@/lib/directus/blocks';
+import {
+  blocksSchema,
+  type BlockType,
+  publishBlocksSchema,
+} from '@/lib/directus/blocks';
 
 const SEED = 'directus/seed/40-templates.sql';
 const seed = fs.readFileSync(path.join(process.cwd(), SEED), 'utf8');
@@ -30,15 +34,41 @@ describe(`starter templates in ${SEED}`, () => {
   });
 
   it.each(Object.entries(EXPECTED))(
-    '%s passes publishBlocksSchema with the expected blocks',
+    '%s is a valid draft with the expected blocks',
     (slug, types) => {
-      const blocks = publishBlocksSchema.parse(templates.get(slug));
+      const blocks = blocksSchema.parse(templates.get(slug));
       expect(blocks.map((block) => block.type)).toEqual(types);
     },
   );
 
+  it.each(Object.keys(EXPECTED))(
+    '%s cannot be published until its placeholders are replaced',
+    (slug) => {
+      const result = publishBlocksSchema.safeParse(templates.get(slug));
+      expect(result.success).toBe(false);
+      const issues = result.error!.issues;
+      expect(issues.length).toBeGreaterThan(0);
+      for (const issue of issues) {
+        expect(issue.message).toMatch(/placeholder template/);
+        expect(issue.path[1]).toBe('props');
+      }
+    },
+  );
+
+  it('flags the CTA link and the gallery alt text', () => {
+    const paths = publishBlocksSchema
+      .safeParse(templates.get('event'))
+      .error!.issues.map((issue) => issue.path.join('.'));
+    expect(paths).toContain('3.props.action.href');
+
+    const programPaths = publishBlocksSchema
+      .safeParse(templates.get('program'))
+      .error!.issues.map((issue) => issue.path.join('.'));
+    expect(programPaths).toContain('2.props.images.0.alt');
+  });
+
   it('points the gallery at the seeded placeholder file', () => {
-    const blocks = publishBlocksSchema.parse(templates.get('program'));
+    const blocks = blocksSchema.parse(templates.get('program'));
     const gallery = blocks.find((block) => block.type === 'gallery');
     const assets =
       gallery?.type === 'gallery'

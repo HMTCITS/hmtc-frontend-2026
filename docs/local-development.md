@@ -75,9 +75,14 @@ Two published, global templates that any department can create a page from. On a
 | `event`       | hero, eventDetails, agenda, cta |
 | `program`     | hero, richText, gallery         |
 
-The content is bracketed placeholder text, such as `[Judul acara]`. The program gallery uses a placeholder image that reads "Ganti foto ini" (file `4fb657b6-1b26-4389-b00e-a1f64be8e5d3`, from `directus/seed/assets/template-placeholder.webp`, in the "Public Assets" folder). Reviewers should send back any page that still shows it.
+The content is template placeholders. The program gallery uses a placeholder image that reads "Ganti foto ini" (file `4fb657b6-1b26-4389-b00e-a1f64be8e5d3`, from `directus/seed/assets/template-placeholder.webp`, in the "Public Assets" folder).
 
-Both templates pass `publishBlocksSchema`; `src/lib/directus/__tests__/template-seed.test.ts` checks this. Re-running setup never overwrites a template that was edited in Studio. To try one, log in as `editor@example.com` and send `POST /api/cms/pages` with `templateId`.
+Placeholders are allowed in drafts and previews, but publishing is refused with `invalid_blocks` until every one is replaced; the error points at each block and field. `publishBlocksSchema` (`src/lib/directus/blocks.ts`) recognises two forms, and new templates must use them:
+
+- **Text:** the whole value is one bracketed group, such as `[Judul acara]`. Brackets inside real text, as in `Workshop [Online]`, are not a placeholder.
+- **Links:** `/#ganti-tautan`. A real path such as `/` cannot be told apart from content.
+
+The gallery image itself is not checked (its file id differs per environment), but its alt text is a bracketed placeholder, so the editor must describe the real photo before publishing. `src/lib/directus/__tests__/template-seed.test.ts` checks that both templates are valid drafts and cannot be published as seeded. Re-running setup never overwrites a template that was edited in Studio. To try one, log in as `editor@example.com` and send `POST /api/cms/pages` with `templateId`.
 
 **Production (DevOps).** The seed only runs locally. To add the templates to production:
 
