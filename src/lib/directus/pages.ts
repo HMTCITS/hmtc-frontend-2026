@@ -629,6 +629,38 @@ function assertFresh(page: PageDetail, expectedUpdatedAt: string): void {
 }
 
 /**
+ * Directus filter that matches the row only while it is still the version the
+ * client saw. `updatedAt` is `date_updated ?? date_created`, so a page that
+ * was never edited is matched on `date_created`.
+ *
+ * Postgres keeps microseconds but `updatedAt` carries milliseconds, so the
+ * timestamp is matched within its millisecond rather than with `_eq`.
+ */
+function unchangedSinceFilter(
+  id: string,
+  expectedUpdatedAt: string,
+): Record<string, unknown> {
+  const from = new Date(expectedUpdatedAt);
+  const within = {
+    _gte: from.toISOString(),
+    _lt: new Date(from.getTime() + 1).toISOString(),
+  };
+  return {
+    _and: [
+      { id: { _eq: id } },
+      {
+        _or: [
+          { date_updated: within },
+          {
+            _and: [{ date_updated: { _null: true } }, { date_created: within }],
+          },
+        ],
+      },
+    ],
+  };
+}
+
+/**
  * PATCH the working-copy status with the user's token.
  *
  * The Directus update policies (migration 004) pin the allowed *from* statuses,
@@ -776,8 +808,10 @@ function validateDraftBlocks(blocks: unknown[]): PageBlocks {
  * `published_revision` — so public output does not change. A `published`
  * working copy becomes `draft` (`nextStatus('edit')`).
  *
- * Throws `stale_write` when `expectedUpdatedAt` no longer matches, and
- * `invalid_blocks` when blocks fail draft validation.
+ * Throws `stale_write` when `expectedUpdatedAt` no longer matches. The check
+ * is repeated inside the write itself, so two concurrent saves cannot
+ * overwrite each other. Throws `invalid_blocks` when blocks fail draft
+ * validation.
  */
 export async function savePage(
   session: CmsSession,
@@ -803,11 +837,23 @@ export async function savePage(
   if (to !== page.status) body.status = to;
 
   if (Object.keys(body).length > 0) {
+    // assertFresh above fails fast; this filter makes the check and the write
+    // one operation, so a save that lands between our read and this PATCH is
+    // not overwritten.
+    let raw: unknown;
     try {
-      await directusAsUser(
+      raw = await directusAsUser<unknown>(
         session.accessToken,
-        `/items/cms_pages/${encodeURIComponent(id)}`,
-        { method: 'PATCH', body },
+        `/items/cms_pages?${query({ fields: 'id' })}`,
+        {
+          method: 'PATCH',
+          body: {
+            query: {
+              filter: unchangedSinceFilter(id, input.expectedUpdatedAt),
+            },
+            data: body,
+          },
+        },
       );
     } catch (error) {
       // The update policy pins editable statuses: a rejection means the row
@@ -819,6 +865,14 @@ export async function savePage(
         );
       }
       throw error;
+    }
+    const updated = parseRow(
+      listSchema(z.object({ id: z.uuid() })),
+      raw,
+      'cms_pages save',
+    ).data;
+    if (updated.length === 0) {
+      throw new CmsError('stale_write', STALE_WRITE_MESSAGE);
     }
   }
 

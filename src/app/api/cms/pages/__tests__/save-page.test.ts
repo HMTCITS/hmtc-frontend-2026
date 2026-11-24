@@ -101,6 +101,35 @@ const reviewEvents = () => [
 
 /* ------------------------------------------------------- Fetch routing */
 
+/**
+ * ISO timestamp → microseconds since epoch. Postgres keeps microseconds, which
+ * `Date` would drop, so the digits after the milliseconds are added back.
+ */
+function micros(value: string): number {
+  const match = /^(.*\.\d{3})(\d*)Z$/.exec(value);
+  if (!match) return Date.parse(value) * 1000;
+  const extra = (match[2] + '000').slice(0, 3);
+  return Date.parse(`${match[1]}Z`) * 1000 + Number(extra);
+}
+
+/** Evaluates the subset of Directus filter operators `savePage` sends. */
+function matches(row: Record<string, unknown>, filter: unknown): boolean {
+  const f = filter as Record<string, unknown>;
+  if (Array.isArray(f._and)) return f._and.every((x) => matches(row, x));
+  if (Array.isArray(f._or)) return f._or.some((x) => matches(row, x));
+  return Object.entries(f).every(([field, ops]) => {
+    const value = row[field];
+    return Object.entries(ops as Record<string, unknown>).every(([op, arg]) => {
+      if (op === '_null') return (value === null) === arg;
+      if (op === '_eq') return value === arg;
+      if (value === null || typeof value !== 'string') return false;
+      if (op === '_gte') return micros(value) >= micros(String(arg));
+      if (op === '_lt') return micros(value) < micros(String(arg));
+      throw new Error(`unsupported filter operator: ${op}`);
+    });
+  });
+}
+
 function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
     status,
@@ -130,7 +159,7 @@ const fetchMock = jest.fn(async (input: string, init: RequestInit = {}) => {
 });
 
 const callsTo = (key: string) => fetchCalls.filter((c) => c.key === key);
-const patchCalls = () => callsTo(`PATCH /items/cms_pages/${PAGE_ID}`);
+const patchCalls = () => callsTo('PATCH /items/cms_pages');
 const eventCalls = () => callsTo('POST /items/cms_review_events');
 
 let postedEvents: Array<Record<string, unknown>> = [];
@@ -157,17 +186,19 @@ function defaultRoutes(): Record<string, Handler> {
     [`GET /items/cms_pages/${PAGE_ID}`]: () => json({ data: currentRow }),
     'GET /items/cms_review_events': () =>
       json({ data: [...postedEvents, ...reviewEvents()] }),
-    [`PATCH /items/cms_pages/${PAGE_ID}`]: (call) => {
-      const body = JSON.parse(String(call.init.body)) as Record<
-        string,
-        unknown
-      >;
+    // Update by query: only a row that still matches the filter is written.
+    'PATCH /items/cms_pages': (call) => {
+      const { query, data } = JSON.parse(String(call.init.body)) as {
+        query: { filter: unknown };
+        data: Record<string, unknown>;
+      };
+      if (!matches(currentRow, query.filter)) return json({ data: [] });
       currentRow = {
         ...currentRow,
-        ...body,
+        ...data,
         date_updated: '2026-11-10T08:00:00.000Z',
       };
-      return json({ data: { id: PAGE_ID } });
+      return json({ data: [{ id: PAGE_ID }] });
     },
     'POST /items/cms_review_events': (call) => {
       const body = JSON.parse(String(call.init.body)) as Record<
@@ -236,7 +267,11 @@ const hero = (title: string) => ({
 });
 
 const patchBody = () =>
-  JSON.parse(String(patchCalls()[0]!.init.body)) as Record<string, unknown>;
+  (
+    JSON.parse(String(patchCalls()[0]!.init.body)) as {
+      data: Record<string, unknown>;
+    }
+  ).data;
 
 describe('PATCH /api/cms/pages/:id', () => {
   it('saves fields of a draft and returns the new detail', async () => {
@@ -322,6 +357,73 @@ describe('PATCH /api/cms/pages/:id', () => {
       'stale_write',
     );
     expect(patchCalls()).toHaveLength(0);
+  });
+
+  it('rejects a save that another editor beat between the read and the write', async () => {
+    const read = routes[`GET /items/cms_pages/${PAGE_ID}`]!;
+    routes[`GET /items/cms_pages/${PAGE_ID}`] = (call) => {
+      const res = read(call);
+      // Another editor saves right after this request read the page.
+      currentRow = {
+        ...currentRow,
+        title: 'Disimpan editor lain',
+        date_updated: '2026-11-09T10:13:00.000Z',
+      };
+      return res;
+    };
+
+    const res = await saveRequest({
+      expectedUpdatedAt: UPDATED_AT,
+      title: 'Menimpa',
+    });
+
+    expect(res.status).toBe(409);
+    expect(((await res.json()) as { error: { code: string } }).error.code).toBe(
+      'stale_write',
+    );
+    expect(patchCalls()).toHaveLength(1);
+    expect(currentRow.title).toBe('Disimpan editor lain');
+  });
+
+  it('writes only the row on the expected version, by id', async () => {
+    await saveRequest({ expectedUpdatedAt: UPDATED_AT, title: 'x' });
+
+    const call = patchCalls()[0]!;
+    expect(call.url.searchParams.get('fields')).toBe('id');
+    const { query } = JSON.parse(String(call.init.body)) as {
+      query: { filter: unknown };
+    };
+    // Against the row as it was read: only the id differs between the two.
+    const seen = pageRow({ status: 'draft' });
+    expect(matches(seen, query.filter)).toBe(true);
+    expect(matches({ ...seen, id: OTHER_USER_ID }, query.filter)).toBe(false);
+  });
+
+  it('saves a page that was never edited, matched on date_created', async () => {
+    setPageRow({ status: 'draft', date_updated: null });
+
+    const res = await saveRequest({
+      expectedUpdatedAt: '2026-11-01T08:00:00.000Z',
+      title: 'Pertama kali',
+    });
+
+    expect(res.status).toBe(200);
+    expect(currentRow.title).toBe('Pertama kali');
+  });
+
+  it('saves when Postgres stored the timestamp with microseconds', async () => {
+    setPageRow({
+      status: 'draft',
+      date_updated: '2026-11-09T10:12:00.000456Z',
+    });
+
+    const res = await saveRequest({
+      expectedUpdatedAt: UPDATED_AT,
+      title: 'Dari seed SQL',
+    });
+
+    expect(res.status).toBe(200);
+    expect(currentRow.title).toBe('Dari seed SQL');
   });
 
   it('returns 403 editing_disabled when CMS_EDITING_ENABLED=false', async () => {
