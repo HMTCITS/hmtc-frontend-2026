@@ -1,7 +1,8 @@
+import { Suspense } from 'react';
+
 import Typography from '@/components/Typography';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { MOCK_PAGES } from '@/lib/cms/fixtures';
 
 import {
   CmsEmpty,
@@ -9,13 +10,9 @@ import {
   CmsLoading,
   CmsPermissionDenied,
 } from './_components/cms-states';
-import { PagesTable } from './_components/pages-table';
+import { PagesList } from './_components/pages-list';
 
-/**
- * Mock "Posts & Pages" screen (task A8). Data comes from `fixtures.ts` and
- * follows the `PageSummary` wire DTO; wiring to the real `/api/cms/pages`
- * replaces the import, not the layout.
- */
+/** "Posts & Pages" screen: the page list comes from `GET /api/cms/pages`. */
 export default function CmsPostsAndPagesPage() {
   return (
     <div className='space-y-8'>
@@ -37,14 +34,6 @@ export default function CmsPostsAndPagesPage() {
         >
           Kelola halaman proker: draft, review, dan publikasi per tahun edisi.
         </Typography>
-        <Typography
-          as='p'
-          font='satoshi'
-          variant='c2'
-          className='text-muted-foreground/70'
-        >
-          Data contoh mengikuti DTO PageSummary — belum tersambung ke Directus.
-        </Typography>
       </header>
 
       <section aria-labelledby='cms-pages-title' className='space-y-3'>
@@ -64,7 +53,9 @@ export default function CmsPostsAndPagesPage() {
           </Button>
         </div>
 
-        <PagesTable pages={MOCK_PAGES} />
+        <Suspense fallback={<CmsLoading rows={3} />}>
+          <PagesList />
+        </Suspense>
       </section>
 
       <section aria-labelledby='cms-states-title' className='space-y-4'>
