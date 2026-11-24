@@ -5,22 +5,10 @@
  */
 import { NextResponse } from 'next/server';
 
+import { CMS_LOGIN, safeNext } from '@/lib/cms/redirect';
 import { getSession } from '@/lib/directus/session';
 
 export const dynamic = 'force-dynamic';
-
-const CMS_HOME = '/dashboard/cms';
-const CMS_LOGIN = '/dashboard/cms/login';
-
-/** Open-redirect guard: only same-site paths under /dashboard/cms. */
-function safeNext(raw: string | null): string {
-  if (!raw || raw.startsWith('//') || raw.includes('\\')) return CMS_HOME;
-  const underCms =
-    raw === CMS_HOME ||
-    raw.startsWith(`${CMS_HOME}/`) ||
-    raw.startsWith(`${CMS_HOME}?`);
-  return underCms ? raw : CMS_HOME;
-}
 
 export async function GET(request: Request): Promise<Response> {
   const url = new URL(request.url);

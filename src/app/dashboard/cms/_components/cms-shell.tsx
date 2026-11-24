@@ -8,6 +8,8 @@ import type { ReactNode } from 'react';
 import Typography from '@/components/Typography';
 import { cn } from '@/lib/utils';
 
+import { LogoutButton } from './logout-button';
+
 /**
  * L4 shell for `/dashboard/cms/**` (DESIGN.md §8): shadcn tokens only, no L1
  * palette. Live entries link to routes that exist; planned entries render as
@@ -26,7 +28,16 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export function CmsShell({ children }: { children: ReactNode }) {
+/** The verified session user, as shown in the shell. */
+export type CmsShellUser = { name: string; email: string };
+
+export function CmsShell({
+  user,
+  children,
+}: {
+  user: CmsShellUser;
+  children: ReactNode;
+}) {
   const pathname = usePathname();
 
   const renderNavItem = (item: (typeof NAV_ITEMS)[number]) => {
@@ -91,15 +102,27 @@ export function CmsShell({ children }: { children: ReactNode }) {
           {PLANNED_ITEMS.map(renderPlannedItem)}
         </nav>
 
-        <div className='border-t border-border p-3'>
-          <Typography
-            as='p'
-            font='satoshi'
-            variant='c2'
-            className='text-muted-foreground'
-          >
-            Data mock — belum tersambung ke Directus.
-          </Typography>
+        <div className='space-y-3 border-t border-border p-3'>
+          <div className='min-w-0'>
+            <Typography
+              as='p'
+              font='satoshi'
+              weight='medium'
+              variant='b4'
+              className='truncate'
+            >
+              {user.name}
+            </Typography>
+            <Typography
+              as='p'
+              font='satoshi'
+              variant='c2'
+              className='truncate text-muted-foreground'
+            >
+              {user.email}
+            </Typography>
+          </div>
+          <LogoutButton className='w-full' />
         </div>
       </aside>
 
@@ -119,6 +142,7 @@ export function CmsShell({ children }: { children: ReactNode }) {
               CMS
             </Typography>
             {NAV_ITEMS.map(renderNavItem)}
+            <LogoutButton className='ml-auto shrink-0' />
           </nav>
         </header>
 

@@ -8,15 +8,19 @@ import {
   CmsError,
   CmsLoading,
   CmsPermissionDenied,
-} from './_components/cms-states';
-import { PagesTable } from './_components/pages-table';
+} from '../_components/cms-states';
+import { PagesTable } from '../_components/pages-table';
+import { requireEditorSession } from '../_lib/editor-session';
 
 /**
  * Mock "Posts & Pages" screen (task A8). Data comes from `fixtures.ts` and
  * follows the `PageSummary` wire DTO; wiring to the real `/api/cms/pages`
  * replaces the import, not the layout.
  */
-export default function CmsPostsAndPagesPage() {
+export default async function CmsPostsAndPagesPage() {
+  // The layout redirect alone does not stop this page from rendering.
+  if (!(await requireEditorSession())) return null;
+
   return (
     <div className='space-y-8'>
       <header className='space-y-2'>
