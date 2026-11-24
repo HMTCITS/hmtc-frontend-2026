@@ -12,7 +12,7 @@ const PROKERS_STALE_TIME_MS = 10 * 60 * 1000;
  */
 export function useCmsProkers(departmentId?: string) {
   return useQuery({
-    ...cmsQuery('listProkers', [...cmsKeys.all, 'prokers'], {
+    ...cmsQuery('listProkers', cmsKeys.prokers(), {
       query: { departmentId },
     }),
     staleTime: PROKERS_STALE_TIME_MS,
