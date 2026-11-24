@@ -90,7 +90,9 @@ function hasAppliedLocalMigrations() {
     ) === 't';
   if (!ledgerExists) return false;
 
-  return sqlValue('SELECT EXISTS (SELECT 1 FROM hmtc_local_migrations)') === 't';
+  return (
+    sqlValue('SELECT EXISTS (SELECT 1 FROM hmtc_local_migrations)') === 't'
+  );
 }
 
 function setup() {
@@ -119,6 +121,19 @@ function setup() {
 
   step('Applying migrations 003+');
   applyMigrations();
+
+  // Seed files reference these by `directus_files.filename_disk`. The repo's
+  // directus/ folder is mounted read-only at /directus/hmtc; copying inside the
+  // container keeps the files owned by the Directus user.
+  step('Copying seed assets into the uploads volume');
+  docker([
+    'exec',
+    '-T',
+    'directus',
+    'sh',
+    '-c',
+    'cp /directus/hmtc/seed/assets/* /directus/uploads/',
+  ]);
 
   step('Seeding local data');
   const seedDir = path.join(root, 'directus', 'seed');
