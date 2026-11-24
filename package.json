@@ -22,6 +22,7 @@
     "directus:setup": "node scripts/directus-local.mjs setup",
     "directus:down": "node scripts/directus-local.mjs down",
     "directus:reset": "node scripts/directus-local.mjs reset",
+    "smoke:publish": "bash scripts/smoke/cms-publish.sh",
     "analyze": "cross-env ANALYZE=true next build"
   },
   "dependencies": {
