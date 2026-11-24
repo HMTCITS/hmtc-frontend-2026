@@ -15,6 +15,7 @@ import { revalidateTag } from 'next/cache';
 
 import { createBlock } from '@/lib/directus/blocks';
 import { resetCmsEnvForTests } from '@/lib/directus/env';
+import { logError } from '@/lib/directus/logger';
 import {
   CMS_ACCESS_COOKIE,
   resetSessionStateForTests,
@@ -535,7 +536,7 @@ describe('POST /api/cms/pages/:id/publish', () => {
     expect(revalidateTag).not.toHaveBeenCalled();
   });
 
-  it('still revalidates when the approved event fails after the page went live', async () => {
+  it('answers 200, logs and revalidates when the approved event fails after the page went live', async () => {
     routes = {
       ...defaultRoutes(),
       'POST /items/cms_review_events': directusError(
@@ -546,8 +547,15 @@ describe('POST /api/cms/pages/:id/publish', () => {
 
     const res = await publishRequest(BODY);
 
-    expect(res.status).toBeGreaterThanOrEqual(500);
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { page: { status: string } };
+    expect(body.page.status).toBe('published');
     expect(currentRow.published_revision).toBe(REV_ID);
+    expect(logError).toHaveBeenCalledWith(
+      expect.any(String),
+      'page published but the approved event failed',
+      expect.objectContaining({ pageId: PAGE_ID, revisionId: REV_ID }),
+    );
     for (const tag of PUBLIC_TAGS) {
       expect(revalidateTag).toHaveBeenCalledWith(tag, { expire: 0 });
     }

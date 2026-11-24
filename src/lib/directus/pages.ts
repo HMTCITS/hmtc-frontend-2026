@@ -896,9 +896,10 @@ function revalidatePublished(pageId: string, route: PageRoute): void {
  * 5. write the `approved` event;
  * 6. revalidate the page's tags.
  *
- * Nothing public changes before step 4. Once it succeeds the page is live, so
- * the cache is revalidated even if the event write fails; that failure is
- * still reported.
+ * Nothing public changes before step 4. Once it succeeds the page is live:
+ * the cache is revalidated and the request succeeds even if the event write
+ * fails. That failure is only logged, because a 5xx would make the publisher
+ * retry and get `invalid_transition` for a page that is already published.
  */
 export async function publishPage(
   session: CmsSession,
@@ -931,11 +932,10 @@ export async function publishPage(
     logError(LOG_SCOPE, 'page published but the approved event failed', {
       pageId: id,
       revisionId,
+      error: error instanceof Error ? error.message : String(error),
     });
-    throw error;
-  } finally {
-    revalidatePublished(id, route);
   }
+  revalidatePublished(id, route);
 
   return getPageDetail(session, id);
 }
