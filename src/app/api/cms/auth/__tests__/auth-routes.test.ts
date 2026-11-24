@@ -15,6 +15,7 @@
  * @jest-environment node
  */
 import { resetCmsEnvForTests } from '@/lib/directus/env';
+import { resetRateLimitsForTests } from '@/lib/directus/rate-limit';
 import {
   CMS_ACCESS_COOKIE,
   CMS_REFRESH_COOKIE,
@@ -22,7 +23,6 @@ import {
 } from '@/lib/directus/session';
 
 import { logError, logWarn } from '../../../../../lib/directus/logger';
-import { resetRateLimitForTests } from '../_lib/rate-limit';
 import { POST as login } from '../login/route';
 import { POST as logout } from '../logout/route';
 import { GET as me } from '../me/route';
@@ -212,7 +212,7 @@ beforeEach(() => {
   process.env.CMS_REVALIDATE_SECRET = 'secret';
   resetCmsEnvForTests();
   resetSessionStateForTests();
-  resetRateLimitForTests();
+  resetRateLimitsForTests();
 
   mockJar.clear();
   mockSetCalls.length = 0;
