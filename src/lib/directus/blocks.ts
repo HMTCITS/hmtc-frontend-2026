@@ -221,11 +221,51 @@ export const blocksSchema = z
     });
   });
 
+/* ---------------------------------------------------------- Placeholders */
+
+/**
+ * Template placeholder text: the whole string is one `[...]` group, such as
+ * `[Judul acara]`. Brackets inside real text, as in `Workshop [Online]`, are
+ * not a placeholder.
+ */
+const PLACEHOLDER_TEXT = /^\s*\[[^\]]+\]\s*$/;
+
+/**
+ * Placeholder link target for templates. A real URL such as `/` cannot be told
+ * apart from content, so templates use this one instead.
+ */
+export const TEMPLATE_PLACEHOLDER_HREF = '/#ganti-tautan';
+
+function isPlaceholder(value: unknown): boolean {
+  return (
+    typeof value === 'string' &&
+    (PLACEHOLDER_TEXT.test(value) || value === TEMPLATE_PLACEHOLDER_HREF)
+  );
+}
+
+/** Path to every value that is still a template placeholder. */
+export function findPlaceholders(
+  value: unknown,
+  path: (string | number)[] = [],
+): (string | number)[][] {
+  if (isPlaceholder(value)) return [path];
+  if (Array.isArray(value)) {
+    return value.flatMap((item, i) => findPlaceholders(item, [...path, i]));
+  }
+  if (value && typeof value === 'object') {
+    return Object.entries(value).flatMap(([key, inner]) =>
+      findPlaceholders(inner, [...path, key]),
+    );
+  }
+  return [];
+}
+
 /**
  * Publish-safe page body.
  *
  * `hero` must appear exactly once, which is what guarantees the public page has
- * exactly one `<h1>` (AGENTS.md §7).
+ * exactly one `<h1>` (AGENTS.md §7). Template placeholders are allowed in
+ * drafts and previews but block publishing.
  */
 export const publishBlocksSchema = blocksSchema.superRefine((blocks, ctx) => {
   const heroes = blocks.filter((block) => block.type === 'hero');
@@ -249,6 +289,15 @@ export const publishBlocksSchema = blocksSchema.superRefine((blocks, ctx) => {
         code: 'custom',
         message: 'blok masih kosong',
         path: [index, 'props'],
+      });
+    }
+
+    for (const path of findPlaceholders(block.props, ['props'])) {
+      ctx.addIssue({
+        code: 'custom',
+        path: [index, ...path],
+        message:
+          'Masih berisi placeholder template. Ganti sebelum menerbitkan.',
       });
     }
   });
