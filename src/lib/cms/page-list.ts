@@ -2,7 +2,7 @@
  * HMTC CMS — state helpers for the dashboard page list.
  *
  * Pure functions only: the URL ↔ query mapping, filter changes, the year
- * options and the choice of which screen state to render. Field rules come
+ * options, paging and the choice of which screen state to render. Field rules come
  * from the `listPages` query schema, so the URL can never carry a value the
  * API would reject.
  *
@@ -158,12 +158,28 @@ export function editionYearOptions(now: Date = new Date()): number[] {
   return years;
 }
 
+/** Server route that rotates the session cookie, then redirects to `next`. */
+const CMS_REFRESH_ROUTE = '/api/cms/auth/refresh';
+
+/** Where to send an expired session so it comes back to the same view. */
+export function refreshHref(pathname: string, search: string): string {
+  const here = search ? `${pathname}?${search}` : pathname;
+  return `${CMS_REFRESH_ROUTE}?next=${encodeURIComponent(here)}`;
+}
+
+/** Last page that has rows; at least 1 so an empty list still has a page. */
+export function lastPageOf(total: number, limit: number): number {
+  return Math.max(1, Math.ceil(total / limit));
+}
+
 export type PageListState =
   | 'loading'
+  | 'unauthenticated'
   | 'denied'
   | 'error'
   | 'empty'
   | 'no-matches'
+  | 'out-of-range'
   | 'ready';
 
 type PageListStateInput = {
@@ -171,14 +187,16 @@ type PageListStateInput = {
   error: unknown;
   total: number | undefined;
   filtered: boolean;
+  page: number;
+  limit: number;
 };
 
-function isForbidden(error: unknown): boolean {
+function hasStatus(error: unknown, status: number): boolean {
   return (
     typeof error === 'object' &&
     error !== null &&
     'status' in error &&
-    error.status === 403
+    error.status === status
   );
 }
 
@@ -188,9 +206,15 @@ export function resolvePageListState({
   error,
   total,
   filtered,
+  page,
+  limit,
 }: PageListStateInput): PageListState {
-  if (error) return isForbidden(error) ? 'denied' : 'error';
+  if (error) {
+    if (hasStatus(error, 401)) return 'unauthenticated';
+    return hasStatus(error, 403) ? 'denied' : 'error';
+  }
   if (isLoading || total === undefined) return 'loading';
   if (total === 0) return filtered ? 'no-matches' : 'empty';
+  if (page > lastPageOf(total, limit)) return 'out-of-range';
   return 'ready';
 }

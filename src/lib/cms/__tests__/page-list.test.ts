@@ -3,9 +3,11 @@ import {
   DEFAULT_PAGE_LIST_QUERY,
   editionYearOptions,
   hasActiveFilters,
+  lastPageOf,
   PAGE_LIST_MIN_YEAR,
   type PageListQuery,
   parsePageListParams,
+  refreshHref,
   resolvePageListState,
   toPageListParams,
   withFilters,
@@ -155,18 +157,51 @@ describe('editionYearOptions', () => {
   });
 });
 
+describe('refreshHref', () => {
+  it('sends the current view as next, encoded', () => {
+    expect(refreshHref('/dashboard/cms', 'status=draft&page=2')).toBe(
+      '/api/cms/auth/refresh?next=%2Fdashboard%2Fcms%3Fstatus%3Ddraft%26page%3D2',
+    );
+  });
+
+  it('leaves out an empty query string', () => {
+    expect(refreshHref('/dashboard/cms', '')).toBe(
+      '/api/cms/auth/refresh?next=%2Fdashboard%2Fcms',
+    );
+  });
+});
+
+describe('lastPageOf', () => {
+  it('rounds a partial page up', () => {
+    expect(lastPageOf(26, 25)).toBe(2);
+    expect(lastPageOf(25, 25)).toBe(1);
+  });
+
+  it('is 1 for an empty list', () => {
+    expect(lastPageOf(0, 25)).toBe(1);
+  });
+});
+
 describe('resolvePageListState', () => {
   const base = {
     isLoading: false,
     error: null,
     total: 3,
     filtered: false,
+    page: 1,
+    limit: 25,
   };
 
   it('is loading while the first response is pending', () => {
     expect(
       resolvePageListState({ ...base, isLoading: true, total: undefined }),
     ).toBe('loading');
+  });
+
+  it('is unauthenticated for a 401 error', () => {
+    expect(
+      resolvePageListState({ ...base, error: { status: 401 }, total: 0 }),
+    ).toBe('unauthenticated');
   });
 
   it('is denied for a 403 error', () => {
@@ -206,5 +241,15 @@ describe('resolvePageListState', () => {
 
   it('is ready when there are pages', () => {
     expect(resolvePageListState(base)).toBe('ready');
+  });
+
+  it('is ready on the last page', () => {
+    expect(resolvePageListState({ ...base, total: 26, page: 2 })).toBe('ready');
+  });
+
+  it('is out-of-range past the last page', () => {
+    expect(resolvePageListState({ ...base, total: 26, page: 3 })).toBe(
+      'out-of-range',
+    );
   });
 });

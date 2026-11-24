@@ -1,6 +1,7 @@
 'use client';
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useEffect } from 'react';
 
 import Typography from '@/components/Typography';
 import { Button } from '@/components/ui/button';
@@ -8,8 +9,10 @@ import { usePages } from '@/hooks/api/cms/usePages';
 import {
   clearFilters,
   hasActiveFilters,
+  lastPageOf,
   type PageListQuery,
   parsePageListParams,
+  refreshHref,
   resolvePageListState,
   toPageListParams,
 } from '@/lib/cms/page-list';
@@ -35,20 +38,47 @@ export function PagesList() {
 
   const { data, error, isLoading, refetch } = usePages(query);
   const filtered = hasActiveFilters(query);
+  const total = data?.total ?? 0;
+  const lastPage = lastPageOf(total, query.limit);
   const state = resolvePageListState({
     isLoading,
     error,
     total: data?.total,
     filtered,
+    page: query.page,
+    limit: query.limit,
   });
 
-  function navigate(next: PageListQuery) {
+  function hrefFor(next: PageListQuery): string {
     const params = toPageListParams(next).toString();
-    router.push(params ? `${pathname}?${params}` : pathname);
+    return params ? `${pathname}?${params}` : pathname;
   }
+
+  function navigate(next: PageListQuery) {
+    router.push(hrefFor(next));
+  }
+
+  const refreshTo =
+    state === 'unauthenticated'
+      ? refreshHref(pathname, searchParams.toString())
+      : null;
+  const lastPageHref =
+    state === 'out-of-range' ? hrefFor({ ...query, page: lastPage }) : null;
+
+  useEffect(() => {
+    // Full navigation: the refresh route sets cookies, then redirects back.
+    if (refreshTo) window.location.assign(refreshTo);
+  }, [refreshTo]);
+
+  useEffect(() => {
+    // replace, not push: the page that does not exist stays out of history.
+    if (lastPageHref) router.replace(lastPageHref);
+  }, [lastPageHref, router]);
 
   switch (state) {
     case 'loading':
+    case 'unauthenticated':
+    case 'out-of-range':
       return <CmsLoading rows={3} />;
     case 'denied':
       return (
@@ -87,9 +117,7 @@ export function PagesList() {
           }
         />
       );
-    case 'ready': {
-      const total = data?.total ?? 0;
-      const lastPage = Math.max(1, Math.ceil(total / query.limit));
+    case 'ready':
       return (
         <div className='space-y-3'>
           <PagesTable pages={data?.items ?? []} />
@@ -125,6 +153,5 @@ export function PagesList() {
           </div>
         </div>
       );
-    }
   }
 }
