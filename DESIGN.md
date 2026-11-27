@@ -345,7 +345,7 @@ Weights: `thin` `extralight` `light` `regular` `medium` `semibold` `bold` `extra
 | `BaseDialog` + `useDialogStore` | `src/components/dialog/BaseDialog.tsx`  | Promise-based confirm.                                                                                                                          |
 | `ConfirmModal`                  | `src/components/ui/confirm-modal.tsx`   | `variant: neutral \| info \| success \| danger \| warning`, `size: sm \| md \| lg`.                                                             |
 | `StatusBadge`                   | `src/components/table/status-badge.tsx` | pending / in-review / approved / rejected.                                                                                                      |
-| `Loading`                       | `src/components/Loading.tsx`            | Suspense fallback (`Providers`).                                                                                                                |
+| `Loading`                       | `src/components/Loading.tsx`            | Local Suspense fallback (for example, `coming-soon`).                                                                                           |
 | `LazySection`                   | `src/components/LazySection.tsx`        | IntersectionObserver, `threshold 0.15`.                                                                                                         |
 | `JsonLd`                        | `src/components/JsonLd.tsx`             | Required on public pages.                                                                                                                       |
 | `Toaster`                       | `src/components/ui/sonner.tsx`          | `position='top-center'`.                                                                                                                        |
@@ -606,14 +606,11 @@ source of truth:
 
 Rules:
 
-- An unpublished or malformed year must stay a **404**. Enforce it in the router
-  (`generateStaticParams` + `dynamicParams = false`) — not with a render-time
-  `notFound()`.
-- The legacy redirect must live in a **route handler**, not a page. The root
-  `<Suspense>` in `src/app/providers.tsx` wraps every page and flushes a 200
-  shell before the page body renders, so a page-level `permanentRedirect()`
-  degrades into a client-side redirect and `notFound()` into a soft-404. A route
-  handler sets the status itself: `NextResponse.redirect(url, 301)`.
+- An unpublished or malformed year must stay a **404**. Hardcoded proker routes
+  enforce this in the router (`generateStaticParams` + `dynamicParams = false`).
+  CMS proker routes render on demand and call `notFound()` before the first flush.
+- The legacy redirect stays in a **route handler** so it returns an explicit
+  HTTP 301 with `NextResponse.redirect(url, 301)` and preserves the query string.
 - Internal links, nav, breadcrumbs and cards use `prokerHref(PROKER_BASE_PATHS.<key>)`
   — see `src/contents/layout.ts`.
 - Never add a second `[year]` page or a hand-written redirect list per route.

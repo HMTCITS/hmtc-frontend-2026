@@ -237,7 +237,7 @@ The Directus credential must be read in exactly one place — the server module 
 - Lifecycle is **Draft → In review → Published**. Self-approval is prohibited and enforced server-side, not in client state.
 - Editing a published page must not change public output until it is republished.
 - Previews are bearer links scoped to one page + revision, revocable, non-indexable, 72 h by default. A preview grant never permits editing.
-- **Unpublished content must return a real HTTP 404** — use `generateStaticParams()` + `export const dynamicParams = false`, **not** `notFound()`. The root `<React.Suspense>` in `src/app/providers.tsx` makes `notFound()` a soft-404 (HTTP 200).
+- **Unpublished content must return a real HTTP 404.** CMS proker routes render on demand and call `notFound()` before the first response flush. Hardcoded proker routes continue to use `generateStaticParams()` with `dynamicParams = false`. Keep Suspense boundaries local to routes that need them; do not wrap every page in `src/app/providers.tsx`.
 
 ### Changing the Directus schema
 
