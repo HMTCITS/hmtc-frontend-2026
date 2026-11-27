@@ -294,6 +294,8 @@ export async function proxy(req: NextRequest) {
     if (!isCmsLoginPath(pathname) && !hasCmsSessionCookie(req)) {
       const loginUrl = cloneUrl(req.nextUrl);
       loginUrl.pathname = CMS_LOGIN_PATH;
+      loginUrl.search = '';
+      loginUrl.searchParams.set('next', `${pathname}${req.nextUrl.search}`);
       return NextResponse.redirect(loginUrl);
     }
     return NextResponse.next();
