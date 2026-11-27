@@ -822,6 +822,12 @@ function validateDraftBlocks(blocks: unknown[]): PageBlocks {
     if (error instanceof ZodError) {
       throw new CmsError('invalid_blocks', 'Blok tidak valid.', {
         invalidBlocks: toInvalidBlocks(error, blocks),
+      });
+    }
+    throw error;
+  }
+}
+
 /* ----------------------------------------------------------------- Publish */
 
 const INVALID_BLOCKS_MESSAGE =
@@ -922,6 +928,9 @@ export async function savePage(
       throw new CmsError('stale_write', STALE_WRITE_MESSAGE);
     }
   }
+  return getPageDetail(session, id);
+}
+
 async function nextRevisionNumber(
   session: CmsSession,
   pageId: string,
