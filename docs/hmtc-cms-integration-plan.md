@@ -146,7 +146,7 @@ The first request renders the page and caches it under its tags. Later requests 
 - **One container per environment (confirmed):** the built-in Next.js cache and `revalidateTag` are sufficient. No Redis or custom `cacheHandler` is needed.
 - **Shared Directus (confirmed):** staging editors are editing **production content**. Either make `/dashboard/cms` read-only on staging (`CMS_EDITING_ENABLED=false`), or accept staging as a second production editor. The Flow webhook targets both environments.
 - **Order of rollout:** migration 003 + Directus policies → env vars on the host → deploy with the Suspense fix (no visible change) → deploy the CMS module behind `/dashboard/cms` → migrate one low-risk proker (e.g. `bluecamp`), checking with curl that the page returns 200 when published, 404 when unpublished and a 301 for the legacy URL → expand.
-- **Pre-launch blockers carried forward:** B7 (`next@16.2.9` advisory, inactive `pnpm.overrides`) and the outstanding M11 behavioural draft-leak test, which now runs against `cms_page_revisions` and the removed public read.
+- **Pre-launch blockers carried forward:** the outstanding M11 behavioural draft-leak test (B7 was resolved in #234), which now runs against `cms_page_revisions` and the removed public read.
 
 ## Critical files
 

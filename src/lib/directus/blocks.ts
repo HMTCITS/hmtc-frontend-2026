@@ -118,8 +118,8 @@ export const eventDetailsBlock = defineBlock('eventDetails', 1, {
   items: z
     .array(
       z.strictObject({
-        label: z.string().min(1).max(40),
-        value: z.string().min(1).max(160),
+        label: z.string().min(1, 'Label wajib diisi').max(40),
+        value: z.string().min(1, 'Isi wajib diisi').max(160),
         icon: z
           .enum(['calendar', 'clock', 'location', 'ticket', 'link'])
           .optional(),
@@ -134,8 +134,8 @@ export const agendaBlock = defineBlock('agenda', 1, {
   items: z
     .array(
       z.strictObject({
-        time: z.string().min(1).max(40),
-        title: z.string().min(1).max(120),
+        time: z.string().min(1, 'Jam wajib diisi').max(40),
+        title: z.string().min(1, 'Judul sesi wajib diisi').max(120),
         description: z.string().max(300).optional(),
       }),
     )
@@ -150,7 +150,7 @@ export const galleryBlock = defineBlock('gallery', 1, {
     .array(
       z.strictObject({
         asset: assetId,
-        alt: z.string().min(1).max(160),
+        alt: z.string().min(1, 'Alt text wajib diisi').max(160),
         caption: z.string().max(160).optional(),
       }),
     )
