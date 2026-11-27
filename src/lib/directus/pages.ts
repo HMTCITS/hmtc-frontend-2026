@@ -47,6 +47,8 @@ import {
   BLOCK_LIMITS,
   BLOCKS_SCHEMA_VERSION,
   createBlock,
+  type InvalidBlock,
+  type PageBlocks,
   parseBlocksForRead,
   parseBlocksForWrite,
 } from '@/lib/directus/blocks';
@@ -652,6 +654,38 @@ function assertFresh(page: PageDetail, expectedUpdatedAt: string): void {
 }
 
 /**
+ * Directus filter that matches the row only while it is still the version the
+ * client saw. `updatedAt` is `date_updated ?? date_created`, so a page that
+ * was never edited is matched on `date_created`.
+ *
+ * Postgres keeps microseconds but `updatedAt` carries milliseconds, so the
+ * timestamp is matched within its millisecond rather than with `_eq`.
+ */
+function unchangedSinceFilter(
+  id: string,
+  expectedUpdatedAt: string,
+): Record<string, unknown> {
+  const from = new Date(expectedUpdatedAt);
+  const within = {
+    _gte: from.toISOString(),
+    _lt: new Date(from.getTime() + 1).toISOString(),
+  };
+  return {
+    _and: [
+      { id: { _eq: id } },
+      {
+        _or: [
+          { date_updated: within },
+          {
+            _and: [{ date_updated: { _null: true } }, { date_created: within }],
+          },
+        ],
+      },
+    ],
+  };
+}
+
+/**
  * PATCH the working-copy status with the user's token.
  *
  * The Directus update policies (migration 004) pin the allowed *from* statuses,
@@ -753,6 +787,47 @@ export async function requestChangesPage(
   );
 }
 
+/* ------------------------------------------------------------------ Save */
+
+export type SavePageInput = CmsRequestBody<'savePage'>;
+
+/** Zod issues from `parseBlocksForWrite` → one entry per offending block. */
+function toInvalidBlocks(error: ZodError, blocks: unknown[]): InvalidBlock[] {
+  const byIndex = new Map<number, InvalidBlock>();
+  for (const issue of error.issues) {
+    const [head, ...rest] = issue.path;
+    const index = typeof head === 'number' ? head : -1;
+    if (byIndex.has(index)) continue;
+    const raw = index >= 0 ? blocks[index] : undefined;
+    const type =
+      typeof raw === 'object' &&
+      raw !== null &&
+      typeof (raw as { type?: unknown }).type === 'string'
+        ? (raw as { type: string }).type
+        : null;
+    const where = rest.map(String).join('.');
+    byIndex.set(index, {
+      index,
+      type,
+      reason: where ? `${where}: ${issue.message}` : issue.message,
+    });
+  }
+  return Array.from(byIndex.values()).sort((a, b) => a.index - b.index);
+}
+
+function validateDraftBlocks(blocks: unknown[]): PageBlocks {
+  try {
+    return parseBlocksForWrite(blocks, 'draft');
+  } catch (error) {
+    if (error instanceof ZodError) {
+      throw new CmsError('invalid_blocks', 'Blok tidak valid.', {
+        invalidBlocks: toInvalidBlocks(error, blocks),
+      });
+    }
+    throw error;
+  }
+}
+
 /* ----------------------------------------------------------------- Publish */
 
 const INVALID_BLOCKS_MESSAGE =
@@ -779,6 +854,81 @@ function blocksForPublish(page: PageDetail) {
     }
     throw error;
   }
+}
+
+/**
+ * Save the working copy. Only `cms_pages` fields are written — never
+ * `published_revision` — so public output does not change. A `published`
+ * working copy becomes `draft` (`nextStatus('edit')`).
+ *
+ * Throws `stale_write` when `expectedUpdatedAt` no longer matches. The check
+ * is repeated inside the write itself, so two concurrent saves cannot
+ * overwrite each other. Throws `invalid_blocks` when blocks fail draft
+ * validation.
+ */
+export async function savePage(
+  session: CmsSession,
+  id: string,
+  input: SavePageInput,
+): Promise<PageDetail> {
+  const page = await getPageDetail(session, id);
+  assertAuthorized(session.user, 'edit', page);
+  assertFresh(page, input.expectedUpdatedAt);
+
+  const body: Record<string, unknown> = {};
+  if (input.title !== undefined) body.title = input.title;
+  if (input.blocks !== undefined)
+    body.blocks = validateDraftBlocks(input.blocks);
+  if (input.excerpt !== undefined) body.excerpt = input.excerpt;
+  if (input.featuredImageId !== undefined)
+    body.featured_image = input.featuredImageId;
+  if (input.seoTitle !== undefined) body.seo_title = input.seoTitle;
+  if (input.seoDescription !== undefined)
+    body.seo_description = input.seoDescription;
+
+  const to = nextStatus('edit', page.status);
+  if (to !== page.status) body.status = to;
+
+  if (Object.keys(body).length > 0) {
+    // assertFresh above fails fast; this filter makes the check and the write
+    // one operation, so a save that lands between our read and this PATCH is
+    // not overwritten.
+    let raw: unknown;
+    try {
+      raw = await directusAsUser<unknown>(
+        session.accessToken,
+        `/items/cms_pages?${query({ fields: 'id' })}`,
+        {
+          method: 'PATCH',
+          body: {
+            query: {
+              filter: unchangedSinceFilter(id, input.expectedUpdatedAt),
+            },
+            data: body,
+          },
+        },
+      );
+    } catch (error) {
+      // The update policy pins editable statuses: a rejection means the row
+      // left an editable status after our read (same race as patchStatus).
+      if (error instanceof DirectusRequestError && error.code === 'forbidden') {
+        throw new CmsError(
+          'invalid_transition',
+          DENIAL_MESSAGE.invalid_transition,
+        );
+      }
+      throw error;
+    }
+    const updated = parseRow(
+      listSchema(z.object({ id: z.uuid() })),
+      raw,
+      'cms_pages save',
+    ).data;
+    if (updated.length === 0) {
+      throw new CmsError('stale_write', STALE_WRITE_MESSAGE);
+    }
+  }
+  return getPageDetail(session, id);
 }
 
 async function nextRevisionNumber(
