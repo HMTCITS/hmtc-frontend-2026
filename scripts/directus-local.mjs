@@ -83,22 +83,36 @@ function applyMigrations() {
   }
 }
 
+function hasAppliedLocalMigrations() {
+  const ledgerExists =
+    sqlValue(
+      "SELECT to_regclass('public.hmtc_local_migrations') IS NOT NULL",
+    ) === 't';
+  if (!ledgerExists) return false;
+
+  return sqlValue('SELECT EXISTS (SELECT 1 FROM hmtc_local_migrations)') === 't';
+}
+
 function setup() {
   step('Starting Directus and Postgres');
   docker(['up', '-d', '--wait']);
 
-  step('Applying the production schema snapshot');
-  docker([
-    'exec',
-    '-T',
-    'directus',
-    'node',
-    '/directus/cli.js',
-    'schema',
-    'apply',
-    '--yes',
-    '/directus/hmtc/snapshot.json',
-  ]);
+  if (hasAppliedLocalMigrations()) {
+    step('Production schema snapshot already applied; skipping baseline');
+  } else {
+    step('Applying the production schema snapshot');
+    docker([
+      'exec',
+      '-T',
+      'directus',
+      'node',
+      '/directus/cli.js',
+      'schema',
+      'apply',
+      '--yes',
+      '/directus/hmtc/snapshot.json',
+    ]);
+  }
 
   step('Applying constraints the snapshot cannot carry');
   sql(path.join(root, 'directus', 'post-snapshot.sql'));

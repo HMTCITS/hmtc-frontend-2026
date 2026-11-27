@@ -15,8 +15,11 @@ FROM base AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Install dependencies based on the preferred package manager
-COPY package.json pnpm-lock.yaml* .npmrc* ./
+# Install dependencies based on the preferred package manager.
+# pnpm-workspace.yaml holds the pnpm `overrides` (decision B7). Without it the
+# frozen install sees different overrides than the lockfile and stops with
+# ERR_PNPM_LOCKFILE_CONFIG_MISMATCH.
+COPY package.json pnpm-lock.yaml* pnpm-workspace.yaml* .npmrc* ./
 RUN \
   # Choose pnpm as package manager 
   corepack enable pnpm && pnpm i --frozen-lockfile;
