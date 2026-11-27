@@ -13,13 +13,13 @@ import { createHash } from 'node:crypto';
 
 import { resetCmsEnvForTests } from '@/lib/directus/env';
 import { logError, logInfo, logWarn } from '@/lib/directus/logger';
+import { resetRateLimitsForTests } from '@/lib/directus/rate-limit';
 import {
   CMS_ACCESS_COOKIE,
   resetSessionStateForTests,
 } from '@/lib/directus/session';
 
 import { DELETE as revokeGrant } from '../../preview-grants/[grantId]/route';
-import { resetPreviewRateLimitForTests } from '../[id]/preview-grants/_lib/rate-limit';
 import {
   GET as listGrants,
   POST as createGrant,
@@ -250,7 +250,7 @@ beforeEach(() => {
   process.env.CMS_EDITING_ENABLED = 'true';
   resetCmsEnvForTests();
   resetSessionStateForTests();
-  resetPreviewRateLimitForTests();
+  resetRateLimitsForTests();
   jest.mocked(logInfo).mockClear();
   jest.mocked(logWarn).mockClear();
   jest.mocked(logError).mockClear();

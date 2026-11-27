@@ -2,10 +2,12 @@ import {
   createPreviewGrant,
   listPreviewGrants,
 } from '@/lib/directus/preview-grants';
+import {
+  assertPreviewMintAllowed,
+  recordPreviewMint,
+} from '@/lib/directus/rate-limit';
 import { defineCmsRoute } from '@/lib/directus/route-handler';
 import { requireSession } from '@/lib/directus/session';
-
-import { assertPreviewMintAllowed, recordPreviewMint } from './_lib/rate-limit';
 
 export const GET = defineCmsRoute('listPreviewGrants', async ({ params }) => {
   const session = await requireSession();

@@ -16,9 +16,11 @@
  */
 import 'server-only';
 
+import { revalidateTag } from 'next/cache';
 import { z, ZodError } from 'zod';
 
 import type { CmsRequestBody } from '@/lib/cms/api-contract';
+import { cmsTags } from '@/lib/cms/cache-tags';
 import type {
   PageDetail,
   PageSummary,
@@ -43,6 +45,7 @@ import {
 } from '@/lib/directus/authz';
 import {
   BLOCK_LIMITS,
+  BLOCKS_SCHEMA_VERSION,
   createBlock,
   type InvalidBlock,
   type PageBlocks,
@@ -357,6 +360,20 @@ export async function getPageDetail(
   session: CmsSession,
   id: string,
 ): Promise<PageDetail> {
+  return (await readPage(session, id)).page;
+}
+
+/** Public route identity of a page, for cache tags. */
+type PageRoute = {
+  departmentSlug: string;
+  prokerSlug: string;
+  editionYear: number;
+};
+
+async function readPage(
+  session: CmsSession,
+  id: string,
+): Promise<{ page: PageDetail; route: PageRoute }> {
   let pageRaw: unknown;
   try {
     pageRaw = await directusAsUser<unknown>(
@@ -404,7 +421,7 @@ export async function getPageDetail(
   const summary = toSummary(row);
   const { blocks, invalid } = parseBlocksForRead(row.blocks ?? []);
 
-  return {
+  const page: PageDetail = {
     ...summary,
     blocks,
     invalidBlocks: invalid,
@@ -423,6 +440,14 @@ export async function getPageDetail(
       isLive: summary.isLive,
       lastSubmission,
     }),
+  };
+  return {
+    page,
+    route: {
+      departmentSlug: row.department.slug,
+      prokerSlug: row.proker.slug,
+      editionYear: row.edition_year,
+    },
   };
 }
 
@@ -696,7 +721,7 @@ async function patchStatus(
 async function createReviewEvent(
   session: CmsSession,
   pageId: string,
-  action: 'submitted' | 'changes_requested',
+  action: 'submitted' | 'changes_requested' | 'approved',
   from: PageStatus,
   to: PageStatus,
   comment: string | null,
@@ -797,6 +822,28 @@ function validateDraftBlocks(blocks: unknown[]): PageBlocks {
     if (error instanceof ZodError) {
       throw new CmsError('invalid_blocks', 'Blok tidak valid.', {
         invalidBlocks: toInvalidBlocks(error, blocks),
+/* ----------------------------------------------------------------- Publish */
+
+const INVALID_BLOCKS_MESSAGE =
+  'Ada blok yang belum valid. Perbaiki sebelum menerbitkan.';
+const PUBLISH_RACE_MESSAGE =
+  'Halaman ini baru saja diterbitkan oleh orang lain. Muat ulang.';
+
+const revisionNumberRowSchema = z.object({ revision_number: z.number().int() });
+
+/** Blocks valid for publishing, or `invalid_blocks` (422). */
+function blocksForPublish(page: PageDetail) {
+  if (page.invalidBlocks.length > 0) {
+    throw new CmsError('invalid_blocks', INVALID_BLOCKS_MESSAGE, {
+      invalidBlocks: page.invalidBlocks,
+    });
+  }
+  try {
+    return parseBlocksForWrite(page.blocks, 'publish');
+  } catch (error) {
+    if (error instanceof ZodError) {
+      throw new CmsError('invalid_blocks', INVALID_BLOCKS_MESSAGE, {
+        issues: toValidationIssues(error),
       });
     }
     throw error;
@@ -875,6 +922,165 @@ export async function savePage(
       throw new CmsError('stale_write', STALE_WRITE_MESSAGE);
     }
   }
+async function nextRevisionNumber(
+  session: CmsSession,
+  pageId: string,
+): Promise<number> {
+  const raw = await directusAsUser<unknown>(
+    session.accessToken,
+    `/items/cms_page_revisions?${query({
+      fields: 'revision_number',
+      filter: { page: { _eq: pageId } },
+      sort: '-revision_number',
+      limit: '1',
+    })}`,
+  );
+  const [latest] = parseRow(
+    listSchema(revisionNumberRowSchema),
+    raw,
+    'cms_page_revisions latest',
+  ).data;
+  return (latest?.revision_number ?? 0) + 1;
+}
+
+/** Immutable snapshot of the working copy. Harmless if a later step fails. */
+async function insertRevision(
+  session: CmsSession,
+  page: PageDetail,
+  blocks: ReturnType<typeof parseBlocksForWrite>,
+  changeNote: string | null,
+): Promise<string> {
+  const revisionNumber = await nextRevisionNumber(session, page.id);
+  let raw: unknown;
+  try {
+    raw = await directusAsUser<unknown>(
+      session.accessToken,
+      `/items/cms_page_revisions?${query({ fields: 'id' })}`,
+      {
+        method: 'POST',
+        body: {
+          page: page.id,
+          revision_number: revisionNumber,
+          title: page.title,
+          blocks,
+          blocks_schema_version: BLOCKS_SCHEMA_VERSION,
+          excerpt: page.excerpt,
+          featured_image: page.featuredImageId,
+          seo_title: page.seoTitle,
+          seo_description: page.seoDescription,
+          change_note: changeNote,
+        },
+      },
+    );
+  } catch (error) {
+    // (page, revision_number) is unique: a concurrent publish took this number.
+    if (error instanceof DirectusRequestError && error.code === 'duplicate') {
+      throw new CmsError('stale_write', PUBLISH_RACE_MESSAGE);
+    }
+    throw error;
+  }
+  return parseRow(
+    itemSchema(z.object({ id: z.uuid() })),
+    raw,
+    'cms_page_revisions create',
+  ).data.id;
+}
+
+/**
+ * The one write that makes the revision public. Every published field goes in
+ * a single PATCH, so the old revision stays live until it succeeds.
+ */
+async function pointAtRevision(
+  session: CmsSession,
+  pageId: string,
+  revisionId: string,
+): Promise<void> {
+  try {
+    await directusAsUser(
+      session.accessToken,
+      `/items/cms_pages/${encodeURIComponent(pageId)}`,
+      {
+        method: 'PATCH',
+        body: {
+          published_revision: revisionId,
+          status: 'published',
+          published_at: new Date().toISOString(),
+          published_by: session.user.id,
+        },
+      },
+    );
+  } catch (error) {
+    if (error instanceof DirectusRequestError && error.code === 'forbidden') {
+      throw new CmsError(
+        'invalid_transition',
+        DENIAL_MESSAGE.invalid_transition,
+      );
+    }
+    throw error;
+  }
+}
+
+function revalidatePublished(pageId: string, route: PageRoute): void {
+  const tags = [
+    cmsTags.page(route.departmentSlug, route.prokerSlug, route.editionYear),
+    cmsTags.pageId(pageId),
+    cmsTags.routes,
+  ];
+  // Route Handlers cannot use `updateTag`; `expire: 0` drops the entry now.
+  for (const tag of tags) revalidateTag(tag, { expire: 0 });
+}
+
+/**
+ * `in_review → published`, publisher only, never the last submitter (admins
+ * included). Runs in an order that keeps a failure safe:
+ *
+ * 1. authorize (self-approval) and check `expectedUpdatedAt`;
+ * 2. re-validate blocks in publish mode, or 422;
+ * 3. insert the revision snapshot;
+ * 4. one PATCH of `published_revision`, `status`, `published_at`, `published_by`;
+ * 5. write the `approved` event;
+ * 6. revalidate the page's tags.
+ *
+ * Nothing public changes before step 4. Once it succeeds the page is live:
+ * the cache is revalidated and the request succeeds even if the event write
+ * fails. That failure is only logged, because a 5xx would make the publisher
+ * retry and get `invalid_transition` for a page that is already published.
+ */
+export async function publishPage(
+  session: CmsSession,
+  id: string,
+  input: CmsRequestBody<'publishPage'>,
+): Promise<PageDetail> {
+  const { page, route } = await readPage(session, id);
+  assertAuthorized(session.user, 'publish', page);
+  assertFresh(page, input.expectedUpdatedAt);
+
+  const blocks = blocksForPublish(page);
+  const revisionId = await insertRevision(
+    session,
+    page,
+    blocks,
+    input.changeNote || null,
+  );
+  await pointAtRevision(session, id, revisionId);
+
+  try {
+    await createReviewEvent(
+      session,
+      id,
+      'approved',
+      page.status,
+      'published',
+      input.changeNote || null,
+    );
+  } catch (error) {
+    logError(LOG_SCOPE, 'page published but the approved event failed', {
+      pageId: id,
+      revisionId,
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
+  revalidatePublished(id, route);
 
   return getPageDetail(session, id);
 }

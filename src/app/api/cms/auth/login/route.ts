@@ -1,4 +1,9 @@
 import { CmsError } from '@/lib/cms/errors';
+import {
+  assertLoginAllowed,
+  recordLoginFailure,
+  resetLoginFailures,
+} from '@/lib/directus/rate-limit';
 import { defineCmsRoute } from '@/lib/directus/route-handler';
 import {
   loadSessionUser,
@@ -7,12 +12,6 @@ import {
   setSessionCookies,
   type TokenPair,
 } from '@/lib/directus/session';
-
-import {
-  assertLoginAllowed,
-  recordLoginFailure,
-  resetLoginFailures,
-} from '../_lib/rate-limit';
 
 /**
  * Origin check (login CSRF), body validation and no-store come from
